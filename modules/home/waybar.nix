@@ -53,10 +53,10 @@ in
         };
 
         cpu = { format = "<span color=\"#ebbcba\"></span>  {usage}%"; tooltip = false; }; # Rose
-        memory = { format = "<span color=\"#9ccfd8\"></span>  {percentage}%"; }; # Foam
+        memory = { format = "<span color=\"#9ccfd8\"></span>  {percentage}% "; }; # Foam
         battery = {
-          format = "<span color=\"#f6c177\">{icon}</span>  {capacity}%"; # Gold
-          format-icons = [ "" "" "" "" "" ];
+          format = "<span color=\"#f6c177\">{icon}</span> {capacity}%"; # Gold
+          format-icons = [ " " " " " " " " " " ];
         };
 
         "group/zvuk" = {
@@ -65,14 +65,14 @@ in
         };
 
         "pulseaudio#output" = {
-          format = "<span color=\"#31748f\">{icon}</span>  {volume}%"; # Pine
+          format = "<span color=\"#31748f\">{icon}</span> {volume}%"; # Pine
           format-muted = " ";
-          format-icons = { headphone = ""; default = [ "" "" "" ]; };
+          format-icons = { headphone = ""; default = [ " " " " " " ]; };
           on-click = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
         };
 
         "pulseaudio#input" = {
-          format = "<span color=\"#31748f\"></span> {volume}%";
+          format = "<span color=\"#31748f\"></span>  {volume}%";
           format-source-muted = " ";
           on-click = "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
         };
@@ -93,81 +93,158 @@ in
         tray = { spacing = 10; };
       };
     };
-
     style = ''
-      /* Rose Pine Colors */
-      @define-color base     #1f1d2e;
-      @define-color surface  #26233a;
-      @define-color overlay  #524f67;
-      @define-color text     #e0def4;
-      @define-color gold     #f6c177;
-      @define-color rose     #ebbcba;
-      @define-color pine     #31748f;
-      @define-color foam     #9ccfd8;
-      @define-color love     #eb6f92;
+      /* --- ROSE PINE COLOR PALETTE --- */
+      @define-color background      #1f1d2e; /* Base */
+      @define-color foreground      #e0def4; /* Text */
+      @define-color foreground-dark #908caa; /* Subtle */
+      @define-color power           #eb6f92; /* Love (Red/Pink) */
+      @define-color red             #eb6f92; /* Love */
+      @define-color orange          #f6c177; /* Gold */
+      @define-color overlay         #26233a; /* Surface */
+      @define-color pine            #31748f; /* Pine (Accent) */
+      @define-color foam            #9ccfd8; /* Foam (Accent) */
 
+      /* --- GLOBAL STYLES --- */
       * {
-        font-family: "JetBrains Mono Nerd Font", sans-serif;
-        font-size: 14px;
+        font-family: "JetBrains Mono NerdFont", FontAwesome, Roboto, Helvetica, Arial, sans-serif;
+        font-size: 1.01em;
       }
 
       window#waybar {
         background-color: transparent;
+        border-radius: 0;
+        transition-property: background-color;
+        transition-duration: 0.5s;
       }
 
       window#waybar > box {
         padding: 5px 0;
       }
 
-      /* Module Styling */
-      #workspaces, #zvuk, #hardware, #time, #tray, #network, #language, #window {
-        background-color: @base;
-        color: @text;
+      button {
+        box-shadow: inset 0 -3px transparent;
+        border: none;
         border-radius: 10px;
-        padding: 2px 10px;
-        margin: 0 4px;
       }
 
-      /* High Contrast Workspaces */
+      button:hover {
+        background: inherit;
+        border: none;
+      }
+
+      /* --- WORKSPACES --- */
+      #workspaces {
+        font-weight: 800;
+        margin-right: 5px;
+        background-color: @background;
+        color: @foreground;
+        border-radius: 10px;
+      }
+
       #workspaces button {
-        color: @overlay;
+        border-radius: 10px;
         padding: 0 8px;
+        color: @foreground-dark;
+        background-color: transparent;
+        transition: 0.5s ease-out;
+      }
+
+      #workspaces button:hover {
+        background: rgba(224, 222, 244, 0.1);
       }
 
       #workspaces button.active {
-        color: @gold;
-        background-color: @surface;
+        background-color: @pine; 
+        color: @background;
       }
+
+      #workspaces button.active:nth-child(1) { border-radius: 10px 0 0 10px; }
+      #workspaces button.active:nth-last-child(1) { border-radius: 0 10px 10px 0; }
 
       #workspaces button.urgent {
-        color: @love;
+        border-bottom: 2px solid @red;
+        border-radius: 0;
       }
 
-      /* Audio / Sound */
+      /* --- HARDWARE --- */
+      #hardware { margin-right: 5px; }
+      #cpu { padding-right: 10px; }
+      #memory { padding-left: 10px; }
+
+      /* --- AUDIO (ZVUK) --- */
+      #zvuk {
+        background-color: @background;
+        color: @foreground;
+        border-radius: 10px;
+        margin-right: 5px;
+      }
+
+      #pulseaudio:hover { background-color: @overlay; }
+      #pulseaudio {
+        font-weight: 700;
+        padding: 6px 10px;
+        border-radius: 10px;
+      }
+
       #pulseaudio.output.muted, #pulseaudio.input.source-muted {
-        color: @love;
+        color: @red;
       }
 
-      /* Time Group */
+      /* --- PRIVACY & LANGUAGE --- */
+      #privacy {
+        background-color: @background;
+        color: @power;
+        border: 1.5px solid @power;
+        padding: 6px 10px;
+        border-radius: 10px;
+        margin-right: 10px;
+      }
+
+      #language { margin-right: 5px; }
+
+      /* --- TIME & CLOCK --- */
+      #time {
+        border-radius: 10px;
+        font-weight: 700;
+        background-color: @background;
+        color: @foreground;
+      }
+
       #clock.simple {
-        background-color: @pine;
-        color: @base;
+        padding: 6px 10px;
+        background-color: @orange; /* Gold Accent */
+        color: @background;
         border-radius: 0 10px 10px 0;
-        margin-left: 5px;
-        padding-left: 10px;
+        font-weight: 700;
       }
 
       #clock {
-        padding-right: 5px;
+        padding: 6px 10px;
+        border-radius: 10px 0 0 10px;
       }
 
-      /* Privacy Indicator */
-      #privacy {
-        background-color: @love;
-        color: @base;
-        padding: 0 10px;
+      /* --- TRAY & SYSTEM --- */
+      #tray { margin-right: 5px; }
+      #tray > .passive { -gtk-icon-effect: dim; }
+      #tray > .needs-attention { -gtk-icon-effect: highlight; }
+
+      #battery,
+      #temperature,
+      #network,
+      #hardware,
+      #window,
+      #tray,
+      #language {
+        font-weight: 700;
+        background-color: @background;
+        color: @foreground;
+        padding: 6px 10px;
         border-radius: 10px;
       }
+
+      .modules-right, .modules-left { padding: 0 10px; }
+      label:focus { background-color: #000; }
     '';
   };
 }

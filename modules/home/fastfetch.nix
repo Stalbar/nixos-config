@@ -31,7 +31,7 @@ in
           "2" = "black";
         };
         padding = {
-          top = 0;
+          top = 2;
           right = 5;
         };
         height = 18;
@@ -51,27 +51,27 @@ in
         }
         {
           type = "os";
-          key = "";
+          key = " 󱄅 ";
           keyColor = "red";
         }
         {
           type = "kernel";
-          key = "";
+          key = "  ";
           keyColor = "red";
         }
         {
           type = "de";
-          key = "";
+          key = "  ";
           keyColor = "green";
         }
         {
           type = "wm";
-          key = "";
+          key = "  ";
           keyColor = "green";
         }
         {
           type = "packages";
-          key = "";
+          key = "  ";
           keyColor = "yellow";
         }
         {
@@ -81,37 +81,37 @@ in
         }
         {
           type = "memory";
-          key = "";
+          key = "  ";
           keyColor = "blue";
         }
         {
           type = "host";
-          key = "";
+          key = "  ";
           keyColor = "blue";
         }
         {
           type = "cpu";
-          key = "";
+          key = " 󰻠 ";
           keyColor = "blue";
         }
         {
           type = "gpu";
-          key = "";
+          key = " 󰢮 ";
           keyColor = "magenta";
         }
         {
           type = "swap";
-          key = "";
+          key = " 󰾴 ";
           keyColor = "magenta";
         }
         {
           type = "disk";
-          key = "";
+          key = "  ";
           keyColor = "red";
         }
         {
           type = "battery";
-          key = "";
+          key = " 󰂀 ";
           keyColor = "red";
         }
         {
@@ -121,17 +121,17 @@ in
         }
         {
           type = "uptime";
-          key = "";
+          key = "  ";
           keyColor = "yellow";
         }
         {
           type = "terminal";
-          key = "";
+          key = "  ";
           keyColor = "yellow";
         }
         {
           type = "locale";
-          key = "";
+          key = "  ";
           keyColor = "yellow";
         }
         {

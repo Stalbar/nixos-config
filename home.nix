@@ -6,6 +6,7 @@
     ./modules/home/kitty.nix
     ./modules/home/fastfetch.nix
     ./modules/home/starship.nix
+    ./modules/home/waybar.nix
   ];
 
   home.username = "stalbar";

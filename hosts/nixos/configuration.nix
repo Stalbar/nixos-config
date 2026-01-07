@@ -4,6 +4,7 @@
   imports =
     [ 
       ./hardware-configuration.nix
+      ../../modules/system/tlp/default.nix
     ];
 
   boot.loader.systemd-boot.enable = true;
@@ -42,4 +43,30 @@
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 	
   programs.git.enable = true;
+
+  programs.zsh.enable = true;
+  users.users.stalbar.shell = pkgs.zsh;
+
+  services.power-profiles-daemon.enable = false;
+  services.tlp.enable = true;
+  specialisation = {
+    gaming.configuration = {
+      imports = [ ../../modules/system/tlp/gaming.nix ];
+    };
+    boost.configuration = {
+      imports = [ ../../modules/system/tlp/gaming-boost.nix ];
+    };
+  };
+  
+  sound.enable = false;
+  hardware.pulseaudio.enable = false;
+
+  securityy.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+    wireplumber.enable = true;
+  };
 }

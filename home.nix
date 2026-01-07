@@ -1,6 +1,7 @@
 { config, pkgs, ...}: {
   imports = [
     ./modules/home/git.nix
+    ./modules/home/zsh.nix
   ];
 
   home.username = "stalbar";

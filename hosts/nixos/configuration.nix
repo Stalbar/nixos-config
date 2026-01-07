@@ -28,7 +28,7 @@
   users.users.stalbar = {
     isNormalUser = true;
     description = "aleksey";
-    extraGroups = [ "networkmanager" "wheel" "video" "render" ];
+    extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [];
   };
 
@@ -105,4 +105,11 @@
     powerOnBoot = true;
   };
   services.blueman.enable = true;
+
+  programs.hyprland = {
+    enable = true;
+    xwayland.enable = true;
+    withUWSM = true;
+  };
+  hardware.enableAllFirmware = true;
 }

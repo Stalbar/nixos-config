@@ -8,6 +8,7 @@
     ./modules/home/starship.nix
     ./modules/home/waybar.nix
     ./modules/home/rofi.nix
+    ./modules/home/btop.nix
   ];
 
   home.username = "stalbar";

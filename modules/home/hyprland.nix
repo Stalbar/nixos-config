@@ -84,6 +84,7 @@
 	"SUPER, V, togglefloating"
 	"SUPER, F4, killactive"
 	"SUPER, T, togglesplit"
+	"SUPER, F, fullscreen"
 
 	"ALT, SPACE, exec, rofi -show drun"
 	

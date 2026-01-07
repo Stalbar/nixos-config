@@ -28,7 +28,7 @@
   users.users.stalbar = {
     isNormalUser = true;
     description = "aleksey";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "video" "render" ];
     packages = with pkgs; [];
   };
 
@@ -36,6 +36,7 @@
 
   environment.systemPackages = with pkgs; [
     neovim
+    bluez
   ];
 
   system.stateVersion = "25.11"; 
@@ -58,10 +59,9 @@
     };
   };
   
-  sound.enable = false;
   hardware.pulseaudio.enable = false;
 
-  securityy.rtkit.enable = true;
+  security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
     alsa.enable = true;
@@ -69,4 +69,40 @@
     pulse.enable = true;
     wireplumber.enable = true;
   };
+
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true;
+    extraPackages = with pkgs; [
+      intel-media-driver
+      intel-vaapi-driver
+      libvdpau-va-gl
+    ];
+  };
+
+  services.xserver.videoDrivers = [ "nvidia" ];
+  hardware.nvidia = {
+    modesetting.enable = true;
+    open = false;
+    nvidiaSettings = true;
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    prime = {
+      offload = {
+	enable = true;
+	enableOffloadCmd = true;
+      };
+      intelBusId = "PCI:0:2:0";
+      nvidiaBusId = "PCI:1:0:0";
+    };
+  };
+
+  services.libinput.enable = true;
+
+  hardware.cpu.intel.updateMicrocode = true;
+
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+  };
+  services.blueman.enable = true;
 }

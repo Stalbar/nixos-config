@@ -28,7 +28,7 @@
   users.users.stalbar = {
     isNormalUser = true;
     description = "aleksey";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "video" ];
     packages = with pkgs; [];
   };
 
@@ -37,6 +37,7 @@
   environment.systemPackages = with pkgs; [
     neovim
     bluez
+    brightnessctl
   ];
 
   system.stateVersion = "25.11"; 

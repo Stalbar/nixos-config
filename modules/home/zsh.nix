@@ -23,7 +23,7 @@
     autosuggestion.enable = true;
 
     initExtra = ''
-      ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#f6c177'
+      ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#31748f,bold'
     '';
   };
 }

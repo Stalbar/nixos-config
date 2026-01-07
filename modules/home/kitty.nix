@@ -8,7 +8,9 @@
 
       background = "#1f1d2e";
       foreground = "#e0def4";
-      cursor = "#524f67";
+      cursor = "#f6c177";
+      cursor_text_color="background";
+      cursor_shape="block";
       
       color0 = "#191724";
       color8 = "#26233a";

@@ -4,6 +4,8 @@
     ./modules/home/zsh.nix
     ./modules/home/hyprland.nix
     ./modules/home/kitty.nix
+    ./modules/home/fastfetch.nix
+    ./modules/home/starship.nix
   ];
 
   home.username = "stalbar";

@@ -7,6 +7,7 @@
     ./modules/home/fastfetch.nix
     ./modules/home/starship.nix
     ./modules/home/waybar.nix
+    ./modules/home/rofi.nix
   ];
 
   home.username = "stalbar";

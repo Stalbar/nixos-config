@@ -3,6 +3,7 @@
     ./modules/home/git.nix
     ./modules/home/zsh.nix
     ./modules/home/hyprland.nix
+    ./modules/home/kitty.nix
   ];
 
   home.username = "stalbar";
@@ -12,5 +13,7 @@
   home.packages = with pkgs; [
     firefox
     kitty
+    nerd-fonts.jetbrains-mono
   ];
+  fonts.fontconfig.enable = true;
 }

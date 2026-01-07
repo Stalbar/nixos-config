@@ -2,7 +2,6 @@
   programs.zsh = {
     enable = true;
     enableCompletion = true;
-    autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
 
     shellAliases = {
@@ -16,7 +15,15 @@
 
     oh-my-zsh = {
       enable = true;
-      plugins = [ "git" "sudo" ];
+      plugins = [
+        "git"
+	"sudo"
+      ];
     };
+    autosuggestion.enable = true;
+
+    initExtra = ''
+      ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#f6c177'
+    '';
   };
 }

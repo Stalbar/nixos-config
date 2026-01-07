@@ -1,4 +1,8 @@
 { config, pkgs, ...}: {
+  imports = [
+    ./modules/home/git.nix
+  ];
+
   home.username = "stalbar";
   home.homeDirectory = "/home/stalbar";
   home.stateVersion = "25.11";

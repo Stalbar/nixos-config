@@ -34,11 +34,12 @@
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs; [
-    git
     neovim
   ];
 
   system.stateVersion = "25.11"; 
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+	
+  programs.git.enable = true;
 }

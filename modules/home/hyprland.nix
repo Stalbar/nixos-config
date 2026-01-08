@@ -87,6 +87,7 @@
 	"SUPER, F, fullscreen"
 
 	"ALT, SPACE, exec, rofi -show drun"
+	"SUPER, S, exec, grimblast --freeze save area - | swappy -f -"
 	
 	"SUPER, 1, workspace, 1"
 	"SUPER, 2, workspace, 2"

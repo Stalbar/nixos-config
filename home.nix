@@ -19,6 +19,8 @@
     firefox
     kitty
     nerd-fonts.jetbrains-mono
+    grimblast
+    swappy
   ];
   fonts.fontconfig.enable = true;
 }

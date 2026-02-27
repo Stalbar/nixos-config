@@ -1,45 +1,20 @@
-{ pkgs, inputs, ... }:
+{ lib, ... }:
 
 {
-  home.packages = with pkgs; [
-    btop
-    fastfetch
-    nodejs
-    kdePackages.okular
-    obsidian
-    pavucontrol
-    libreoffice
-    telegram-desktop
-    transmission_4-gtk
-    thunar
-    thunar-volman
-    thunar-archive-plugin
-    tumbler
-    grim
-    slurp
-    grimblast
-    wl-clipboard
-    gowall
-    qt6.qtwayland
-    qt6.qtimageformats
-    kdePackages.breeze-icons
-    kdePackages.kio
-    kdePackages.kio-extras
-    eza
-    bat
-    trash-cli
-    podman-desktop
-    kind
-    wineWow64Packages.stagingFull
-    winetricks
-    dxvk
-    vkd3d-proton
-    lutris
-    heroic
-    mangohud
-    gamescope
-    gamemode
-    protonup-ng
-    inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
+  imports = [
+    ./profiles/base.nix
+    ./profiles/dev.nix
+    ./profiles/gaming.nix
   ];
+
+  options.stalbar.profiles = {
+    dev.enable = lib.mkEnableOption "development package profile";
+    gaming.enable = lib.mkEnableOption "gaming package profile";
+  };
+
+  # Keep current behavior; disable per profile in home.nix when needed.
+  config = {
+    stalbar.profiles.dev.enable = lib.mkDefault true;
+    stalbar.profiles.gaming.enable = lib.mkDefault true;
+  };
 }

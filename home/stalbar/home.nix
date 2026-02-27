@@ -16,5 +16,10 @@
   home.homeDirectory = "/home/stalbar";
   home.stateVersion = "25.11";
 
+  stalbar.profiles = {
+    dev.enable = true;
+    gaming.enable = true;
+  };
+
   programs.home-manager.enable = true;
 }

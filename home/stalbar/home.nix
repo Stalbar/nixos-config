@@ -4,6 +4,7 @@
   imports = [
     ./packages.nix
     ./theme/nord.nix
+    ./programs/theme.nix
     ./programs/git.nix
     ./programs/zsh.nix
     ./programs/kitty.nix

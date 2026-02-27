@@ -45,8 +45,8 @@
       cursor_trail_start_threshold = 1;
 
       scrollback_lines = 20000;
-      whell_scroll_multiplier = "2.0";
-      touch_scrool_multiplier = "1.0";
+      wheel_scroll_multiplier = "2.0";
+      touch_scroll_multiplier = "1.0";
 
       url_color = "#${nord.nord8}";
       underline_hyperlinks = "always";
@@ -104,8 +104,8 @@
       "f2" = "new_tab_with_cwd";
       "ctrl+left" = "resize_window narrower";
       "ctrl+right" = "resize_window wider";
-      "crtl+up" = "resize_window taller";
-      "crtl+down" = "resize_window shorter 3";
+      "ctrl+up" = "resize_window taller";
+      "ctrl+down" = "resize_window shorter 3";
       "ctrl+home" = "resize_window reset";
     };
   };

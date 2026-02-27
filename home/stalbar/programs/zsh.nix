@@ -233,7 +233,7 @@ $character
       nvac = "nvidia_ac";
     };
 
-    initExtra = ''
+    initContent = ''
       export PATH="$PATH:$HOME/.dotnet/tools"
       export PATH="$PATH:$HOME/.cargo/bin"
       export PATH="$PATH:$HOME/go/bin"

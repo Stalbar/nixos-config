@@ -5,19 +5,16 @@
     btop
     fastfetch
     nodejs
-    kitty
-    firefox
     kdePackages.okular
     obsidian
     pavucontrol
-    blueman
     libreoffice
     telegram-desktop
     transmission_4-gtk
-    xfce.thunar
-    xfce.thunar-volman
-    xfce.thunar-archive-plugin
-    xfce.tumbler
+    thunar
+    thunar-volman
+    thunar-archive-plugin
+    tumbler
     grim
     slurp
     grimblast
@@ -31,7 +28,6 @@
     eza
     bat
     trash-cli
-    docker
     podman-desktop
     kind
     wineWow64Packages.stagingFull
@@ -44,6 +40,6 @@
     gamescope
     gamemode
     protonup-ng
-    inputs.codex-cli-nix.packages.${pkgs.system}.default
+    inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 }

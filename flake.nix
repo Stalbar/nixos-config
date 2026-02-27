@@ -19,17 +19,8 @@
 	{
 	  home-manager.useGlobalPkgs = true;
 	  home-manager.useUserPackages = true;
-	  home-manager.users.stalbar = { pkgs, ... }: {
-	    home.username = "stalbar";
-	    home.homeDirectory = "/home/stalbar";
-	    home.stateVersion = "25.11";
-
-	    programs.home-manager.enable = true;
-
-	    home.packages = with pkgs; [
-	      git
-	    ];
-          };
+	  home-manager.backupFileExtension = "hm-bak";
+	  home-manager.users.stalbar = import ./home/stalbar/home.nix;
 	}
       ];
     };

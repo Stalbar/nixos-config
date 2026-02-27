@@ -3,8 +3,6 @@
 {
   services.irqbalance.enable = true;
 
-  powerManagement.cpuFreqGovernor = "performance";
-
   services.power-profiles-daemon.enable = false;
   services.tlp = {
       enable = true;
@@ -19,7 +17,7 @@
         CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
 
         CPU_MIN_PERF_ON_AC = 15;
-        CPU_MAX_PERF_ON_AC = 90;
+        CPU_MAX_PERF_ON_AC = 85;
 
         CPU_MIN_PERF_ON_BAT = 5;
         CPU_MAX_PERF_ON_BAT = 60;

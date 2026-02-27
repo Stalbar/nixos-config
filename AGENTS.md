@@ -2,6 +2,7 @@
 
 ## Purpose
 This repository defines a reproducible, modular NixOS + Home Manager setup for a single-user laptop.
+
 Primary goals:
 - Modern Nix workflow: flakes, pinned inputs, reproducible builds, easy rollbacks.
 - Clear separation:
@@ -10,17 +11,20 @@ Primary goals:
 - Minimalistic desktop (Hyprland) with a Nord/Nordic color scheme.
 - Performance-first without “jet engine” fans: balanced defaults, opt-in boost.
 
-## Hard rules for Codex
-1) Do NOT run commands or apply changes automatically. Only propose commands and code for me to paste/run.
-2) For every change, output complete file contents to paste (not partial diffs), unless I explicitly ask for a diff.
-3) Keep secrets out of the Nix store and out of git:
-   - Never inline private keys, tokens, VPN keys.
-   - Prefer `sops-nix` or `agenix` if we need secrets in repo; otherwise reference `/etc/...` paths.
-4) Prefer minimal dependencies and minimal background services. No “enable everything” defaults.
-5) If a hardware-specific value is required (e.g., NVIDIA PRIME Bus IDs), provide the exact command I should run to obtain it, then show me where to paste the result.
+## Arch reference source (read-only)
+Use my previous Arch configuration as the reference baseline for behavior, UX, and tool choices:
 
-## Repo layout (target)
-We will refactor toward this layout:
+- Path: `/home/stalbar/Arch`
+
+## Safety rules (secrets, system integrity)
+- Keep secrets out of the Nix store and out of git:
+  - Never inline private keys, tokens, VPN keys.
+  - Prefer `sops-nix` or `agenix` if we need secrets in repo; otherwise reference `/etc/...` paths.
+- No destructive system operations. Never suggest disk/partition commands unless explicitly requested.
+- Do not suggest `mitigations=off` by default.
+
+## Repo layout (target modular structure)
+We will refactor toward:
 
 - flake.nix
 - flake.lock
@@ -52,57 +56,51 @@ We will refactor toward this layout:
     - programs/
       - zsh.nix
       - kitty.nix
-      - hyprland.nix           # hypr config and keybinds (minimal)
+      - hyprland.nix
       - firefox.nix
       - git.nix
 
 Notes:
-- System packages should stay minimal: admin tools, drivers, core CLI.
+- System packages should stay minimal: admin tools, drivers, core CLI, services needed pre-login.
 - GUI apps should generally live in Home Manager unless there is a system reason.
 
 ## Flake policy (fresh like Arch, but reproducible)
-- Track `nixos-unstable` for nixpkgs to keep packages fresh.
+- Track `nixos-unstable` for nixpkgs for fresh packages.
 - Keep `flake.lock` committed.
-- Updates are explicit:
+- Updates are explicit and user-driven:
   - `nix flake update`
-  - then `nixos-rebuild switch --flake .#laptop`
-- Avoid “floating” channels.
-
-## Commands (I will run; Codex only suggests)
-- Rebuild system:
   - `sudo nixos-rebuild switch --flake .#laptop`
-- Build without switching:
-  - `sudo nixos-rebuild build --flake .#laptop`
-- Check flake:
-  - `nix flake check`
-- Show outputs:
-  - `nix flake show`
-- Format Nix:
-  - Use `alejandra` (preferred) and `nix fmt` when wired.
+
+## Commands (I run; Codex only suggests)
+Codex may ask me to run commands like:
+- Inspect repo: `ls -la`, `git status`, `tree -a`, `rg ...`
+- Inspect Arch reference: `find /run/media/stalbar/Ventoy/Arch ...`, `rg -n ...`
+- Nix validation: `nix flake show`, `nix flake check`, `sudo nixos-rebuild build --flake .#laptop`
+- Hardware discovery (only when required): `lspci -D -d ::03xx`, `lsusb`, `lscpu`
+
+Codex MUST NOT execute commands itself.
 
 ## Hardware/driver assumptions
 - Laptop may be Intel iGPU + NVIDIA dGPU (PRIME offload).
 - If PRIME is used:
-  - Codex must request bus IDs via:
-    - `lspci -D -d ::03xx`
-  - Then instruct where to paste converted values.
+  - Codex must ask me to run: `lspci -D -d ::03xx`
+  - Then tell me exactly where to paste converted Bus IDs.
 - Audio: PipeWire.
 - Bluetooth: BlueZ + Blueman.
 - Storage: Btrfs + zram swap (no traditional swapfile unless explicitly requested).
-- IPv6: disabled system-wide (per preference).
-- TTL: set to 65 (per preference).
+- IPv6: disabled system-wide (preference).
+- TTL: set to 65 (preference).
 
 ## Performance + quiet-fan strategy (default behavior)
 Default profile must be “quiet, cool, responsive”:
-- Use `schedutil` (or platform balanced) on AC.
-- Limit boost/peak performance slightly on AC to avoid constant fan ramp.
+- Prefer balanced scheduling/governor on AC (avoid forcing “performance” all day).
+- Limit boost/peak slightly on AC to avoid constant fan ramp.
 - More conservative on battery.
 - zram enabled to reduce disk thrash.
 - IRQ balance enabled.
-- Avoid `mitigations=off` by default.
 
 Opt-in “boost” mode:
-- Provide a documented one-liner to temporarily switch to performance (e.g., TLP settings change or power profile), but do not make it default.
+- Provide a documented one-liner to temporarily switch to performance, but do not make it the default.
 
 Important: TLP reduces heat but does not directly control fan curves. Do not claim fan control unless installing vendor fan tools.
 
@@ -110,8 +108,8 @@ Important: TLP reduces heat but does not directly control fan curves. Do not cla
 - Follow Nord palette (dark, low saturation).
 - Minimal UI elements; no heavy theming stacks.
 - Prefer:
-  - `kitty` with Nord colors
-  - `Papirus-Dark` icons if needed
+  - kitty with Nord colors
+  - Papirus-Dark icons if needed
   - GTK/Qt consistent theme (Nordic or Nord-based) with minimal overrides
 - Hyprland config must stay short and readable:
   - sane keybinds, workspace rules, minimal animations (or off), sensible gaps.
@@ -123,57 +121,26 @@ System (NixOS) packages:
 - core debugging tools
 
 Home Manager packages:
-- GUI apps (firefox, telegram, obsidian, okular, thunar, transmission)
+- GUI apps (firefox, telegram-desktop, obsidian, okular, thunar, transmission)
 - developer UX tools (fastfetch, btop, codex) unless required globally
 - shells, prompts, dotfiles, editor configs
 
 If something can be user-scoped, default to Home Manager.
 
-## Portal / Wayland notes
-Hyprland requires:
-- xdg-desktop-portal + hyprland portal
-- polkit enabled
-- dbus enabled
-Codex should enable the minimal set only.
-
-## NVIDIA on Wayland notes (only if applicable)
-- Prefer stable settings: modeset on, DRM enabled, PRIME offload command available.
-- Do not hardcode bus IDs; request them.
-- Prefer minimal environment variables; only add workarounds if a known issue is present.
-
 ## Output format Codex must use
-When proposing changes:
+For any proposed change:
 1) Short rationale (2–6 sentences).
 2) List of files to create/replace.
-3) For each file: provide the full file content in a single code block labeled with its path.
-4) Provide the exact commands I should run to apply and verify.
+3) For each file: provide full file content in a single code block labeled with its path.
+4) Provide exact commands I should run to apply/verify.
 
-Example format:
-- `hosts/laptop/default.nix` (full content)
-- `modules/system/base.nix` (full content)
-- Commands:
-  - `sudo nixos-rebuild switch --flake .#laptop`
-  - `systemctl status ...`
+No partial diffs unless I ask.
 
-## Definition of done for tasks
+## Definition of done
 A task is done only when:
 - `nix flake check` passes (if configured)
-- `nixos-rebuild build` succeeds
+- `sudo nixos-rebuild build --flake .#laptop` succeeds
 - No secrets added to git
 - The resulting config stays minimal and follows Nord theme constraints
-
-## Current target software stack (planned)
-System-level enablement (as needed):
-- Intel + NVIDIA drivers (hybrid if present)
-- USB tools (usbutils/udisks2/gvfs)
-- Bluetooth tools (bluez, blueman)
-- Audio (pipewire)
-- Power (TLP, quiet defaults)
-- Hyprland session support (portals, polkit)
-Apps/tools (prefer Home Manager):
-- firefox, telegram-desktop, thunar, okular, obsidian, transmission
-- grimblast + slurp + grim
-- zsh, kitty, btop, fastfetch, gowall
-- codex
 
 End of agents.md

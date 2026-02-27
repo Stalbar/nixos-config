@@ -1,11 +1,17 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 
 {
   home.packages = with pkgs; [
     btop
     fastfetch
+    nodejs
     kitty
     firefox
+    kdePackages.okular
+    obsidian
+    pavucontrol
+    blueman
+    libreoffice
     telegram-desktop
     transmission_4-gtk
     xfce.thunar
@@ -22,6 +28,22 @@
     kdePackages.breeze-icons
     kdePackages.kio
     kdePackages.kio-extras
-    codex
+    eza
+    bat
+    trash-cli
+    docker
+    podman-desktop
+    kind
+    wineWow64Packages.stagingFull
+    winetricks
+    dxvk
+    vkd3d-proton
+    lutris
+    heroic
+    mangohud
+    gamescope
+    gamemode
+    protonup-ng
+    inputs.codex-cli-nix.packages.${pkgs.system}.default
   ];
 }

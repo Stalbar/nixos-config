@@ -20,7 +20,16 @@
     max-jobs = "auto";
   };
 
+  fonts.packages = with pkgs; [
+    nerd-fonts.jetbrains-mono
+  ];
+
+  fonts.fontconfig.defaultFonts = {
+    monospace = [ "JetBrainsMono Nerd Font Mono" ];
+  };
+
   virtualisation.docker.enable = true;
+  programs.gamemode.enable = true;
 
   nixpkgs.config.allowUnfree = true;
 

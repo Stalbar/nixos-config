@@ -208,7 +208,8 @@ in
       #custom-mic,
       #battery {
         font-size: 23px;
-        padding: 4px 0;
+        padding: 2px 0;
+        margin: 0;
       }
 
       #pulseaudio {
@@ -235,7 +236,8 @@ in
         color: #EBCB8B;
         font-size: 11px;
         font-weight: 700;
-        padding: 4px 0;
+        padding: 2px 0;
+        margin: 0;
       }
 
       #tray {

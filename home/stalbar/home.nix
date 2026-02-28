@@ -13,6 +13,8 @@
     ./programs/lock.nix
     ./programs/rofi.nix
     ./programs/wlogout.nix
+    ./programs/fastfetch.nix
+    ./programs/btop.nix
     ./programs/waybar.nix
     ./programs/wallpaper.nix
     ./programs/hyprland.nix

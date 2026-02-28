@@ -111,7 +111,9 @@
         "$mod, V, togglefloating"
         "$mod, S, exec, grimblast --freeze --wait 0.60 copy area"
         "$mod, R, exec, change-wallpaper"
-        "$mod, O, exec, $HOME/code/bash/lock.sh"
+        "$mod, O, exec, hyprlock"
+        "ALT, SPACE, exec, rofi -show drun"
+        "$mod, M, exec, wlogout -b 5"
         "$mod, F, fullscreen"
         "$mod, T, togglesplit"
 
@@ -164,12 +166,12 @@
       ];
 
       binde = [
-        ", xf86MonBrightnessDown, exec, $HOME/code/bash/brightness --dec"
-        ", xf86MonBrightnessUp, exec, $HOME/code/bash/brightness --inc"
-        ", xf86AudioRaiseVolume, exec, $HOME/code/bash/volume --inc"
-        ", xf86AudioLowerVolume, exec, $HOME/code/bash/volume --dec"
-        ", xf86AudioMute, exec, $HOME/code/bash/volume --mute-volume"
-        ", xf86AudioMicMute, exec, $HOME/code/bash/volume --mute-mic"
+        ", xf86MonBrightnessDown, exec, /etc/profiles/per-user/stalbar/bin/brightness --dec"
+        ", xf86MonBrightnessUp, exec, /etc/profiles/per-user/stalbar/bin/brightness --inc"
+        ", xf86AudioRaiseVolume, exec, /etc/profiles/per-user/stalbar/bin/volume --inc"
+        ", xf86AudioLowerVolume, exec, /etc/profiles/per-user/stalbar/bin/volume --dec"
+        ", xf86AudioMute, exec, /etc/profiles/per-user/stalbar/bin/volume --mute-volume"
+        ", xf86AudioMicMute, exec, /etc/profiles/per-user/stalbar/bin/volume --mute-mic"
       ];
 
       windowrule = [

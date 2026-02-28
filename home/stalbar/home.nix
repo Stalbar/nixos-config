@@ -9,6 +9,10 @@
     ./programs/zsh.nix
     ./programs/kitty.nix
     ./programs/firefox.nix
+    ./programs/notifications.nix
+    ./programs/lock.nix
+    ./programs/rofi.nix
+    ./programs/wlogout.nix
     ./programs/waybar.nix
     ./programs/wallpaper.nix
     ./programs/hyprland.nix

@@ -3,30 +3,32 @@
 {
   wayland.windowManager.hyprland = {
     enable = true;
-    extraConfig = ''
-      windowrule {
-        name = pavucontrol-floating
-        match:class = ^(pavucontrol)$
-
-        float = yes
-        center = yes
-        size = 60% 60%
-      }
-    '';
     settings = {
       "$mod" = "SUPER";
       "$terminal" = "kitty";
       "$browser" = "firefox";
       "$fileManager" = "thunar";
+
       monitor = ",preferred,auto,1";
 
       exec-once = [
         "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
+        "systemctl --user start hyprpolkitagent"
+        "waybar"
+        "nm-applet --indicator"
+        "blueman-applet"
+        "swww-daemon"
       ];
 
+      cursor = {
+        no_hardware_cursors = true;
+      };
+
       input = {
-        kb_layout = "us";
+        kb_layout = "us,ru";
+        kb_options = "grp:win_space_toggle";
         follow_mouse = 1;
+        sensitivity = 0;
         touchpad = {
           natural_scroll = true;
           middle_button_emulation = true;
@@ -34,34 +36,64 @@
       };
 
       general = {
-        gaps_in = 4;
-        gaps_out = 8;
+        gaps_in = 5;
+        gaps_out = 10;
         border_size = 2;
         resize_on_border = true;
         layout = "dwindle";
-        "col.active_border" = "rgb(${nord.nord10})";
-        "col.inactive_border" = "rgb(${nord.nord3})";
+        "col.active_border" = "rgba(${nord.nord15}ee) rgba(${nord.nord10}cc) 45deg";
+        "col.inactive_border" = "rgba(${nord.nord0}55)";
       };
 
       decoration = {
-        rounding = 6;
+        rounding = 10;
         active_opacity = 1.0;
         inactive_opacity = 0.97;
+        dim_inactive = true;
+        dim_strength = 0.04;
+
         blur = {
-          enabled = false;
+          enabled = true;
+          size = 5;
+          passes = 1;
+          new_optimizations = true;
+          xray = false;
+          noise = 0.01;
+          contrast = 0.95;
+          brightness = 0.90;
+          vibrancy = 0.08;
+          vibrancy_darkness = 0.25;
+          popups = true;
+          popups_ignorealpha = 0.2;
         };
+
         shadow = {
           enabled = false;
         };
       };
 
       animations = {
-        enabled = false;
+        enabled = true;
+        bezier = [
+          "soft, 0.25, 0.10, 0.25, 1.00"
+          "decel, 0.05, 0.70, 0.10, 1.00"
+        ];
+        animation = [
+          "windows, 1, 4, soft, slide"
+          "windowsOut, 1, 4, decel, popin 95%"
+          "workspaces, 1, 3, decel, slidefade 10%"
+          "fade, 1, 4, soft"
+          "border, 1, 5, soft"
+        ];
       };
 
       dwindle = {
         pseudotile = true;
         preserve_split = true;
+      };
+
+      master = {
+        new_status = "master";
       };
 
       misc = {
@@ -75,16 +107,16 @@
 
       bind = [
         "$mod, Q, exec, $terminal"
-        "$mod, E, exec, $fileManager"
-        "$mod, B, exec, $browser"
-        "ALT, F, exec, firefox"
-        "ALT, T, exec, telegram-desktop"
-        "ALT SHIFT, T, exec, $fileManager"
         "$mod, F4, killactive"
-        "$mod, F, fullscreen, 1"
         "$mod, V, togglefloating"
-        "$mod, T, togglesplit"
         "$mod, S, exec, grimblast --freeze --wait 0.60 copy area"
+        "$mod, R, exec, change-wallpaper"
+        "$mod, O, exec, $HOME/code/bash/lock.sh"
+        "$mod, F, fullscreen"
+        "$mod, T, togglesplit"
+
+        "ALT, Tab, cyclenext"
+        "ALT, Tab, bringactivetotop"
 
         "$mod, h, movefocus, l"
         "$mod, l, movefocus, r"
@@ -116,6 +148,14 @@
         "$mod SHIFT, 8, movetoworkspacesilent, 8"
         "$mod SHIFT, 9, movetoworkspacesilent, 9"
         "$mod SHIFT, 0, movetoworkspacesilent, 10"
+
+        "ALT, T, exec, Telegram"
+        "ALT SHIFT, T, exec, thunar"
+        "ALT, F, exec, firefox"
+        "ALT SHIFT, F, exec, firefox --private-window"
+        "ALT, O, exec, obsidian"
+        "ALT SHIFT, O, exec, okular"
+        "ALT, B, exec, blueman-manager"
       ];
 
       bindm = [
@@ -123,6 +163,26 @@
         "$mod, mouse:273, resizewindow"
       ];
 
+      binde = [
+        ", xf86MonBrightnessDown, exec, $HOME/code/bash/brightness --dec"
+        ", xf86MonBrightnessUp, exec, $HOME/code/bash/brightness --inc"
+        ", xf86AudioRaiseVolume, exec, $HOME/code/bash/volume --inc"
+        ", xf86AudioLowerVolume, exec, $HOME/code/bash/volume --dec"
+        ", xf86AudioMute, exec, $HOME/code/bash/volume --mute-volume"
+        ", xf86AudioMicMute, exec, $HOME/code/bash/volume --mute-mic"
+      ];
+
+      windowrule = [
+        "match:modal true, float on, center on, pin on"
+        "match:title ^(Open File|Save File|Save As|Preferences|Settings|Properties)$, float on, center on, pin on"
+        "match:title ^(Authentication Required|Permission Required)$, float on, center on, pin on"
+        "match:class ^org\\.pulseaudio\\.pavucontrol$, float on, center on, pin on, size 520 520"
+        "match:class ^org\\.pulseaudio\\.pavucontrol$, stay_focused on"
+        "match:class ^blueman-manager$, float on, center on, pin on, size 760 520"
+        "match:class ^blueman-manager$, stay_focused on"
+        "match:class ^kitty$, opacity 0.96 0.96"
+        "match:class ^org\\.kde\\.okular$, opacity 1.0 1.0"
+      ];
     };
   };
 }

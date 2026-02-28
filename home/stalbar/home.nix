@@ -9,6 +9,8 @@
     ./programs/zsh.nix
     ./programs/kitty.nix
     ./programs/firefox.nix
+    ./programs/waybar.nix
+    ./programs/wallpaper.nix
     ./programs/hyprland.nix
   ];
 

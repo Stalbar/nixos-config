@@ -10,6 +10,8 @@
     libreoffice
     telegram-desktop
     transmission_4-gtk
+    networkmanagerapplet
+    blueman
     thunar
     thunar-volman
     thunar-archive-plugin
@@ -18,6 +20,7 @@
     slurp
     grimblast
     wl-clipboard
+    swww
     gowall
     qt6.qtwayland
     qt6.qtimageformats

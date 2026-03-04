@@ -4,6 +4,7 @@
   environment.systemPackages = with pkgs; [
     git
     neovim
+    neovide
     curl
     wget
     ripgrep
@@ -13,6 +14,7 @@
     pciutils
     usbutils
     btrfs-progs
+    snapper
     openssl
     wireguard-tools
   ];

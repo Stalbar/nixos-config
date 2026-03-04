@@ -10,14 +10,14 @@
         PLATFORM_PROFILE_ON_AC = "balanced";
         PLATFORM_PROFILE_ON_BAT = "low-power";
 
-        CPU_SCALING_GOVERNOR_ON_AC = "schedutil";
+        CPU_SCALING_GOVERNOR_ON_AC = "powersave";
         CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
 
-        CPU_ENERGY_PERF_POLICY_ON_AC = "balance_performance";
+        CPU_ENERGY_PERF_POLICY_ON_AC = "balance_power";
         CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
 
-        CPU_MIN_PERF_ON_AC = 15;
-        CPU_MAX_PERF_ON_AC = 85;
+        CPU_MIN_PERF_ON_AC = 10;
+        CPU_MAX_PERF_ON_AC = 75;
 
         CPU_MIN_PERF_ON_BAT = 5;
         CPU_MAX_PERF_ON_BAT = 60;

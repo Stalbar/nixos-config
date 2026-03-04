@@ -7,8 +7,9 @@
     kdePackages.okular
     obsidian
     pavucontrol
-    libreoffice
+    libreoffice-fresh
     telegram-desktop
+    bruno
     transmission_4-gtk
     networkmanagerapplet
     blueman
@@ -19,6 +20,7 @@
     grim
     slurp
     grimblast
+    swappy
     wl-clipboard
     swww
     gowall

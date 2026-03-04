@@ -6,13 +6,14 @@
     enableZshIntegration = true;
     settings = {
       add_newline = true;
-      command_timeout = 1000;
+      command_timeout = 500;
+      scan_timeout = 20;
       palette = "nord";
 
       format = ''
-$os$directory$git_branch$git_status$c$dart$dotnet$golang$java$lua$nodejs$php$python$rust$zig$fill$time
-$character
-'';
+        $os$directory$git_branch$git_status$fill$time
+        $character
+      '';
 
       palettes.nord = {
         nord0 = "#2E3440";
@@ -164,35 +165,15 @@ $character
   programs.zoxide = {
     enable = true;
     enableZshIntegration = true;
-    options = [ "--cmd" "cd" ];
+    options = [
+      "--cmd"
+      "cd"
+    ];
   };
 
   programs.zsh = {
     enable = true;
     enableCompletion = true;
-
-    autosuggestion = {
-      enable = true;
-      strategy = [ "history" "completion" ];
-    };
-
-    syntaxHighlighting.enable = true;
-
-    plugins = [
-      {
-        name = "zsh-autosuggestions";
-        src = "${pkgs.zsh-autosuggestions}/share/zsh/plugins/zsh-autosuggestions";
-      }
-      {
-        name = "zsh-syntax-highlighting";
-        src = "${pkgs.zsh-syntax-highlighting}/share/zsh-syntax-highlighting";
-        file = "zsh-syntax-highlighting.zsh";
-      }
-      {
-        name = "you-should-use";
-        src = "${pkgs.zsh-you-should-use}/share/zsh/plugins/you-should-use";
-      }
-    ];
 
     oh-my-zsh = {
       enable = true;
@@ -200,15 +181,31 @@ $character
         "git"
         "sudo"
         "z"
-        "extract"
         "colored-man-pages"
         "docker"
         "kubectl"
       ];
     };
 
+    autosuggestion = {
+      enable = true;
+      strategy = [
+        "history"
+      ];
+    };
+
+    syntaxHighlighting.enable = true;
+
+    plugins = [
+      {
+        name = "you-should-use";
+        src = "${pkgs.zsh-you-should-use}/share/zsh/plugins/you-should-use";
+      }
+    ];
+
     shellAliases = {
       ".." = "cd ..";
+      md = "mkdir -p";
       mkdir = "mkdir -p";
       vi = "nvim";
       ls = "eza --icons --group-directories-first";
@@ -225,9 +222,20 @@ $character
 
       gs = "git status -sb";
       rebuild = "sudo nixos-rebuild switch --flake .#laptop";
+      upgrade = "sudo nix flake update && sudo nixos-rebuild switch --flake .#laptop";
+      upgrade-dev = "sudo nix flake lock --update-input nixpkgs --update-input home-manager && sudo nixos-rebuild switch --flake .#laptop";
 
       boost = "sudo tlp performance";
       quiet = "sudo tlp balanced";
+
+      nvh = "nvim-dev-health";
+      nvsync = "nvim-plugin-sync";
+      tg-theme-nord = "xdg-open \"$HOME/Downloads/nord.tdesktop-theme\"";
+      snap-root-list = "sudo snapper -c root list";
+      snap-home-list = "sudo snapper -c home list";
+      snap-root-now = "sudo snapper -c root create -d manual";
+      snap-home-now = "sudo snapper -c home create -d manual";
+      snap-root-rollback = "sudo snapper -c root rollback";
 
       nv = "nvidia-offload";
       nvac = "nvidia_ac";
@@ -269,14 +277,25 @@ $character
       }
 
       _up_or_accept_suggestion() {
-        if [[ -n "$POSTDISPLAY" ]]; then
+        if (( $+widgets[autosuggest-accept] )) && [[ -n "''${POSTDISPLAY:-}" ]]; then
           zle autosuggest-accept
+        elif (( $+widgets[history-substring-search-up] )); then
+          zle history-substring-search-up
         else
           zle up-line-or-history
         fi
       }
       zle -N _up_or_accept_suggestion
       bindkey '^[[A' _up_or_accept_suggestion
+      bindkey '^[OA' _up_or_accept_suggestion
+      bindkey -M main '^[[A' _up_or_accept_suggestion
+      bindkey -M main '^[OA' _up_or_accept_suggestion
+      bindkey -M emacs '^[[A' _up_or_accept_suggestion
+      bindkey -M emacs '^[OA' _up_or_accept_suggestion
+      bindkey -M viins '^[[A' _up_or_accept_suggestion
+      bindkey -M viins '^[OA' _up_or_accept_suggestion
+      bindkey -M vicmd '^[[A' _up_or_accept_suggestion
+      bindkey -M vicmd '^[OA' _up_or_accept_suggestion
     '';
   };
 }

@@ -1,0 +1,15 @@
+return {
+  { import = "plugins.ui.theme" },
+  { import = "plugins.ui.lualine" },
+  { import = "plugins.ui.smooth_scroll" },
+  { import = "plugins.ui.neotree" },
+  { import = "plugins.ui.incline" },
+  { import = "plugins.ui.telescope" },
+  { import = "plugins.ui.which_key" },
+  { import = "plugins.ui.bufferline" },
+  { import = "plugins.ui.dressing" },
+  { import = "plugins.ui.notify" },
+  { import = "plugins.ui.noice" },
+  { import = "plugins.ui.alpha" },
+  { import = "plugins.ui.toggles" },
+}

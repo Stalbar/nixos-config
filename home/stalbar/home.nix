@@ -7,12 +7,14 @@
     ./programs/theme.nix
     ./programs/git.nix
     ./programs/zsh.nix
+    ./programs/psql.nix
+    ./programs/neovim.nix
     ./programs/kitty.nix
     ./programs/firefox.nix
+    ./programs/obsidian.nix
     ./programs/notifications.nix
     ./programs/lock.nix
-    ./programs/rofi.nix
-    ./programs/wlogout.nix
+    ./programs/quickshell.nix
     ./programs/fastfetch.nix
     ./programs/btop.nix
     ./programs/waybar.nix

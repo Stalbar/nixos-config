@@ -69,8 +69,8 @@
       visual_bell_duration = 0;
       bell_border_color = "#${nord.nord12}";
 
-      selection_background = "#${nord.nord0}";
-      selection_foreground = "#${nord.nord8}";
+      selection_background = "#${nord.nord10}";
+      selection_foreground = "#${nord.nord6}";
 
       color0 = "#${nord.nord1}";
       color8 = "#${nord.nord3}";

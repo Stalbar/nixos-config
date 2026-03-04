@@ -1,4 +1,4 @@
-{ nord, ... }:
+{ pkgs, nord, ... }:
 
 {
   wayland.windowManager.hyprland = {
@@ -8,12 +8,15 @@
       "$terminal" = "kitty";
       "$browser" = "firefox";
       "$fileManager" = "thunar";
+      # Launcher and power menu are on-demand Quickshell widgets.
+      "$launcher" = "qs-app-launcher";
+      "$powermenu" = "qs-power-menu";
 
       monitor = ",preferred,auto,1";
 
       exec-once = [
         "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
-        "systemctl --user start hyprpolkitagent"
+        "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
         "waybar"
         "nm-applet --indicator"
         "blueman-applet"
@@ -100,7 +103,7 @@
         vfr = true;
         disable_hyprland_logo = true;
         disable_splash_rendering = true;
-        focus_on_activate = true;
+        focus_on_activate = false;
         animate_manual_resizes = false;
         animate_mouse_windowdragging = false;
       };
@@ -109,11 +112,11 @@
         "$mod, Q, exec, $terminal"
         "$mod, F4, killactive"
         "$mod, V, togglefloating"
-        "$mod, S, exec, grimblast --freeze --wait 0.60 copy area"
+        "$mod, S, exec, grimblast --freeze --wait 0.60 save area - | swappy -f -"
         "$mod, R, exec, change-wallpaper"
         "$mod, O, exec, hyprlock"
-        "ALT, SPACE, exec, rofi -show drun"
-        "$mod, M, exec, wlogout -b 5"
+        "ALT, SPACE, exec, $launcher"
+        "$mod, M, exec, $powermenu"
         "$mod, F, fullscreen"
         "$mod, T, togglesplit"
 
@@ -156,6 +159,7 @@
         "ALT, F, exec, firefox"
         "ALT SHIFT, F, exec, firefox --private-window"
         "ALT, O, exec, obsidian"
+        "ALT, N, exec, neovide"
         "ALT SHIFT, O, exec, okular"
         "ALT, B, exec, blueman-manager"
       ];
@@ -174,16 +178,39 @@
         ", xf86AudioMicMute, exec, /etc/profiles/per-user/stalbar/bin/volume --mute-mic"
       ];
 
+      layerrule = [
+        "blur on, ignore_alpha 0.10, match:namespace wallpaper_picker"
+        "blur on, ignore_alpha 0.15, match:namespace waybar"
+        "blur_popups on, match:namespace waybar"
+        "blur on, ignore_alpha 0.10, match:namespace quickshell"
+        "animation popin, match:namespace quickshell"
+        "blur off, match:namespace swww-daemon"
+        "blur on, ignore_alpha 0.35, match:namespace quickshell:powermenu"
+      ];
+
       windowrule = [
         "match:modal true, float on, center on, pin on"
+
         "match:title ^(Open File|Save File|Save As|Preferences|Settings|Properties)$, float on, center on, pin on"
         "match:title ^(Authentication Required|Permission Required)$, float on, center on, pin on"
-        "match:class ^org\\.pulseaudio\\.pavucontrol$, float on, center on, pin on, size 520 520"
-        "match:class ^org\\.pulseaudio\\.pavucontrol$, stay_focused on"
-        "match:class ^blueman-manager$, float on, center on, pin on, size 760 520"
-        "match:class ^blueman-manager$, stay_focused on"
-        "match:class ^kitty$, opacity 0.96 0.96"
-        "match:class ^org\\.kde\\.okular$, opacity 1.0 1.0"
+
+        "match:class ^\\.?((org\\.pulseaudio\\.pavucontrol|pavucontrol)(\\.wrapped|-wrapped)?)$, float on, center on, pin on, size 520 520"
+        "match:class ^\\.?((org\\.pulseaudio\\.pavucontrol|pavucontrol)(\\.wrapped|-wrapped)?)$, stay_focused on"
+
+        "match:class ^\\.?((blueman-manager|org\\.blueman\\.Manager)(\\.wrapped|-wrapped)?)$, float on, center on, pin on, size 760 520"
+        "match:class ^\\.?((blueman-manager|org\\.blueman\\.Manager)(\\.wrapped|-wrapped)?)$, stay_focused on"
+
+        "match:class ^\\.?((com\\.transmissionbt\\.transmission_.*|transmission-gtk)(\\.wrapped|-wrapped)?)$, no_max_size on"
+        "match:class ^\\.?org\\.kde\\.okular(\\.wrapped|-wrapped)?$, no_max_size on"
+        "match:class ^\\.?libreoffice-startcenter(\\.wrapped|-wrapped)?$, no_max_size on"
+        "match:class ^\\.?obsidian(\\.wrapped|-wrapped)?$, no_max_size on"
+        "match:class ^\\.?org\\.telegram\\.desktop(\\.wrapped|-wrapped)?$, no_max_size on"
+
+        "match:class ^\\.?vlc(\\.wrapped|-wrapped)?$, float on, center on"
+
+        "match:class ^\\.?kitty(\\.wrapped|-wrapped)?$, opacity 0.92 0.92"
+        "match:class ^\\.?org\\.kde\\.okular(\\.wrapped|-wrapped)?$, opacity 1.0 1.0"
+        "match:class ^\\.?neovide(\\.wrapped|-wrapped)?$, opacity 0.92 0.92"
       ];
     };
   };

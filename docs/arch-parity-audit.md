@@ -1,65 +1,72 @@
 # Arch Parity Audit
 
 Reference baseline: `/home/stalbar/Arch/.config`  
-Audit date: 2026-02-28
+Audit date: 2026-03-02
 
-## Ported (or intentionally replaced with Nix-native equivalent)
+## Ported
 
-- Hyprland core session and keybindings:
+- Hyprland session, keybinds, and XF86 controls:
   - `home/stalbar/programs/hyprland.nix`
-  - Includes workspace/navigation/app binds and XF86 media/brightness binds.
-- Waybar:
+- Waybar right-side Nordic layout:
   - `home/stalbar/programs/waybar.nix`
-  - Ported to minimal right-side Nordic layout.
-- Notifications:
+- Notifications + volume/brightness scripts:
   - `home/stalbar/programs/notifications.nix`
-  - `dunst` configured + `volume`/`brightness` scripts integrated.
-- Theme stack:
+- Lockscreen + idle flow:
+  - `home/stalbar/programs/lock.nix`
+- GTK/Qt/icon/cursor/font theming:
   - `home/stalbar/programs/theme.nix`
-  - Nordic GTK theme, Papirus-Dark icons, Bibata cursor, JetBrainsMono Nerd Font Mono.
-- Terminal + shell UX:
-  - `home/stalbar/programs/kitty.nix`
-  - `home/stalbar/programs/zsh.nix` (includes Starship config; not Arch-identical, but intentionally Nord-focused).
+- Launcher + power menu:
+  - `home/stalbar/programs/rofi.nix`
+  - `home/stalbar/programs/wlogout.nix`
 - Wallpaper workflow:
   - `home/stalbar/programs/wallpaper.nix`
-  - `swww` + `change-wallpaper` command.
-- Core desktop packages:
-  - `home/stalbar/profiles/base.nix`
-  - Includes core apps/tooling (Thunar, Telegram, Obsidian, Okular, etc.).
+- Fastfetch + btop theming:
+  - `home/stalbar/programs/fastfetch.nix`
+  - `home/stalbar/programs/btop.nix`
+- Firefox + extensions + profile defaults:
+  - `home/stalbar/programs/firefox.nix`
+  - `home/stalbar/programs/firefox/profile.nix`
+  - `home/stalbar/programs/firefox/extensions.nix`
+- Boot/login visual stack:
+  - `modules/system/boot.nix` (Plymouth)
+  - `modules/system/grub-theme.nix`
+  - `modules/desktop/login.nix` (greetd/tuigreet)
 
-## Missing / partial parity that still matters
+## Newly Staged For Quickshell Migration
+
+- Quickshell runtime and helper launchers are prepared:
+  - `home/stalbar/programs/quickshell.nix`
+- Current behavior remains unchanged (`rofi` + `wlogout` still active).
+- Hyprland commands are now variable-based for easier backend swap:
+  - `home/stalbar/programs/hyprland.nix`
+
+## Gaps Still Not Covered
 
 ### High impact
 
-- Lockscreen + idle policy are not Nix-managed yet:
-  - Arch had `hyprlock` config (`/home/stalbar/Arch/.config/hypr/hyprlock.conf`).
-  - Current Nix config still uses external lock script path (`$HOME/code/bash/lock.sh`) in Hyprland bind.
-  - No `hypridle` policy currently declared for lock/suspend timing.
+- Quickshell widgets are not yet in-repo:
+  - No declarative `~/.config/quickshell/*` widget source managed by Home Manager yet.
+- Greetd is still `tuigreet`-based:
+  - No custom Quickshell greeter (`dms-greeter`) wired yet.
 
 ### Medium impact
 
-- App launcher parity:
-  - Arch has `rofi` config (`/home/stalbar/Arch/.config/rofi/*`).
-  - Current Nix config has no `rofi` package/config and no launcher keybind equivalent.
-- Power menu parity:
-  - Arch has `wlogout` config (`/home/stalbar/Arch/.config/wlogout/*`).
-  - Current Nix config has no `wlogout` package/config or bind.
+- No secrets management framework yet:
+  - WireGuard relies on `/etc/wireguard/wg0.conf`; no `sops-nix`/`agenix` integration.
+- No automated Nix maintenance policy:
+  - No scheduled GC/store optimization/update cadence module.
 
-### Low impact / optional polish
+### Optional / quality
 
-- `fastfetch` custom config from Arch is not ported (package exists).
-- `btop` custom config from Arch is not ported (package exists).
-- App-specific configs not ported (only if you care): `mpv`, `qBittorrent`, `neovide`, `nvim` user config.
-- `qt5ct`/`qt6ct`/`xsettingsd` Arch-style tweaks are not ported (mostly superseded by current GTK/Qt theme setup).
+- No structured backup/restore policy beyond snapshots:
+  - Snapper exists, but no off-device backup (restic/borg) module.
+- No explicit desktop profile toggle set:
+  - Current launcher/powermenu backends are editable in Hyprland vars, but not exposed as formal Home Manager options.
 
-## Intentionally not ported
+## Recommended Next Order
 
-- Hyprland plugins (`hyprpm` ecosystem) and Quickshell IPC bindings:
-  - intentionally excluded per current design goals.
-
-## Recommended next parity order
-
-1. Port `hyprlock` + add `hypridle` (Nix-managed lock/idle flow).
-2. Port `rofi` (minimal Nordic style) and add launcher bind.
-3. Port `wlogout` (minimal Nordic power menu) and add power-menu bind.
-4. Port `fastfetch` + `btop` config polish.
+1. Vendor Quickshell widget source into this repo and manage it declaratively.
+2. Add backend toggles (`rofi`/`wlogout` vs Quickshell) as formal options.
+3. Switch launcher + power menu binds to Quickshell and remove legacy packages.
+4. Move greetd from `tuigreet` to a themed Quickshell greeter.
+5. Add secrets + backup policy modules (`sops-nix` + restic).

@@ -16,6 +16,7 @@ in
       gamescope
       gamemode
       protonup-ng
+      steam-run
     ];
   };
 }

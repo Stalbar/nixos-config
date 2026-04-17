@@ -4,22 +4,7 @@
   imports = [
     ./packages.nix
     ./theme/nord.nix
-    ./programs/theme.nix
-    ./programs/git.nix
-    ./programs/zsh.nix
-    ./programs/psql.nix
-    ./programs/neovim.nix
-    ./programs/kitty.nix
-    ./programs/firefox.nix
-    ./programs/obsidian.nix
-    ./programs/notifications.nix
-    ./programs/lock.nix
-    ./programs/quickshell.nix
-    ./programs/fastfetch.nix
-    ./programs/btop.nix
-    ./programs/waybar.nix
-    ./programs/wallpaper.nix
-    ./programs/hyprland.nix
+    ./programs/default.nix
   ];
 
   home.username = "stalbar";
@@ -32,4 +17,9 @@
   };
 
   programs.home-manager.enable = true;
+
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+  };
 }

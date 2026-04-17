@@ -1,12 +1,14 @@
-{ nord, ... }:
+{ config, ... }:
 
 {
   programs.firefox = {
     enable = true;
+    configPath = ".mozilla/firefox";
 
     profiles.stalbar = {
       id = 0;
       name = "stalbar";
+      path = "stalbar";
       isDefault = true;
 
       settings = {
@@ -69,11 +71,11 @@
         "security.https_only_mode" = true;
         "dom.security.https_first" = true;
         "privacy.donottrackheader.enabled" = true;
-        "privacy.globalprivacycontrol.enabled" = true;
-        "privacy.query_stripping.enabled" = true;
-        "privacy.query_stripping.enabled.pbmode" = true;
-        "network.cookie.cookieBehavior" = 1;
-        "network.cookie.cookieBehavior.pbmode" = 5;
+        "privacy.globalprivacycontrol.enabled" = false;
+        "privacy.query_stripping.enabled" = false;
+        "privacy.query_stripping.enabled.pbmode" = false;
+        "network.cookie.cookieBehavior" = 0;
+        "network.cookie.cookieBehavior.pbmode" = 0;
         "media.autoplay.default" = 1;
 
         # Keep new tab enabled and lightweight.
@@ -85,15 +87,9 @@
       };
 
       userChrome = ''
+        @import url("file://${config.home.homeDirectory}/.mozilla/firefox/stalbar/chrome/stalbar-theme-userChrome.css");
+
         :root {
-          --nord0: #${nord.nord0};
-          --nord1: #${nord.nord1};
-          --nord2: #${nord.nord2};
-          --nord3: #${nord.nord3};
-          --nord4: #${nord.nord4};
-          --nord6: #${nord.nord6};
-          --nord8: #${nord.nord8};
-          --nord10: #${nord.nord10};
           --ffu-sidebar-collapsed: 52px;
           --ffu-sidebar-expanded: 312px;
           --ffu-sidebar-radius: 12px;
@@ -180,10 +176,6 @@
           padding: 6px 0 6px 6px !important;
         }
 
-        #sidebar-header {
-          display: none !important;
-        }
-
         #sidebar,
         #sidebar-splitter {
           border: none !important;
@@ -191,28 +183,44 @@
           color: var(--nord4) !important;
         }
 
-        #sidebar-splitter {
-          width: 0 !important;
+        #sidebar-header {
+          display: flex !important;
+          align-items: center !important;
+          min-height: 34px !important;
+          padding: 4px 6px !important;
+          background: transparent !important;
+          border: none !important;
+          color: var(--nord4) !important;
         }
 
-        /* FF Ultima-like icon rail that expands on hover for Sidebery. */
+        #sidebar-switcher-target,
+        #sidebar-close {
+          appearance: none !important;
+          border: 1px solid color-mix(in srgb, var(--nord3) 70%, transparent) !important;
+          border-radius: 10px !important;
+          background: var(--nord1) !important;
+          color: var(--nord4) !important;
+        }
+
+        #sidebar-switcher-target:hover,
+        #sidebar-close:hover {
+          background: color-mix(in srgb, var(--nord2) 80%, transparent) !important;
+        }
+
+        #sidebar-splitter {
+          width: 1px !important;
+          background: color-mix(in srgb, var(--nord3) 40%, transparent) !important;
+        }
+
+        /* Always-expanded Sidebery with explicit header controls. */
         #sidebar-box[sidebarcommand*="3c078156"] {
           margin: 0 0 0 2px !important;
-          min-width: var(--ffu-sidebar-collapsed) !important;
-          width: var(--ffu-sidebar-collapsed) !important;
-          max-width: var(--ffu-sidebar-collapsed) !important;
-          border-right: none !important;
-          overflow: hidden !important;
-          transition:
-            width 95ms ease-out,
-            min-width 95ms ease-out,
-            max-width 95ms ease-out !important;
-        }
-
-        #sidebar-box[sidebarcommand*="3c078156"]:hover {
           min-width: var(--ffu-sidebar-expanded) !important;
           width: var(--ffu-sidebar-expanded) !important;
           max-width: var(--ffu-sidebar-expanded) !important;
+          border-right: none !important;
+          overflow: hidden !important;
+          transition: none !important;
         }
 
         #sidebar-box[sidebarcommand*="3c078156"] + #sidebar-splitter {
@@ -226,30 +234,27 @@
           border-radius: var(--ffu-sidebar-radius) !important;
           overflow: hidden !important;
         }
-
-        #sidebar-box[sidebarcommand*="3c078156"]:not(:hover) #sidebar {
-          border-color: transparent !important;
-          background: transparent !important;
-        }
       '';
 
       userContent = ''
+        @import url("file://${config.home.homeDirectory}/.mozilla/firefox/stalbar/chrome/stalbar-theme-userContent.css");
+
         /* Sidebery: FF Ultima-like Nord vertical tabs. */
         @-moz-document regexp("^moz-extension://.*/sidebery/.*\\.html$") {
           :root,
           #root {
-            --s-frame-bg: #${nord.nord0} !important;
-            --s-frame-fg: #${nord.nord4} !important;
-            --s-toolbar-bg: #${nord.nord1} !important;
-            --s-toolbar-fg: #${nord.nord4} !important;
-            --s-toolbar-border: #${nord.nord3} !important;
-            --s-popup-bg: #${nord.nord1} !important;
-            --s-popup-fg: #${nord.nord6} !important;
-            --s-popup-border: #${nord.nord3} !important;
-            --s-act-el-bg: #${nord.nord2} !important;
-            --s-act-el-fg: #${nord.nord6} !important;
-            --s-act-el-border: #${nord.nord10} !important;
-            --s-accent: #${nord.nord10} !important;
+            --s-frame-bg: var(--nord0) !important;
+            --s-frame-fg: var(--nord4) !important;
+            --s-toolbar-bg: var(--nord1) !important;
+            --s-toolbar-fg: var(--nord4) !important;
+            --s-toolbar-border: var(--nord3) !important;
+            --s-popup-bg: var(--nord1) !important;
+            --s-popup-fg: var(--nord6) !important;
+            --s-popup-border: var(--nord3) !important;
+            --s-act-el-bg: var(--nord2) !important;
+            --s-act-el-fg: var(--nord6) !important;
+            --s-act-el-border: var(--nord10) !important;
+            --s-accent: var(--nord10) !important;
             --general-font-family: "JetBrainsMono Nerd Font Mono", "JetBrains Mono", monospace !important;
             --general-border-radius: 10px !important;
             --general-margin: 3px !important;
@@ -261,7 +266,7 @@
             --d-fast: 90ms !important;
             --d-norm: 110ms !important;
             --d-slow: 130ms !important;
-            background: #${nord.nord1} !important;
+            background: var(--nord1) !important;
           }
 
           * {
@@ -285,8 +290,8 @@
 
           .NavigationBar .nav-item:hover,
           .NavigationBar .item:hover {
-            background: #${nord.nord2} !important;
-            border-color: #${nord.nord3} !important;
+            background: var(--nord2) !important;
+            border-color: var(--nord3) !important;
           }
 
           .Tab,
@@ -302,16 +307,16 @@
           .Tab .t-box {
             min-height: 36px !important;
             border-radius: 10px !important;
-            border: 1px solid #${nord.nord3} !important;
-            background: #${nord.nord1} !important;
+            border: 1px solid var(--nord3) !important;
+            background: var(--nord1) !important;
           }
 
           .Tab:hover .body,
           .PinnedTab:hover .body,
           .Tab:hover .main,
           .Tab:hover .t-box {
-            background: #${nord.nord2} !important;
-            border-color: #${nord.nord10} !important;
+            background: var(--nord2) !important;
+            border-color: var(--nord10) !important;
           }
 
           .Tab[data-active="true"] .body,
@@ -321,8 +326,8 @@
           .Tab[data-selected="true"] .main,
           .Tab[data-selected="true"] .t-box,
           .Tab.active .body {
-            background: rgba(94, 129, 172, 0.22) !important;
-            border-color: #${nord.nord10} !important;
+            background: var(--tab-active-bg) !important;
+            border-color: var(--nord10) !important;
           }
 
           .Tab[data-active="true"]::before,
@@ -335,7 +340,7 @@
             bottom: 7px !important;
             width: 3px !important;
             border-radius: 6px !important;
-            background: #${nord.nord10} !important;
+            background: var(--nord10) !important;
           }
 
           .Tab .title,

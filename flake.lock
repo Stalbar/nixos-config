@@ -1,5 +1,22 @@
 {
   "nodes": {
+    "agentmemory": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1780046609,
+        "narHash": "sha256-anLCkdQALyKsd3RXeV/PqxbcVqPgSMUcHxAxyGEXzD0=",
+        "owner": "rohitg00",
+        "repo": "agentmemory",
+        "rev": "fd9e3bd42d6208a33f0ee9de1442fdbb60eab106",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rohitg00",
+        "ref": "v0.9.24",
+        "repo": "agentmemory",
+        "type": "github"
+      }
+    },
     "codex-cli-nix": {
       "inputs": {
         "flake-utils": "flake-utils",
@@ -8,11 +25,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1772475571,
-        "narHash": "sha256-yXeRqr3YTx7jWGd0VK48+RFoa5izPdPbYZA29rwB3nE=",
+        "lastModified": 1779998039,
+        "narHash": "sha256-TrNmfalbdX4VOXJyBYDX+jH6Ph7YJbUMAnq6/akCyms=",
         "owner": "sadjow",
         "repo": "codex-cli-nix",
-        "rev": "89ed8d506a74057629c11716eac51717aed9470d",
+        "rev": "803b7de2cccae3abbb9d23c10826af087428b06e",
         "type": "github"
       },
       "original": {
@@ -46,26 +63,27 @@
         ]
       },
       "locked": {
-        "lastModified": 1772569491,
-        "narHash": "sha256-bdr6ueeXO1Xg91sFkuvaysYF0mVdwHBpdyhTjBEWv+s=",
+        "lastModified": 1779726825,
+        "narHash": "sha256-RUkMrREjKDQrA+dA9+xZviGAxM5W1aVdyOr/bSYpHrE=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "924e61f5c2aeab38504028078d7091077744ab17",
+        "rev": "b179bde238977f7d4454fc770b1a727eaf55111c",
         "type": "github"
       },
       "original": {
         "owner": "nix-community",
+        "ref": "release-26.05",
         "repo": "home-manager",
         "type": "github"
       }
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1772542754,
-        "narHash": "sha256-WGV2hy+VIeQsYXpsLjdr4GvHv5eECMISX1zKLTedhdg=",
+        "lastModified": 1779560665,
+        "narHash": "sha256-tpyBcxPpcQb8ukyNF7DoCwfSY3VPsxHoYwj00Cayv5o=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "8c809a146a140c5c8806f13399592dbcb1bb5dc4",
+        "rev": "64c08a7ca051951c8eae34e3e3cb1e202fe36786",
         "type": "github"
       },
       "original": {
@@ -77,6 +95,7 @@
     },
     "root": {
       "inputs": {
+        "agentmemory": "agentmemory",
         "codex-cli-nix": "codex-cli-nix",
         "home-manager": "home-manager",
         "nixpkgs": "nixpkgs"

@@ -1,5 +1,6 @@
 local ls = require("luasnip")
 local s = ls.snippet
+local t = ls.text_node
 local i = ls.insert_node
 local fmta = require("luasnip.extras.fmt").fmta
 
@@ -14,25 +15,25 @@ return {
     i(2, "module"),
   })),
 
-  s("fn", fmta([[
-const <> = (<>) => {
-  <>
-};
-]], {
+s("fn", {
+    t("const "),
     i(1, "fnName"),
+    t(" = ("),
     i(2),
+    t({ ") => {", "  " }),
     i(3),
-  })),
+    t({ "", "};" }),
+  }),
 
-  s("expfn", fmta([[
-export const <> = (<>) => {
-  <>
-};
-]], {
+s("expfn", {
+    t("export const "),
     i(1, "fnName"),
+    t(" = ("),
     i(2),
+    t({ ") => {", "  " }),
     i(3),
-  })),
+    t({ "", "};" }),
+  }),
 
   s("iface", fmta([[
 interface <> {

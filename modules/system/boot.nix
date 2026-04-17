@@ -103,6 +103,8 @@ EOF
 in
 {
   boot.loader.efi.canTouchEfiVariables = true;
+  # Keep the shared EFI system partition explicit here for dual-boot installs.
+  boot.loader.efi.efiSysMountPoint = "/boot";
   boot.loader.grub = {
     enable = true;
     efiSupport = true;
@@ -111,7 +113,7 @@ in
     configurationLimit = 10;
   };
 
-  boot.kernelPackages = pkgs.linuxPackages_zen;
+  boot.kernelPackages = pkgs.linuxPackages;
 
   boot.kernelParams = [
     "threadirqs"
@@ -136,5 +138,8 @@ in
   boot.kernel.sysctl = {
     "vm.swappiness" = 10;
     "vm.vfs_cache_pressure" = 50;
+    "fs.inotify.max_user_watches" = 8388608;
+    "fs.inotify.max_user_instances" = 32768;
+    "fs.inotify.max_queued_events" = 1048576;
   };
 }

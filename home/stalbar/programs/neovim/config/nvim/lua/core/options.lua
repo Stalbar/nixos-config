@@ -47,12 +47,13 @@ opt.winblend = 8
 opt.pumblend = 8
 
 if is_neovide then
-  vim.o.guifont = "JetBrainsMono Nerd Font Mono:h14"
+  vim.o.guifont =
+    "JetBrainsMono Nerd Font Mono,Symbols Nerd Font Mono,DejaVu Sans Mono,Courier New,monospace:h14:#e-antialias:#h-full"
   vim.g.neovide_font_features = { "liga", "calt" }
   vim.opt.linespace = 1
 
-  vim.g.neovide_opacity = 0.94
-  vim.g.neovide_normal_opacity = 0.94
+  vim.g.neovide_opacity = 0.96
+  vim.g.neovide_normal_opacity = 0.96
   vim.g.neovide_scale_factor = 1.0
   vim.g.neovide_hide_mouse_when_typing = true
   vim.g.neovide_remember_window_size = true
@@ -102,6 +103,23 @@ local function set_indent(opts)
     vim.opt_local.shiftwidth = opts.shiftwidth
   end
 end
+
+vim.api.nvim_create_autocmd("FileType", {
+  group = indent_group,
+  pattern = {
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+  },
+  callback = function()
+    set_indent({
+      expandtab = true,
+      tabstop = 2,
+      shiftwidth = 2,
+    })
+  end,
+})
 
 vim.api.nvim_create_autocmd("FileType", {
   group = indent_group,

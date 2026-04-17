@@ -1,6 +1,7 @@
 { pkgs, ... }:
 
 let
+  wallpaperTool = pkgs.awww;
   changeWallpaper = pkgs.writeShellScriptBin "change-wallpaper" ''
     set -euo pipefail
 
@@ -20,22 +21,13 @@ let
       exit 1
     fi
 
-    if ! ${pkgs.procps}/bin/pgrep -x swww-daemon >/dev/null 2>&1; then
-      ${pkgs.swww}/bin/swww-daemon >/dev/null 2>&1 &
+    if ! ${pkgs.procps}/bin/pgrep -x awww-daemon >/dev/null 2>&1; then
+      ${wallpaperTool}/bin/awww-daemon >/dev/null 2>&1 &
       sleep 0.2
     fi
 
-    transitions=(fade left right top bottom wipe grow center outer wave)
-    transition="''${transitions[$((RANDOM % ''${#transitions[@]}))]}"
-
-    x_pos="0.$((RANDOM % 90 + 10))$((RANDOM % 900 + 100))"
-    y_pos="0.$((RANDOM % 90 + 10))$((RANDOM % 900 + 100))"
-
-    ${pkgs.swww}/bin/swww img "$random_img" \
-      --transition-step 5 \
-      --transition-fps 120 \
-      --transition-type "$transition" \
-      --transition-pos "$x_pos,$y_pos"
+    ${wallpaperTool}/bin/awww img "$random_img" \
+      --transition-type none
   '';
 in
 {

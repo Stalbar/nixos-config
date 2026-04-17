@@ -63,6 +63,18 @@ return {
             },
           },
         },
+        gopls = {
+          settings = {
+            gopls = {
+              analyses = {
+                unusedparams = true,
+                shadow = true,
+              },
+              staticcheck = true,
+              gofumpt = true,
+            },
+          },
+        },
         ruff = {},
         ts_ls = {
           root_dir = lspconfig_util and lspconfig_util.root_pattern("tsconfig.json", "jsconfig.json", "package.json", ".git")
@@ -84,38 +96,6 @@ return {
           },
         },
         dockerls = {},
-        tailwindcss = {
-          flags = {
-            debounce_text_changes = 350,
-          },
-          single_file_support = false,
-          filetypes = {
-            "html",
-            "css",
-            "scss",
-            "sass",
-            "javascript",
-            "typescript",
-            "javascriptreact",
-            "typescriptreact",
-            "svelte",
-            "vue",
-          },
-          settings = {
-            tailwindCSS = {
-              files = {
-                exclude = {
-                  "**/.git/**",
-                  "**/node_modules/**",
-                  "**/.next/**",
-                  "**/dist/**",
-                  "**/build/**",
-                  "**/.turbo/**",
-                },
-              },
-            },
-          },
-        },
         protols = {},
         nixd = {},
         postgres_lsp = {

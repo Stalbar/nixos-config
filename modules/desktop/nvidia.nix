@@ -10,10 +10,13 @@
   hardware.nvidia = {
     modesetting.enable = true;
     open = false;
+    gsp.enable = false;
     nvidiaSettings = true;
 
-    powerManagement.enable = true;
-    powerManagement.finegrained = true;
+    # Keep the dGPU on the conservative path; the experimental suspend/runtime
+    # PM path has already caused instability on this laptop.
+    powerManagement.enable = false;
+    powerManagement.finegrained = false;
 
     prime = {
       offload = {

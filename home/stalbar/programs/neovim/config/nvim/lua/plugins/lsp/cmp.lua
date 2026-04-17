@@ -8,13 +8,92 @@ return {
       "hrsh7th/cmp-nvim-lsp",
       "hrsh7th/cmp-buffer",
       "hrsh7th/cmp-path",
-      "hrsh7th/cmp-cmdline",
       "onsails/lspkind.nvim",
     },
     config = function()
       local cmp = require("cmp")
       local lspkind = require("lspkind")
       local luasnip = require("luasnip")
+      local ok_npairs, npairs = pcall(require, "nvim-autopairs")
+      local enter_confirms_selection = false
+
+      local function feed(keys)
+        local termcodes = vim.api.nvim_replace_termcodes(keys, true, false, true)
+        vim.api.nvim_feedkeys(termcodes, "i", true)
+      end
+
+      local function feed_raw(keys)
+        vim.api.nvim_feedkeys(keys, "n", true)
+      end
+
+      local function trigger_autopairs_cr()
+        if not ok_npairs then
+          return false
+        end
+
+        vim.schedule(function()
+          feed_raw(npairs.autopairs_cr())
+        end)
+        return true
+      end
+
+      local function confirm_entry()
+        cmp.confirm({
+          select = false,
+          behavior = cmp.ConfirmBehavior.Replace,
+        })
+      end
+
+      local function confirm_and_feed(char)
+        return cmp.mapping(function(fallback)
+          if cmp.visible() and cmp.get_selected_entry() then
+            confirm_entry()
+            vim.schedule(function()
+              feed(char)
+            end)
+            return
+          end
+
+          fallback()
+        end, { "i" })
+      end
+
+      local function newline_or_autopairs()
+        return cmp.mapping(function(fallback)
+          if cmp.visible() then
+            cmp.abort()
+          end
+
+          if trigger_autopairs_cr() then
+            return
+          end
+
+          fallback()
+        end, { "i", "s" })
+      end
+
+      local function confirm_selected_or_newline()
+        return cmp.mapping(function(fallback)
+          if cmp.visible() and enter_confirms_selection and cmp.get_selected_entry() then
+            enter_confirms_selection = false
+            confirm_entry()
+            return
+          end
+
+          enter_confirms_selection = false
+
+          if cmp.visible() then
+            cmp.abort()
+          end
+
+          if trigger_autopairs_cr() then
+            return
+          end
+
+          fallback()
+        end, { "i", "s" })
+      end
+
       local source_labels = {
         nvim_lsp = "[LSP]",
         luasnip = "[Snip]",
@@ -67,36 +146,61 @@ return {
         mapping = cmp.mapping.preset.insert({
           ["<C-Space>"] = cmp.mapping.complete(),
           ["<C-e>"] = cmp.mapping.abort(),
-          ["<CR>"] = cmp.mapping.confirm({ select = false }),
-          ["<C-j>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
-          ["<C-k>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
-          ["<Tab>"] = cmp.mapping(function(fallback)
+          ["<C-j>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
-              if cmp.get_selected_entry() then
-                cmp.confirm({ select = false })
-              else
-                cmp.abort()
-                fallback()
-              end
-            elseif luasnip.expand_or_jumpable() then
-              luasnip.expand_or_jump()
+              enter_confirms_selection = true
+              cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
+            elseif luasnip.choice_active() then
+              luasnip.change_choice(1)
             else
               fallback()
             end
+          end, { "i", "c" }),
+          ["<C-k>"] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              enter_confirms_selection = true
+              cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select })
+            elseif luasnip.choice_active() then
+              luasnip.change_choice(-1)
+            else
+              fallback()
+            end
+          end, { "i", "c" }),
+          ["<CR>"] = cmp.mapping(function(fallback)
+            if cmp.visible() and cmp.get_selected_entry() then
+              enter_confirms_selection = false
+              confirm_entry()
+              return
+            end
+
+            if luasnip.jumpable(1) then
+              luasnip.jump(1)
+              return
+            end
+
+            if cmp.visible() then
+              enter_confirms_selection = false
+              cmp.abort()
+            end
+
+            if trigger_autopairs_cr() then
+              return
+            end
+
+            fallback()
+          end, { "i", "s" }),
+          ["<Space>"] = confirm_and_feed(" "),
+          ["."] = confirm_and_feed("."),
+          [","] = confirm_and_feed(","),
+          [";"] = confirm_and_feed(";"),
+          [":"] = confirm_and_feed(":"),
+          ["("] = confirm_and_feed("("),
+          [")"] = confirm_and_feed(")"),
+          ["<Tab>"] = cmp.mapping(function(fallback)
+            fallback()
           end, { "i", "s" }),
           ["<S-Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              if cmp.get_selected_entry() then
-                cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select })
-              else
-                cmp.abort()
-                fallback()
-              end
-            elseif luasnip.jumpable(-1) then
-              luasnip.jump(-1)
-            else
-              fallback()
-            end
+            fallback()
           end, { "i", "s" }),
         }),
         sources = cmp.config.sources({
@@ -129,21 +233,57 @@ return {
         }),
       })
 
-      cmp.setup.cmdline("/", {
-        mapping = cmp.mapping.preset.cmdline(),
-        sources = {
-          { name = "buffer" },
+      cmp.setup.filetype({ "cs" }, {
+        sources = cmp.config.sources({
+          { name = "nvim_lsp" },
+          { name = "luasnip" },
+          {
+            name = "path",
+            keyword_length = 1,
+            option = {
+              trailing_slash = true,
+              label_trailing_slash = true,
+              get_cwd = function()
+                return vim.fn.getcwd()
+              end,
+            },
+          },
+        }),
+      })
+
+      cmp.setup.filetype({ "javascriptreact", "typescriptreact", "html", "css", "scss", "sass" }, {
+        completion = {
+          keyword_length = 3,
+        },
+        performance = {
+          debounce = 120,
+          throttle = 160,
+          fetching_timeout = 250,
+          max_view_entries = 12,
+        },
+        sources = cmp.config.sources({
+          { name = "nvim_lsp", keyword_length = 3, max_item_count = 8 },
+          { name = "luasnip" },
+          {
+            name = "path",
+            keyword_length = 2,
+            option = {
+              trailing_slash = true,
+              label_trailing_slash = true,
+              get_cwd = function()
+                return vim.fn.getcwd()
+              end,
+            },
+          },
+        }),
+      })
+
+      cmp.setup.filetype({ "go", "gomod", "gowork" }, {
+        mapping = {
+          ["<CR>"] = confirm_selected_or_newline(),
         },
       })
 
-      cmp.setup.cmdline(":", {
-        mapping = cmp.mapping.preset.cmdline(),
-        sources = cmp.config.sources({
-          { name = "path" },
-        }, {
-          { name = "cmdline" },
-        }),
-      })
     end,
   },
 }

@@ -59,6 +59,7 @@ return {
     event = "InsertEnter",
     opts = {
       check_ts = true,
+      map_cr = false,
       disable_filetype = { "TelescopePrompt", "neo-tree" },
     },
     config = function(_, opts)
@@ -75,7 +76,45 @@ return {
         return
       end
 
-      cmp.event:on("confirm_done", cmp_ap.on_confirm_done())
+      cmp.event:on("confirm_done", function(evt)
+        local item = evt.entry and evt.entry:get_completion_item() or nil
+        local is_snippet = item and item.insertTextFormat == 2
+
+        local ft = vim.bo.filetype
+        local kind = evt.entry and evt.entry:get_kind() or nil
+        local is_methodish = kind == cmp.lsp.CompletionItemKind.Method
+          or kind == cmp.lsp.CompletionItemKind.Function
+
+        if is_snippet or (ft == "cs" and is_methodish) then
+          return
+        end
+
+        cmp_ap.on_confirm_done()(evt)
+      end)
+    end,
+  },
+  {
+    "NvChad/nvim-colorizer.lua",
+    event = { "BufReadPre", "BufNewFile" },
+    opts = {
+      filetypes = { "*" },
+      user_default_options = {
+        RGB = true,
+        RRGGBB = true,
+        RRGGBBAA = true,
+        AARRGGBB = true,
+        names = true,
+        rgb_fn = true,
+        hsl_fn = true,
+        css = true,
+        css_fn = true,
+        tailwind = true,
+        mode = "virtualtext",
+        virtualtext = "■",
+      },
+    },
+    config = function(_, opts)
+      require("colorizer").setup(opts)
     end,
   },
   {

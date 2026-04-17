@@ -1,2 +1,11 @@
 .nvimlog
 result
+*.log
+__pycache__/
+*.pyc
+.superpowers/
+.zed/
+.codex
+.agents/
+docs/monkeytype/
+docs/superpowers/

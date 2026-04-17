@@ -1,4 +1,9 @@
-{ config, lib, pkgs, nord, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   vaultPath = "${config.home.homeDirectory}/obsidian-notes";
@@ -63,12 +68,12 @@ let
   appearanceConfigJson = builtins.toJSON {
     theme = "obsidian";
     cssTheme = "";
-    accentColor = "#${nord.nord8}";
+    accentColor = "#88C0D0";
     baseFontSize = 16;
     interfaceFontFamily = "JetBrainsMono Nerd Font Mono";
     textFontFamily = "JetBrainsMono Nerd Font Mono";
     monospaceFontFamily = "JetBrainsMono Nerd Font Mono";
-    enabledCssSnippets = [ "nord-minimal" ];
+    enabledCssSnippets = [ "runtime-theme" ];
   };
 
   workspaceConfigJson = builtins.toJSON {
@@ -98,7 +103,10 @@ let
       id = "left-root";
       type = "split";
       direction = "vertical";
-      sizes = [ 0.74 0.26 ];
+      sizes = [
+        0.74
+        0.26
+      ];
       children = [
         {
           id = "left-files";
@@ -145,75 +153,14 @@ let
     lastOpenFiles = [ ];
   };
 
-  nordSnippet = ''
-    :root {
-      --font-interface-theme: "JetBrainsMono Nerd Font Mono";
-      --font-text-theme: "JetBrainsMono Nerd Font Mono";
-      --font-monospace-theme: "JetBrainsMono Nerd Font Mono";
-    }
-
-    .theme-dark {
-      --background-primary: #${nord.nord0};
-      --background-primary-alt: #${nord.nord0};
-      --background-secondary: #${nord.nord1};
-      --background-secondary-alt: #${nord.nord1};
-      --background-modifier-border: #${nord.nord4};
-      --background-modifier-hover: #${nord.nord2};
-      --background-modifier-form-field: #${nord.nord1};
-      --background-modifier-form-field-highlighted: #${nord.nord2};
-      --interactive-accent: #${nord.nord8};
-      --interactive-accent-hover: #${nord.nord7};
-      --text-normal: #${nord.nord6};
-      --text-muted: #${nord.nord4};
-      --text-faint: #${nord.nord3};
-      --text-accent: #${nord.nord7};
-      --text-on-accent: #${nord.nord6};
-      --titlebar-background: #${nord.nord0};
-      --titlebar-background-focused: #${nord.nord0};
-      --divider-color: #${nord.nord4};
-      --tab-outline-color: #${nord.nord4};
-      --h1-color: #${nord.nord6};
-      --h2-color: #${nord.nord4};
-      --h3-color: #${nord.nord9};
-      --link-color: #${nord.nord8};
-      --link-external-color: #${nord.nord9};
-      --code-normal: #${nord.nord6};
-      --code-background: rgba(59, 66, 82, 0.80);
-      --text-selection: rgba(136, 192, 208, 0.32);
-      --nav-item-color: #${nord.nord4};
-      --nav-item-color-hover: #${nord.nord6};
-      --nav-item-background-hover: rgba(94, 129, 172, 0.22);
-      --nav-item-color-active: #${nord.nord6};
-      --nav-item-background-active: rgba(94, 129, 172, 0.35);
-      --graph-line: #${nord.nord4};
-      --graph-node: #${nord.nord8};
-      --graph-node-unresolved: #${nord.nord12};
-      --graph-node-tag: #${nord.nord14};
-    }
-
-    * {
-      animation: none !important;
-      transition: none !important;
-    }
-
-    .workspace-ribbon.mod-left {
-      display: none;
-    }
-
-    .workspace-split.mod-left-split .workspace-leaf-content[data-type="graph"] .view-content {
-      min-height: 170px;
-      max-height: 220px;
-      border-top: 1px solid rgba(216, 222, 233, 0.35);
-    }
-
-    .workspace-split.mod-left-split .workspace-leaf-content[data-type="graph"] canvas {
-      opacity: 1;
-    }
-  '';
-
   obsidianPluginSync = pkgs.writeShellApplication {
     name = "obsidian-plugin-sync";
-    runtimeInputs = with pkgs; [ coreutils curl jq gnused ];
+    runtimeInputs = with pkgs; [
+      coreutils
+      curl
+      jq
+      gnused
+    ];
     text = ''
       set -euo pipefail
 
@@ -266,79 +213,81 @@ in
     obsidianPluginSync
   ];
 
-  home.file."obsidian-notes/.obsidian/snippets/nord-minimal.css".text = nordSnippet;
-
   home.activation.obsidianBootstrap = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    vault_dir="${vaultPath}"
-    obsidian_dir="$vault_dir/.obsidian"
-    state_dir="${obsidianStatePath}"
+        vault_dir="${vaultPath}"
+        obsidian_dir="$vault_dir/.obsidian"
+        state_dir="${obsidianStatePath}"
 
-    mkdir -p \
-      "$vault_dir/00 Inbox" \
-      "$vault_dir/01 Projects" \
-      "$vault_dir/02 Areas" \
-      "$vault_dir/90 Archive" \
-      "$obsidian_dir/snippets" \
-      "$obsidian_dir/plugins" \
-      "$state_dir"
+        mkdir -p \
+          "$vault_dir/00 Inbox" \
+          "$vault_dir/01 Projects" \
+          "$vault_dir/02 Areas" \
+          "$vault_dir/90 Archive" \
+          "$obsidian_dir/snippets" \
+          "$obsidian_dir/plugins" \
+          "$state_dir"
 
-    if [ ! -f "$state_dir/obsidian.json" ]; then
-      cat > "$state_dir/obsidian.json" <<'EOF'
-${globalConfigJson}
-EOF
-    elif grep -Fq "${oldVaultPath}" "$state_dir/obsidian.json"; then
-      sed -i "s|${oldVaultPath}|${vaultPath}|g" "$state_dir/obsidian.json"
-    fi
+        if [ ! -f "$state_dir/obsidian.json" ]; then
+          cat > "$state_dir/obsidian.json" <<'EOF'
+    ${globalConfigJson}
+    EOF
+        elif grep -Fq "${oldVaultPath}" "$state_dir/obsidian.json"; then
+          sed -i "s|${oldVaultPath}|${vaultPath}|g" "$state_dir/obsidian.json"
+        fi
 
-    if [ ! -f "$obsidian_dir/app.json" ]; then
-      cat > "$obsidian_dir/app.json" <<'EOF'
-${appConfigJson}
-EOF
-    fi
+        if [ ! -f "$obsidian_dir/app.json" ]; then
+          cat > "$obsidian_dir/app.json" <<'EOF'
+    ${appConfigJson}
+    EOF
+        fi
 
-    if [ ! -f "$obsidian_dir/appearance.json" ]; then
-      cat > "$obsidian_dir/appearance.json" <<'EOF'
-${appearanceConfigJson}
-EOF
-    fi
+        if [ ! -f "$obsidian_dir/appearance.json" ]; then
+          cat > "$obsidian_dir/appearance.json" <<'EOF'
+    ${appearanceConfigJson}
+    EOF
+        fi
 
-    if [ ! -f "$obsidian_dir/core-plugins.json" ]; then
-      cat > "$obsidian_dir/core-plugins.json" <<'EOF'
-${builtins.toJSON corePlugins}
-EOF
-    fi
+        if [ ! -f "$obsidian_dir/snippets/runtime-theme.css" ]; then
+          : > "$obsidian_dir/snippets/runtime-theme.css"
+        fi
 
-    if [ ! -f "$obsidian_dir/community-plugins.json" ]; then
-      cat > "$obsidian_dir/community-plugins.json" <<'EOF'
-${builtins.toJSON communityPlugins}
-EOF
-    fi
+        if [ ! -f "$obsidian_dir/core-plugins.json" ]; then
+          cat > "$obsidian_dir/core-plugins.json" <<'EOF'
+    ${builtins.toJSON corePlugins}
+    EOF
+        fi
 
-    if [ ! -f "$obsidian_dir/workspace.json" ]; then
-      cat > "$obsidian_dir/workspace.json" <<'EOF'
-${workspaceConfigJson}
-EOF
-    fi
+        if [ ! -f "$obsidian_dir/community-plugins.json" ]; then
+          cat > "$obsidian_dir/community-plugins.json" <<'EOF'
+    ${builtins.toJSON communityPlugins}
+    EOF
+        fi
 
-    if [ ! -f "$vault_dir/Home.md" ]; then
-      cat > "$vault_dir/Home.md" <<'EOF'
-# Dashboard
+        if [ ! -f "$obsidian_dir/workspace.json" ]; then
+          cat > "$obsidian_dir/workspace.json" <<'EOF'
+    ${workspaceConfigJson}
+    EOF
+        fi
 
-## Notes
-- [[00 Inbox]]
-- [[01 Projects]]
-- [[02 Areas]]
-- [[90 Archive]]
+        if [ ! -f "$vault_dir/Home.md" ]; then
+          cat > "$vault_dir/Home.md" <<'EOF'
+    # Dashboard
 
-## Quick Links
-- [YouTube](https://youtube.com)
-- [Monkeytype](https://monkeytype.com)
-- [Google](https://google.com)
-- [GitHub](https://github.com)
-- [NixOS Wiki](https://wiki.nixos.org)
-- [Playerok](https://playerok.com)
-EOF
-    fi
+    ## Notes
+    - [[00 Inbox]]
+    - [[01 Projects]]
+    - [[02 Areas]]
+    - [[90 Archive]]
+
+    ## Quick Links
+    - [YouTube](https://youtube.com)
+    - [Monkeytype](https://monkeytype.com)
+    - [Google](https://google.com)
+    - [GitHub](https://github.com)
+    - [NixOS Wiki](https://wiki.nixos.org)
+    - [Playerok](https://playerok.com)
+    EOF
+        fi
 
   '';
 }

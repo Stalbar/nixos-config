@@ -2,9 +2,7 @@
 
 {
   imports = [
-    ./profiles/base.nix
-    ./profiles/dev.nix
-    ./profiles/gaming.nix
+    ./profiles/default.nix
   ];
 
   options.stalbar.profiles = {

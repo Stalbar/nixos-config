@@ -39,6 +39,9 @@ return {
         markdown = { "prettierd", "prettier" },
 
         python = { "ruff_format" },
+        go = { "gofmt" },
+        gomod = { "gofmt" },
+        gowork = { "gofmt" },
 
         sh = { "shfmt" },
         bash = { "shfmt" },

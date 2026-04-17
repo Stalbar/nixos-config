@@ -73,11 +73,40 @@ return {
         }
       end
 
+      local dotnet_adapter = dotnet({
+        discovery_root = "project",
+        dap = { justMyCode = false },
+      })
+
+      local base_is_test_file = dotnet_adapter.is_test_file
+      dotnet_adapter.is_test_file = function(file_path)
+        if type(base_is_test_file) == "function" then
+          local ok, is_test = pcall(base_is_test_file, file_path)
+          if ok and is_test then
+            return true
+          end
+        end
+
+        if type(file_path) ~= "string" or not file_path:match("%.cs$") then
+          return false
+        end
+
+        local ok, lines = pcall(vim.fn.readfile, file_path)
+        if not ok then
+          return false
+        end
+
+        local text = table.concat(lines, "\n")
+        return text:find("%[Fact") ~= nil
+          or text:find("%[Theory") ~= nil
+          or text:find("%[InlineData") ~= nil
+          or text:find("%[MemberData") ~= nil
+          or text:find("%[ClassData") ~= nil
+      end
+
       return {
         adapters = {
-          dotnet({
-            dap = { justMyCode = false },
-          }),
+          dotnet_adapter,
         },
         output_panel = {
           enabled = true,

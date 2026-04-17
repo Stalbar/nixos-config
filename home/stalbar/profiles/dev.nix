@@ -10,12 +10,17 @@ let
     pkgs.dotnet-runtime_11
     pkgs.dotnetCorePackages.aspnetcore_11_0
   ];
+  # podman-desktop tracks Electron aggressively on unstable; keep using the binary runtime.
+  podmanDesktop = pkgs.podman-desktop.override {
+    electron_41 = pkgs.electron_41-bin;
+  };
 in
 {
   config = lib.mkIf cfg.enable {
     home.packages = with pkgs; [
-      # Core language/runtime toolchains.
       nodejs
+      gnumake
+      gcc
       pnpm
       yarn
       typescript
@@ -30,7 +35,9 @@ in
       pyright
       ruff
 
-      # .NET 10 LTS + .NET 11 in one merged package to avoid bin/dotnet collisions.
+      go
+      gopls
+
       dotnetMulti
       roslyn-ls
       csharpier
@@ -39,25 +46,25 @@ in
       bash-language-server
       yaml-language-server
       dockerfile-language-server
-      tailwindcss-language-server
       protols
       qt6.qtdeclarative
       tree-sitter
       nixd
       postgres-language-server
+      sqlcmd
 
-      # Formatters and CLI helpers.
       stylua
       shfmt
       pgformatter
       jq
       yq-go
+      gh
+      k6
 
-      # Docker/Kubernetes/kind workflow.
       docker
       docker-compose
       docker-buildx
-      podman-desktop
+      podmanDesktop
       kind
       kubectl
       kubectx
@@ -66,8 +73,6 @@ in
       k9s
       skaffold
       minikube
-
-      inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
   };
 }

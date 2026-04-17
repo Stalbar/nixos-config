@@ -20,8 +20,8 @@ return {
             csharp_enable_inlay_hints_for_types_for_lambdas_when_parameters_are_implicitly_typed = true,
           },
           ["csharp|background_analysis"] = {
-            dotnet_analyzer_diagnostics_scope = "openFiles",
-            dotnet_compiler_diagnostics_scope = "openFiles",
+            dotnet_analyzer_diagnostics_scope = "fullSolution",
+            dotnet_compiler_diagnostics_scope = "fullSolution",
           },
         },
       })

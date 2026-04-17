@@ -1,6 +1,8 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 let
+  generatedThemeDir = "${config.home.homeDirectory}/.config/stalbar-theme/generated";
+
   micScript = pkgs.writeShellScript "waybar-mic" ''
     set -eu
 
@@ -28,18 +30,17 @@ in
 {
   programs.waybar = {
     enable = true;
-    # Start from Hyprland exec-once for predictable single-instance behavior.
-    systemd.enable = false;
+    systemd.enable = true;
 
     settings = [
       {
         layer = "top";
         position = "right";
-        width = 34;
-        spacing = 3;
-        margin-top = 8;
-        margin-bottom = 8;
-        margin-right = 3;
+        width = 38;
+        spacing = 4;
+        margin-top = 10;
+        margin-bottom = 10;
+        margin-right = 6;
         margin-left = 0;
 
         # Vertical bar layout:
@@ -52,6 +53,7 @@ in
           "tray"
         ];
         modules-right = [
+          "custom/theme"
           "pulseaudio#output"
           "custom/mic"
           "battery"
@@ -66,11 +68,24 @@ in
           format = "{id}";
         };
 
+        "custom/theme" = {
+          exec = "switch-theme --waybar-json";
+          return-type = "json";
+          format = "{}";
+          interval = 3;
+          on-click = "switch-theme --toggle";
+          tooltip = true;
+        };
+
         "pulseaudio#output" = {
           format = "{icon}";
           format-muted = "";
           format-icons = {
-            default = [ "" "" "" ];
+            default = [
+              ""
+              ""
+              ""
+            ];
             headphone = "";
             headset = "";
           };
@@ -100,7 +115,13 @@ in
           format-charging = "";
           format-plugged = "";
           format-full = "";
-          format-icons = [ "" "" "" "" "" ];
+          format-icons = [
+            ""
+            ""
+            ""
+            ""
+            ""
+          ];
           tooltip = true;
           tooltip-format = "{capacity}%";
         };
@@ -114,14 +135,14 @@ in
         };
 
         tray = {
-          icon-size = 22;
+          icon-size = 18;
           spacing = 6;
           show-passive-items = true;
         };
 
         "wlr/taskbar" = {
           format = "{icon}";
-          icon-size = 20;
+          icon-size = 18;
           tooltip-format = "{title}";
           on-click = "activate";
           on-click-middle = "close";
@@ -136,127 +157,7 @@ in
     ];
 
     style = ''
-      * {
-        font-family: "JetBrainsMono Nerd Font Mono", "JetBrains Mono Nerd Font Mono", monospace;
-        font-size: 12px;
-        min-height: 0;
-        border: none;
-        transition: none;
-      }
-
-      window#waybar {
-        background-color: rgba(46, 52, 64, 0.96);
-        border: 1px solid rgba(76, 86, 106, 0.70);
-        border-radius: 12px;
-        color: #D8DEE9;
-      }
-
-      #workspaces,
-      #taskbar,
-      #pulseaudio,
-      #custom-mic,
-      #battery,
-      #language,
-      #tray,
-      #clock {
-        background: transparent;
-        padding: 3px 2px;
-        margin: 2px 0;
-      }
-
-      #workspaces {
-        padding: 4px 3px;
-      }
-
-      #taskbar {
-        padding: 4px 1px;
-      }
-
-      #taskbar button {
-        color: #81A1C1;
-        background: transparent;
-        border-radius: 8px;
-        padding: 2px 0;
-        margin: 1px 0;
-      }
-
-      #taskbar button.active {
-        color: #88C0D0;
-        background: transparent;
-      }
-
-      #workspaces button {
-        color: #81A1C1;
-        background: transparent;
-        border-radius: 9px;
-        padding: 0;
-        min-width: 18px;
-        min-height: 18px;
-      }
-
-      #workspaces button.active {
-        color: #8FBCBB;
-        background: transparent;
-      }
-
-      #workspaces button.urgent {
-        color: #ECEFF4;
-        background-color: rgba(191, 97, 106, 0.92);
-      }
-
-      #pulseaudio,
-      #custom-mic,
-      #battery {
-        font-size: 23px;
-        padding: 2px 0;
-        margin: 0;
-      }
-
-      #pulseaudio {
-        color: #8FBCBB;
-      }
-
-      #custom-mic {
-        color: #88C0D0;
-      }
-
-      #battery {
-        color: #A3BE8C;
-      }
-
-      #battery.warning {
-        color: #D08770;
-      }
-
-      #battery.critical:not(.charging) {
-        color: #BF616A;
-      }
-
-      #language {
-        color: #EBCB8B;
-        font-size: 11px;
-        font-weight: 700;
-        padding: 2px 0;
-        margin: 0;
-      }
-
-      #tray {
-        padding: 5px 2px;
-      }
-
-      #clock.stack {
-        color: #88C0D0;
-        font-size: 16px;
-        font-weight: 700;
-        padding: 6px 0;
-      }
-
-      tooltip {
-        color: #D8DEE9;
-        background-color: rgba(46, 52, 64, 0.97);
-        border: 1px solid rgba(94, 129, 172, 0.55);
-        border-radius: 8px;
-      }
+      @import url("file://${generatedThemeDir}/waybar-theme.css");
     '';
   };
 }

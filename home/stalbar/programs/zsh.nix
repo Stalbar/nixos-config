@@ -4,157 +4,6 @@
   programs.starship = {
     enable = true;
     enableZshIntegration = true;
-    settings = {
-      add_newline = true;
-      command_timeout = 500;
-      scan_timeout = 20;
-      palette = "nord";
-
-      format = ''
-        $os$directory$git_branch$git_status$fill$time
-        $character
-      '';
-
-      palettes.nord = {
-        nord0 = "#2E3440";
-        nord1 = "#3B4252";
-        nord2 = "#434C5E";
-        nord3 = "#4C566A";
-        nord4 = "#D8DEE9";
-        nord5 = "#E5E9F0";
-        nord6 = "#ECEFF4";
-        nord7 = "#8FBCBB";
-        nord8 = "#88C0D0";
-        nord9 = "#81A1C1";
-        nord10 = "#5E81AC";
-        nord11 = "#BF616A";
-        nord12 = "#D08770";
-        nord13 = "#EBCB8B";
-        nord14 = "#A3BE8C";
-        nord15 = "#B48EAD";
-      };
-
-      os = {
-        disabled = false;
-        style = "bold fg:nord8";
-        format = "[$symbol ]($style)";
-      };
-
-      os.symbols.NixOS = "";
-
-      directory = {
-        style = "bold fg:nord9";
-        format = "[$path ]($style)";
-        truncation_length = 5;
-        truncation_symbol = "";
-      };
-
-      git_branch = {
-        symbol = "";
-        style = "bold fg:nord7";
-        format = "[$symbol $branch ]($style)";
-      };
-
-      git_status = {
-        style = "bold fg:nord7";
-        format = "[$all_status$ahead_behind ]($style)";
-        conflicted = "󰕚 ";
-        ahead = "󰜷 ";
-        behind = "󰜮 ";
-        diverged = "󰃻 ";
-        up_to_date = "";
-        untracked = "󰞋 ";
-        stashed = "󰏗 ";
-        modified = "󰏫 ";
-        staged = "󰐗 ";
-        renamed = "󰏪 ";
-        deleted = "󰍶 ";
-      };
-
-      c = {
-        symbol = " ";
-        style = "bold fg:nord10";
-        format = "[$symbol($version) ]($style)";
-      };
-
-      dart = {
-        symbol = " ";
-        style = "bold fg:nord10";
-        format = "[$symbol($version) ]($style)";
-      };
-
-      dotnet = {
-        symbol = " ";
-        style = "bold fg:nord10";
-        format = "[$symbol($version) ]($style)";
-      };
-
-      golang = {
-        symbol = " ";
-        style = "bold fg:nord10";
-        format = "[$symbol($version) ]($style)";
-      };
-
-      java = {
-        symbol = " ";
-        style = "bold fg:nord10";
-        format = "[$symbol($version) ]($style)";
-      };
-
-      lua = {
-        symbol = " ";
-        style = "bold fg:nord10";
-        format = "[$symbol($version) ]($style)";
-      };
-
-      nodejs = {
-        symbol = " ";
-        style = "bold fg:nord10";
-        format = "[$symbol($version) ]($style)";
-      };
-
-      php = {
-        symbol = " ";
-        style = "bold fg:nord10";
-        format = "[$symbol($version) ]($style)";
-      };
-
-      python = {
-        symbol = " ";
-        style = "bold fg:nord10";
-        format = "[$symbol($version) ]($style)";
-      };
-
-      rust = {
-        symbol = " ";
-        style = "bold fg:nord10";
-        format = "[$symbol($version) ]($style)";
-      };
-
-      zig = {
-        symbol = " ";
-        style = "bold fg:nord10";
-        format = "[$symbol($version) ]($style)";
-      };
-
-      fill.symbol = " ";
-
-      time = {
-        disabled = false;
-        time_format = "%H:%M";
-        style = "bold fg:nord8";
-        format = "[ $time ]($style)";
-      };
-
-      character = {
-        success_symbol = "[❯](bold fg:nord8)";
-        error_symbol = "[❯](bold fg:nord11)";
-        vimcmd_symbol = "[❮](bold fg:nord8)";
-        vimcmd_replace_one_symbol = "[❮](bold fg:nord15)";
-        vimcmd_replace_symbol = "[❮](bold fg:nord15)";
-        vimcmd_visual_symbol = "[❮](bold fg:nord13)";
-      };
-    };
   };
 
   programs.fzf = {
@@ -205,6 +54,7 @@
 
     shellAliases = {
       ".." = "cd ..";
+      m = "make";
       md = "mkdir -p";
       mkdir = "mkdir -p";
       vi = "nvim";
@@ -221,12 +71,15 @@
       neofetch = "fastfetch";
 
       gs = "git status -sb";
-      rebuild = "sudo nixos-rebuild switch --flake .#laptop";
-      upgrade = "sudo nix flake update && sudo nixos-rebuild switch --flake .#laptop";
-      upgrade-dev = "sudo nix flake lock --update-input nixpkgs --update-input home-manager && sudo nixos-rebuild switch --flake .#laptop";
+      rebuild = "sudo nixos-rebuild switch --flake path:$HOME/nixos-config#laptop";
+      upgrade = "cd $HOME/nixos-config && sudo nix flake update && sudo nixos-rebuild switch --flake path:$HOME/nixos-config#laptop";
+      upgrade-dev = "cd $HOME/nixos-config && sudo nix flake lock --update-input nixpkgs --update-input home-manager && sudo nixos-rebuild switch --flake path:$HOME/nixos-config#laptop";
 
-      boost = "sudo tlp performance";
+      gaming = "sudo tlp performance";
       quiet = "sudo tlp balanced";
+      powersave = "sudo tlp power-saver";
+      tlpstat = "sudo tlp-stat -s -p -t";
+      devdown = "free_dev_ram";
 
       nvh = "nvim-dev-health";
       nvsync = "nvim-plugin-sync";
@@ -260,7 +113,7 @@
         local ac_online=0
         local power_file
 
-        for power_file in /sys/class/power_supply/AC*/online /sys/class/power_supply/ADP*/online /sys/class/power_supply/AC/online; do
+        for power_file in /sys/class/power_supply/AC*/online(N) /sys/class/power_supply/ADP*/online(N) /sys/class/power_supply/AC/online(N); do
           [ -f "$power_file" ] || continue
           if [ "$(cat "$power_file")" = "1" ]; then
             ac_online=1
@@ -276,26 +129,79 @@
         nvidia-offload "$@"
       }
 
-      _up_or_accept_suggestion() {
-        if (( $+widgets[autosuggest-accept] )) && [[ -n "''${POSTDISPLAY:-}" ]]; then
-          zle autosuggest-accept
-        elif (( $+widgets[history-substring-search-up] )); then
-          zle history-substring-search-up
+      free_dev_ram() {
+        local had_work=0
+        local docker_ids profiles_json profiles profile
+
+        if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+          docker_ids="$(docker ps -q)"
+          if [ -n "$docker_ids" ]; then
+            echo "Stopping running Docker containers..."
+            printf '%s\n' "$docker_ids" | xargs -r docker stop >/dev/null
+            had_work=1
+          fi
+        fi
+
+        if command -v minikube >/dev/null 2>&1; then
+          profiles_json="$(minikube profile list -o json 2>/dev/null || true)"
+          if [ -n "$profiles_json" ] && command -v jq >/dev/null 2>&1; then
+            profiles="$(printf '%s' "$profiles_json" | jq -r '.valid[]?.Name // empty' 2>/dev/null || true)"
+            while IFS= read -r profile; do
+              [ -n "$profile" ] || continue
+              echo "Stopping minikube profile: $profile"
+              minikube stop -p "$profile" >/dev/null 2>&1 || true
+              had_work=1
+            done <<< "$profiles"
+          fi
+        fi
+
+        if [ "$had_work" -eq 0 ]; then
+          echo "No running Docker containers or minikube profiles found."
         else
-          zle up-line-or-history
+          echo "Runtime workloads stopped. Docker and Kubernetes tooling remain enabled."
         fi
       }
-      zle -N _up_or_accept_suggestion
-      bindkey '^[[A' _up_or_accept_suggestion
-      bindkey '^[OA' _up_or_accept_suggestion
-      bindkey -M main '^[[A' _up_or_accept_suggestion
-      bindkey -M main '^[OA' _up_or_accept_suggestion
-      bindkey -M emacs '^[[A' _up_or_accept_suggestion
-      bindkey -M emacs '^[OA' _up_or_accept_suggestion
-      bindkey -M viins '^[[A' _up_or_accept_suggestion
-      bindkey -M viins '^[OA' _up_or_accept_suggestion
-      bindkey -M vicmd '^[[A' _up_or_accept_suggestion
-      bindkey -M vicmd '^[OA' _up_or_accept_suggestion
+
+      _stalbar_apply_runtime_zsh_theme() {
+        local theme_file="$HOME/.config/stalbar-theme/generated/zsh-theme.zsh"
+
+        if [ -r "$theme_file" ]; then
+          source "$theme_file"
+        fi
+      }
+
+      autoload -Uz add-zsh-hook
+      _stalbar_apply_runtime_zsh_theme
+      add-zsh-hook precmd _stalbar_apply_runtime_zsh_theme
+
+      _bind_history_arrows() {
+        local up_widget="up-line-or-beginning-search"
+        local down_widget="down-line-or-beginning-search"
+
+        bindkey '^[[A' "$up_widget"
+        bindkey '^[OA' "$up_widget"
+        bindkey '^[[B' "$down_widget"
+        bindkey '^[OB' "$down_widget"
+        bindkey -M main '^[[A' "$up_widget"
+        bindkey -M main '^[OA' "$up_widget"
+        bindkey -M main '^[[B' "$down_widget"
+        bindkey -M main '^[OB' "$down_widget"
+        bindkey -M emacs '^[[A' "$up_widget"
+        bindkey -M emacs '^[OA' "$up_widget"
+        bindkey -M emacs '^[[B' "$down_widget"
+        bindkey -M emacs '^[OB' "$down_widget"
+        bindkey -M viins '^[[A' "$up_widget"
+        bindkey -M viins '^[OA' "$up_widget"
+        bindkey -M viins '^[[B' "$down_widget"
+        bindkey -M viins '^[OB' "$down_widget"
+        bindkey -M vicmd '^[[A' "$up_widget"
+        bindkey -M vicmd '^[OA' "$up_widget"
+        bindkey -M vicmd '^[[B' "$down_widget"
+        bindkey -M vicmd '^[OB' "$down_widget"
+      }
+
+      _bind_history_arrows
+      unfunction _bind_history_arrows
     '';
   };
 }

@@ -6,6 +6,10 @@ local function iset(key, action, desc)
   vim.keymap.set("i", key, action, { desc = desc })
 end
 
+local function tset(key, action, desc)
+  vim.keymap.set("t", key, action, { desc = desc })
+end
+
 nset("<leader>sh", "<cmd>split<CR>", "Horizontal split")
 nset("<leader>sv", "<cmd>vsplit<CR>", "Vertical split")
 
@@ -38,6 +42,10 @@ nset("<C-Up>", ":resize +2<CR>", "Increase window height")
 nset("<C-Down>", ":resize -2<CR>", "Decrease window height")
 nset("<C-Left>", ":vertical resize -2<CR>", "Decrease window width")
 nset("<C-Right>", ":vertical resize +2<CR>", "Increase window width")
+tset("<C-Up>", "<C-\\><C-n><cmd>resize +2<CR>", "Increase window height")
+tset("<C-Down>", "<C-\\><C-n><cmd>resize -2<CR>", "Decrease window height")
+tset("<C-Left>", "<C-\\><C-n><cmd>vertical resize -2<CR>", "Decrease window width")
+tset("<C-Right>", "<C-\\><C-n><cmd>vertical resize +2<CR>", "Increase window width")
 
 nset("<leader>w=", "<C-w>=", "Balance window sizes")
 

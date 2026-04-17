@@ -1,12 +1,20 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 
 {
   home.packages = with pkgs; [
+    discord
+    alsa-utils
     btop
     fastfetch
+    crosspipe
+    cool-retro-term
     kdePackages.okular
+    kdePackages.kolourpaint
     obsidian
+    pamixer
     pavucontrol
+    pulseaudio
+    chromium
     libreoffice-fresh
     telegram-desktop
     bruno
@@ -22,14 +30,19 @@
     grimblast
     swappy
     wl-clipboard
-    swww
+    awww
     gowall
+    vial
+    qmk
     qt6.qtwayland
     qt6.qtimageformats
     kdePackages.kio
     kdePackages.kio-extras
     eza
     bat
+    lavat
     trash-cli
+    uv
+    inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 }

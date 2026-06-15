@@ -9,6 +9,7 @@
     ./psql.nix
     ./neovim.nix
     ./opencode.nix
+    ./antigravity.nix
     ./graphify.nix
     ./ghostty.nix
     ./firefox.nix
@@ -22,5 +23,7 @@
     ./waybar.nix
     ./wallpaper.nix
     ./hyprland.nix
+    ./niri.nix
+    ./swaylock.nix
   ];
 }

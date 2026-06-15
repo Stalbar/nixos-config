@@ -5,7 +5,7 @@ __pycache__/
 *.pyc
 .superpowers/
 .zed/
-.codex
+.gemini/antigravity-cli
 .agents/
 docs/monkeytype/
 docs/superpowers/

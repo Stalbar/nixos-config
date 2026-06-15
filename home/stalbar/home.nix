@@ -13,7 +13,7 @@
 
   stalbar.profiles = {
     dev.enable = true;
-    gaming.enable = true;
+    gaming.enable = false;
   };
 
   programs.home-manager.enable = true;

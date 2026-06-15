@@ -70,14 +70,13 @@ in
       workspace_rule = [
         {
           workspace = "1";
-          monitor = "eDP-1";
+          monitor = "HDMI-A-1";
           default = true;
           persistent = true;
         }
         {
           workspace = "2";
           monitor = "HDMI-A-1";
-          default = true;
           persistent = true;
         }
         {
@@ -111,6 +110,12 @@ in
         {
           workspace = "10";
           monitor = "HDMI-A-1";
+        }
+        {
+          workspace = "11";
+          monitor = "eDP-1";
+          default = true;
+          persistent = true;
         }
       ];
 

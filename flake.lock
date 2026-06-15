@@ -1,23 +1,6 @@
 {
   "nodes": {
-    "agentmemory": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1780046609,
-        "narHash": "sha256-anLCkdQALyKsd3RXeV/PqxbcVqPgSMUcHxAxyGEXzD0=",
-        "owner": "rohitg00",
-        "repo": "agentmemory",
-        "rev": "fd9e3bd42d6208a33f0ee9de1442fdbb60eab106",
-        "type": "github"
-      },
-      "original": {
-        "owner": "rohitg00",
-        "ref": "v0.9.24",
-        "repo": "agentmemory",
-        "type": "github"
-      }
-    },
-    "codex-cli-nix": {
+    "antigravity-nix": {
       "inputs": {
         "flake-utils": "flake-utils",
         "nixpkgs": [
@@ -25,16 +8,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1779998039,
-        "narHash": "sha256-TrNmfalbdX4VOXJyBYDX+jH6Ph7YJbUMAnq6/akCyms=",
-        "owner": "sadjow",
-        "repo": "codex-cli-nix",
-        "rev": "803b7de2cccae3abbb9d23c10826af087428b06e",
+        "lastModified": 1781080021,
+        "narHash": "sha256-0gaN5Gno9nmdkolW6KUeijBn5/zcDemlqAzAhDFMdCE=",
+        "owner": "jacopone",
+        "repo": "antigravity-nix",
+        "rev": "df1aea386084702cfea0542d907b6676e84d0cd2",
         "type": "github"
       },
       "original": {
-        "owner": "sadjow",
-        "repo": "codex-cli-nix",
+        "owner": "jacopone",
+        "repo": "antigravity-nix",
         "type": "github"
       }
     },
@@ -63,27 +46,27 @@
         ]
       },
       "locked": {
-        "lastModified": 1779726825,
-        "narHash": "sha256-RUkMrREjKDQrA+dA9+xZviGAxM5W1aVdyOr/bSYpHrE=",
+        "lastModified": 1781129616,
+        "narHash": "sha256-Hl0Pz/QIKpePSU7SdK3BMe5VNmUhFvfWyg57GyawxzE=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "b179bde238977f7d4454fc770b1a727eaf55111c",
+        "rev": "7dbd305f8b81050f223f00bcfbc8a6b74e048806",
         "type": "github"
       },
       "original": {
         "owner": "nix-community",
-        "ref": "release-26.05",
+        "ref": "master",
         "repo": "home-manager",
         "type": "github"
       }
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1779560665,
-        "narHash": "sha256-tpyBcxPpcQb8ukyNF7DoCwfSY3VPsxHoYwj00Cayv5o=",
+        "lastModified": 1780749050,
+        "narHash": "sha256-3av0pIjlOWQ6rDbNOmpUSvbNnJkGORQKKjb4LtCZsIY=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "64c08a7ca051951c8eae34e3e3cb1e202fe36786",
+        "rev": "a799d3e3886da994fa307f817a6bc705ae538eeb",
         "type": "github"
       },
       "original": {
@@ -95,8 +78,7 @@
     },
     "root": {
       "inputs": {
-        "agentmemory": "agentmemory",
-        "codex-cli-nix": "codex-cli-nix",
+        "antigravity-nix": "antigravity-nix",
         "home-manager": "home-manager",
         "nixpkgs": "nixpkgs"
       }

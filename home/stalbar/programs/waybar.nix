@@ -26,6 +26,30 @@ let
       echo "󰍮"
     fi
   '';
+
+  kbScript = pkgs.writeShellScript "waybar-kb-layout" ''
+    set -eu
+
+    layout=""
+
+    if command -v hyprctl >/dev/null 2>&1 && pgrep -x Hyprland >/dev/null 2>&1; then
+      layout=$(hyprctl devices -j 2>/dev/null | \
+        ${pkgs.gnugrep}/bin/grep -oP '"active_keymap":\s*"\K[^"]+' | head -1 || true)
+    fi
+
+    if [ -z "$layout" ] && command -v niri >/dev/null 2>&1 && pgrep -x niri >/dev/null 2>&1; then
+      layout=$(niri msg inputs 2>/dev/null | \
+        ${pkgs.gnugrep}/bin/grep -i "active.*layout" | head -1 | \
+        ${pkgs.gnused}/bin/sed 's/.*: *//' || true)
+    fi
+
+    case "$layout" in
+      "English (US)")         echo '{"text":"EN","tooltip":"English (US)"}' ;;
+      "Russian")              echo '{"text":"RU","tooltip":"Russian"}' ;;
+      "English (US, alt. intl.)") echo '{"text":"EN","tooltip":"English (US)"}' ;;
+      *)                      echo "{\"text\":\"\",\"tooltip\":\"$layout\"}" ;;
+    esac
+  '';
 in
 {
   programs.waybar = {
@@ -43,10 +67,9 @@ in
         margin-right = 6;
         margin-left = 0;
 
-        # Vertical bar layout:
-        # top = workspaces, center = tray, bottom = status icons + clock.
         modules-left = [
           "hyprland/workspaces"
+          "wlr/workspaces"
         ];
         modules-center = [
           "wlr/taskbar"
@@ -58,10 +81,18 @@ in
           "custom/mic"
           "battery"
           "hyprland/language"
+          "custom/language"
           "clock#stack"
         ];
 
         "hyprland/workspaces" = {
+          disable-scroll = true;
+          all-outputs = true;
+          sort-by-number = true;
+          format = "{id}";
+        };
+
+        "wlr/workspaces" = {
           disable-scroll = true;
           all-outputs = true;
           sort-by-number = true;
@@ -132,6 +163,15 @@ in
           format-ru = "RU";
           min-length = 2;
           tooltip = false;
+        };
+
+        "custom/language" = {
+          exec = "${kbScript}";
+          return-type = "json";
+          format = "{}";
+          interval = 1;
+          on-click = "wlr-layout-switcher next 2>/dev/null || true";
+          tooltip = true;
         };
 
         tray = {

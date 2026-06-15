@@ -3,14 +3,10 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    home-manager.url = "github:nix-community/home-manager/release-26.05";
+    home-manager.url = "github:nix-community/home-manager/master";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    codex-cli-nix.url = "github:sadjow/codex-cli-nix";
-    codex-cli-nix.inputs.nixpkgs.follows = "nixpkgs";
-    agentmemory = {
-      url = "github:rohitg00/agentmemory/v0.9.24";
-      flake = false;
-    };
+    antigravity-nix.url = "github:jacopone/antigravity-nix";
+    antigravity-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =

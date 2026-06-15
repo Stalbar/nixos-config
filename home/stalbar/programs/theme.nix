@@ -40,16 +40,13 @@ let
     "e" = 14;
     "f" = 15;
   };
-  hexNibble =
-    digit:
-    hexValues.${digit} or (throw "Unsupported hex color digit: ${digit}");
+  hexNibble = digit: hexValues.${digit} or (throw "Unsupported hex color digit: ${digit}");
   hexByte =
     hex: offset:
     (hexNibble (builtins.substring offset 1 hex)) * 16
     + hexNibble (builtins.substring (offset + 1) 1 hex);
   hexToRgb =
-    hex:
-    "${toString (hexByte hex 0)},${toString (hexByte hex 2)},${toString (hexByte hex 4)}";
+    hex: "${toString (hexByte hex 0)},${toString (hexByte hex 2)},${toString (hexByte hex 4)}";
 
   mkKdeColors =
     theme:
@@ -716,6 +713,21 @@ let
       }
     '';
 
+  mkNiriTheme =
+    theme:
+    let
+      c = theme.colors;
+    in
+    ''
+      layout {
+          border {
+              active-color "#${c.accent2}ee"
+              inactive-color "#${c.bg0}55"
+              // active-gradient from="#${c.purple}ee" to="#${c.accent2}cc" angle=45
+          }
+      }
+    '';
+
   mkGhosttyTheme =
     theme:
     let
@@ -1068,9 +1080,15 @@ let
       import QtQuick
 
       QtObject {
-          readonly property color overlay: "${alphaHex (if theme.mode == "light" then "62" else "76") c.bg0}"
-          readonly property color panel: "${alphaHex (if theme.mode == "light" then "D8" else "E8") c.bg0}"
-          readonly property color panelRaised: "${alphaHex (if theme.mode == "light" then "E8" else "F4") c.bg1}"
+          readonly property color overlay: "${
+            alphaHex (if theme.mode == "light" then "62" else "76") c.bg0
+          }"
+          readonly property color panel: "${
+            alphaHex (if theme.mode == "light" then "D8" else "E8") c.bg0
+          }"
+          readonly property color panelRaised: "${
+            alphaHex (if theme.mode == "light" then "E8" else "F4") c.bg1
+          }"
           readonly property color panelBorder: "${alphaHex "B0" c.accent2}"
           readonly property color panelMutedBorder: "${alphaHex "90" c.bg3}"
           readonly property color panelShadow: "${alphaHex "48" c.bg1}"
@@ -1114,6 +1132,7 @@ let
       cp ${pkgs.writeText "${theme.id}-obsidian-runtime-theme.css" (mkObsidianSnippet theme)} "$out/${theme.id}/obsidian-runtime-theme.css"
       cp ${pkgs.writeText "${theme.id}-obsidian-appearance.json" (mkObsidianAppearance theme)} "$out/${theme.id}/obsidian-appearance.json"
       cp ${pkgs.writeText "${theme.id}-hyprlock-theme.conf" (mkHyprlockTheme theme)} "$out/${theme.id}/hyprlock-theme.conf"
+      cp ${pkgs.writeText "${theme.id}-niri-theme.kdl" (mkNiriTheme theme)} "$out/${theme.id}/niri-theme.kdl"
       cp ${pkgs.writeText "QuickshellTheme.qml" (mkQuickshellTheme theme)} "$out/${theme.id}/QuickshellTheme.qml"
       cp ${pkgs.writeText "quickshell-qmldir" ''
         singleton QuickshellTheme 1.0 QuickshellTheme.qml
@@ -1137,235 +1156,235 @@ let
       dunst
     ];
     text = ''
-            set -euo pipefail
+                  set -euo pipefail
 
-            assets_dir="${themeAssets}"
-            state_dir="${themeStateDir}"
-            generated_dir="${generatedThemeDir}"
-            current_file="$state_dir/current"
-            color_scheme_dir="$HOME/.local/share/color-schemes"
-            btop_theme_dir="$HOME/.config/btop/themes"
-            firefox_chrome_dir="$HOME/.mozilla/firefox/stalbar/chrome"
-            obsidian_dir="$HOME/obsidian-notes/.obsidian"
-            nvim_server_dir="$HOME/.local/state/stalbar-theme/nvim-servers"
-            gsettings_schema_dir="${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}/glib-2.0/schemas"
-            default_theme="${builtins.head themeIds}"
-            manage_gui=1
-            theme_order=(${lib.concatStringsSep " " themeIds})
+                  assets_dir="${themeAssets}"
+                  state_dir="${themeStateDir}"
+                  generated_dir="${generatedThemeDir}"
+                  current_file="$state_dir/current"
+                  color_scheme_dir="$HOME/.local/share/color-schemes"
+                  btop_theme_dir="$HOME/.config/btop/themes"
+                  firefox_chrome_dir="$HOME/.mozilla/firefox/stalbar/chrome"
+                  obsidian_dir="$HOME/obsidian-notes/.obsidian"
+                  nvim_server_dir="$HOME/.local/state/stalbar-theme/nvim-servers"
+                  gsettings_schema_dir="${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}/glib-2.0/schemas"
+                  default_theme="${builtins.head themeIds}"
+                  manage_gui=1
+                  theme_order=(${lib.concatStringsSep " " themeIds})
 
-            read_current_theme() {
-              local theme
-              if [ -f "$current_file" ]; then
-                theme="$(tr -d '[:space:]' < "$current_file")"
-              else
-                theme="$default_theme"
-              fi
+                  read_current_theme() {
+                    local theme
+                    if [ -f "$current_file" ]; then
+                      theme="$(tr -d '[:space:]' < "$current_file")"
+                    else
+                      theme="$default_theme"
+                    fi
 
-              case "$theme" in
-                ${themeNamesText})
-                  printf '%s' "$theme"
-                  ;;
-                *)
-                  printf '%s' "$default_theme"
-                  ;;
-              esac
-            }
+                    case "$theme" in
+                      ${themeNamesText})
+                        printf '%s' "$theme"
+                        ;;
+                      *)
+                        printf '%s' "$default_theme"
+                        ;;
+                    esac
+                  }
 
-            next_theme() {
-              local current idx count
-              current="$(read_current_theme)"
-              count="''${#theme_order[@]}"
+                  next_theme() {
+                    local current idx count
+                    current="$(read_current_theme)"
+                    count="''${#theme_order[@]}"
 
-              for idx in "''${!theme_order[@]}"; do
-                if [ "''${theme_order[$idx]}" = "$current" ]; then
-                  printf '%s' "''${theme_order[$(((idx + 1) % count))]}"
-                  return 0
-                fi
-              done
+                    for idx in "''${!theme_order[@]}"; do
+                      if [ "''${theme_order[$idx]}" = "$current" ]; then
+                        printf '%s' "''${theme_order[$(((idx + 1) % count))]}"
+                        return 0
+                      fi
+                    done
 
-              printf '%s' "$default_theme"
-            }
+                    printf '%s' "$default_theme"
+                  }
 
-            restart_waybar() {
-              if systemctl --user --quiet is-enabled waybar.service >/dev/null 2>&1; then
-                systemctl --user restart waybar.service >/dev/null 2>&1 || true
-              elif [ -n "''${WAYLAND_DISPLAY:-}" ] && pgrep -x waybar >/dev/null 2>&1; then
-                pkill -x waybar || true
-                nohup waybar >/dev/null 2>&1 &
-              fi
-            }
+                  restart_waybar() {
+                    if systemctl --user --quiet is-enabled waybar.service >/dev/null 2>&1; then
+                      systemctl --user restart waybar.service >/dev/null 2>&1 || true
+                    elif [ -n "''${WAYLAND_DISPLAY:-}" ] && pgrep -x waybar >/dev/null 2>&1; then
+                      pkill -x waybar || true
+                      nohup waybar >/dev/null 2>&1 &
+                    fi
+                  }
 
-            set_theme_vars() {
-              case "$1" in
-      ${lib.concatMapStringsSep "\n" (theme: ''
-        ${theme.id})
-          gtk_theme=${lib.escapeShellArg theme.gtkTheme}
-          icon_theme=${lib.escapeShellArg theme.iconTheme}
-          cursor_theme=${lib.escapeShellArg theme.cursorTheme}
-          gtk_color_scheme=${lib.escapeShellArg theme.gtkColorScheme}
-        kde_scheme=${lib.escapeShellArg theme.kdeColorScheme}
-        hypr_active_border="rgba(${theme.colors.purple}ee) rgba(${theme.colors.accent2}cc) 45deg"
-        hypr_inactive_border="rgba(${theme.colors.bg0}55)"
-        ;;
-      '') themeList}
-                *)
-                  echo "Unknown theme: $1" >&2
-                  exit 2
-                  ;;
-              esac
-            }
+                  set_theme_vars() {
+                    case "$1" in
+            ${lib.concatMapStringsSep "\n" (theme: ''
+              ${theme.id})
+                gtk_theme=${lib.escapeShellArg theme.gtkTheme}
+                icon_theme=${lib.escapeShellArg theme.iconTheme}
+                cursor_theme=${lib.escapeShellArg theme.cursorTheme}
+                gtk_color_scheme=${lib.escapeShellArg theme.gtkColorScheme}
+              kde_scheme=${lib.escapeShellArg theme.kdeColorScheme}
+              hypr_active_border="rgba(${theme.colors.purple}ee) rgba(${theme.colors.accent2}cc) 45deg"
+              hypr_inactive_border="rgba(${theme.colors.bg0}55)"
+              ;;
+            '') themeList}
+                      *)
+                        echo "Unknown theme: $1" >&2
+                        exit 2
+                        ;;
+                    esac
+                  }
 
-            write_runtime_files() {
-              local theme="$1"
+                  write_runtime_files() {
+                    local theme="$1"
 
-              mkdir -p "$state_dir" "$generated_dir" "$color_scheme_dir" "$btop_theme_dir" "$HOME/.config"
-              mkdir -p "$firefox_chrome_dir" "$obsidian_dir/snippets"
-              mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0" "$HOME/.config/qt5ct" "$HOME/.config/qt6ct"
-              mkdir -p "$HOME/.config/ghostty/themes"
-              mkdir -p "$HOME/.config/environment.d"
+                    mkdir -p "$state_dir" "$generated_dir" "$color_scheme_dir" "$btop_theme_dir" "$HOME/.config"
+                    mkdir -p "$firefox_chrome_dir" "$obsidian_dir/snippets"
+                    mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0" "$HOME/.config/qt5ct" "$HOME/.config/qt6ct"
+                    mkdir -p "$HOME/.config/ghostty/themes"
+                    mkdir -p "$HOME/.config/environment.d"
 
-              printf '%s\n' "$theme" > "$current_file"
+                    printf '%s\n' "$theme" > "$current_file"
 
-              install -m 0644 "$assets_dir/$theme/ghostty-theme" "$generated_dir/ghostty-theme"
-              install -m 0644 "$assets_dir/$theme/ghostty-theme" "$HOME/.config/ghostty/themes/stalbar-runtime"
-              install -m 0644 "$assets_dir/$theme/rofi-theme.rasi" "$generated_dir/rofi-theme.rasi"
-              install -m 0644 "$assets_dir/$theme/waybar-theme.css" "$generated_dir/waybar-theme.css"
-              install -m 0644 "$assets_dir/$theme/hyprlock-theme.conf" "$generated_dir/hyprlock-theme.conf"
-              install -m 0644 "$assets_dir/$theme/QuickshellTheme.qml" "$generated_dir/QuickshellTheme.qml"
-              install -m 0644 "$assets_dir/$theme/qmldir" "$generated_dir/qmldir"
-              install -m 0644 "$assets_dir/$theme/starship.toml" "$generated_dir/starship.toml"
-              install -m 0644 "$assets_dir/$theme/starship.toml" "$HOME/.config/starship.toml"
-              install -m 0644 "$assets_dir/$theme/zsh-theme.zsh" "$generated_dir/zsh-theme.zsh"
-              install -m 0644 "$assets_dir/$theme/btop.theme" "$btop_theme_dir/current.theme"
-              install -m 0644 "$assets_dir/$theme/$kde_scheme.colors" "$color_scheme_dir/$kde_scheme.colors"
-              install -m 0644 "$assets_dir/$theme/kdeglobals" "$HOME/.config/kdeglobals"
-              install -m 0644 "$assets_dir/$theme/gtk-settings.ini" "$HOME/.config/gtk-3.0/settings.ini"
-              install -m 0644 "$assets_dir/$theme/gtk-settings.ini" "$HOME/.config/gtk-4.0/settings.ini"
-              install -m 0644 "$assets_dir/$theme/gtk.css" "$HOME/.config/gtk-3.0/gtk.css"
-              install -m 0644 "$assets_dir/$theme/gtk.css" "$HOME/.config/gtk-4.0/gtk.css"
-              install -m 0644 "$assets_dir/$theme/qtct.conf" "$HOME/.config/qt5ct/qt5ct.conf"
-              install -m 0644 "$assets_dir/$theme/qtct.conf" "$HOME/.config/qt6ct/qt6ct.conf"
-              install -m 0644 "$assets_dir/$theme/firefox-userChrome-theme.css" "$firefox_chrome_dir/stalbar-theme-userChrome.css"
-              install -m 0644 "$assets_dir/$theme/firefox-userContent-theme.css" "$firefox_chrome_dir/stalbar-theme-userContent.css"
-              install -m 0644 "$assets_dir/$theme/obsidian-runtime-theme.css" "$obsidian_dir/snippets/runtime-theme.css"
-              install -m 0644 "$assets_dir/$theme/obsidian-appearance.json" "$obsidian_dir/appearance.json"
-              cat > "$HOME/.config/environment.d/90-stalbar-theme.conf" <<EOF
-XCURSOR_THEME=$cursor_theme
-XCURSOR_SIZE=24
-GTK_THEME=$gtk_theme
-EOF
-            }
+                    install -m 0644 "$assets_dir/$theme/ghostty-theme" "$generated_dir/ghostty-theme"
+                    install -m 0644 "$assets_dir/$theme/ghostty-theme" "$HOME/.config/ghostty/themes/stalbar-runtime"
+                    install -m 0644 "$assets_dir/$theme/rofi-theme.rasi" "$generated_dir/rofi-theme.rasi"
+                    install -m 0644 "$assets_dir/$theme/waybar-theme.css" "$generated_dir/waybar-theme.css"
+                    install -m 0644 "$assets_dir/$theme/hyprlock-theme.conf" "$generated_dir/hyprlock-theme.conf"
+                    install -m 0644 "$assets_dir/$theme/QuickshellTheme.qml" "$generated_dir/QuickshellTheme.qml"
+                    install -m 0644 "$assets_dir/$theme/qmldir" "$generated_dir/qmldir"
+                    install -m 0644 "$assets_dir/$theme/starship.toml" "$generated_dir/starship.toml"
+                    install -m 0644 "$assets_dir/$theme/starship.toml" "$HOME/.config/starship.toml"
+                    install -m 0644 "$assets_dir/$theme/zsh-theme.zsh" "$generated_dir/zsh-theme.zsh"
+                    install -m 0644 "$assets_dir/$theme/btop.theme" "$btop_theme_dir/current.theme"
+                    install -m 0644 "$assets_dir/$theme/$kde_scheme.colors" "$color_scheme_dir/$kde_scheme.colors"
+                    install -m 0644 "$assets_dir/$theme/kdeglobals" "$HOME/.config/kdeglobals"
+                    install -m 0644 "$assets_dir/$theme/gtk-settings.ini" "$HOME/.config/gtk-3.0/settings.ini"
+                    install -m 0644 "$assets_dir/$theme/gtk-settings.ini" "$HOME/.config/gtk-4.0/settings.ini"
+                    install -m 0644 "$assets_dir/$theme/gtk.css" "$HOME/.config/gtk-3.0/gtk.css"
+                    install -m 0644 "$assets_dir/$theme/gtk.css" "$HOME/.config/gtk-4.0/gtk.css"
+                    install -m 0644 "$assets_dir/$theme/qtct.conf" "$HOME/.config/qt5ct/qt5ct.conf"
+                    install -m 0644 "$assets_dir/$theme/qtct.conf" "$HOME/.config/qt6ct/qt6ct.conf"
+                    install -m 0644 "$assets_dir/$theme/firefox-userChrome-theme.css" "$firefox_chrome_dir/stalbar-theme-userChrome.css"
+                    install -m 0644 "$assets_dir/$theme/firefox-userContent-theme.css" "$firefox_chrome_dir/stalbar-theme-userContent.css"
+                    install -m 0644 "$assets_dir/$theme/obsidian-runtime-theme.css" "$obsidian_dir/snippets/runtime-theme.css"
+                    install -m 0644 "$assets_dir/$theme/obsidian-appearance.json" "$obsidian_dir/appearance.json"
+                    cat > "$HOME/.config/environment.d/90-stalbar-theme.conf" <<EOF
+      XCURSOR_THEME=$cursor_theme
+      XCURSOR_SIZE=24
+      GTK_THEME=$gtk_theme
+      EOF
+                  }
 
-            apply_theme() {
-              local theme="$1"
-              local okular_rc
+                  apply_theme() {
+                    local theme="$1"
+                    local okular_rc
 
-              set_theme_vars "$theme"
-              write_runtime_files "$theme"
+                    set_theme_vars "$theme"
+                    write_runtime_files "$theme"
 
-              if command -v gsettings >/dev/null 2>&1 && [ -d "$gsettings_schema_dir" ]; then
-                GSETTINGS_SCHEMA_DIR="$gsettings_schema_dir" gsettings set org.gnome.desktop.interface gtk-theme "$gtk_theme" >/dev/null 2>&1 || true
-                GSETTINGS_SCHEMA_DIR="$gsettings_schema_dir" gsettings set org.gnome.desktop.interface icon-theme "$icon_theme" >/dev/null 2>&1 || true
-                GSETTINGS_SCHEMA_DIR="$gsettings_schema_dir" gsettings set org.gnome.desktop.interface cursor-theme "$cursor_theme" >/dev/null 2>&1 || true
-                GSETTINGS_SCHEMA_DIR="$gsettings_schema_dir" gsettings set org.gnome.desktop.interface color-scheme "$gtk_color_scheme" >/dev/null 2>&1 || true
-              fi
+                    if command -v gsettings >/dev/null 2>&1 && [ -d "$gsettings_schema_dir" ]; then
+                      GSETTINGS_SCHEMA_DIR="$gsettings_schema_dir" gsettings set org.gnome.desktop.interface gtk-theme "$gtk_theme" >/dev/null 2>&1 || true
+                      GSETTINGS_SCHEMA_DIR="$gsettings_schema_dir" gsettings set org.gnome.desktop.interface icon-theme "$icon_theme" >/dev/null 2>&1 || true
+                      GSETTINGS_SCHEMA_DIR="$gsettings_schema_dir" gsettings set org.gnome.desktop.interface cursor-theme "$cursor_theme" >/dev/null 2>&1 || true
+                      GSETTINGS_SCHEMA_DIR="$gsettings_schema_dir" gsettings set org.gnome.desktop.interface color-scheme "$gtk_color_scheme" >/dev/null 2>&1 || true
+                    fi
 
-              okular_rc="$HOME/.config/okularrc"
-              if [ -f "$okular_rc" ]; then
-                if grep -q '^ColorScheme=' "$okular_rc"; then
-                  sed -i "s/^ColorScheme=.*/ColorScheme=$kde_scheme/" "$okular_rc"
-                else
-                  printf '\n[UiSettings]\nColorScheme=%s\n' "$kde_scheme" >> "$okular_rc"
-                fi
-              else
-                printf '[UiSettings]\nColorScheme=%s\n' "$kde_scheme" > "$okular_rc"
-              fi
+                    okular_rc="$HOME/.config/okularrc"
+                    if [ -f "$okular_rc" ]; then
+                      if grep -q '^ColorScheme=' "$okular_rc"; then
+                        sed -i "s/^ColorScheme=.*/ColorScheme=$kde_scheme/" "$okular_rc"
+                      else
+                        printf '\n[UiSettings]\nColorScheme=%s\n' "$kde_scheme" >> "$okular_rc"
+                      fi
+                    else
+                      printf '[UiSettings]\nColorScheme=%s\n' "$kde_scheme" > "$okular_rc"
+                    fi
 
-              if [ "$manage_gui" -eq 1 ] && command -v hyprctl >/dev/null 2>&1; then
-                hyprctl keyword general:col.active_border "$hypr_active_border" >/dev/null 2>&1 || true
-                hyprctl keyword general:col.inactive_border "$hypr_inactive_border" >/dev/null 2>&1 || true
-                hyprctl setcursor "$cursor_theme" 24 >/dev/null 2>&1 || true
-              fi
+                    if [ "$manage_gui" -eq 1 ] && command -v hyprctl >/dev/null 2>&1; then
+                      hyprctl keyword general:col.active_border "$hypr_active_border" >/dev/null 2>&1 || true
+                      hyprctl keyword general:col.inactive_border "$hypr_inactive_border" >/dev/null 2>&1 || true
+                      hyprctl setcursor "$cursor_theme" 24 >/dev/null 2>&1 || true
+                    fi
 
-              if [ "$manage_gui" -eq 1 ]; then
-                restart_waybar
-              fi
+                    if [ "$manage_gui" -eq 1 ]; then
+                      restart_waybar
+                    fi
 
-              if [ "$manage_gui" -eq 1 ]; then
-                systemctl --user --quiet is-active qs-app-launcher.service >/dev/null 2>&1 && systemctl --user restart qs-app-launcher.service >/dev/null 2>&1 || true
-              fi
+                    if [ "$manage_gui" -eq 1 ]; then
+                      systemctl --user --quiet is-active qs-app-launcher.service >/dev/null 2>&1 && systemctl --user restart qs-app-launcher.service >/dev/null 2>&1 || true
+                    fi
 
-              if [ -d "$nvim_server_dir" ]; then
-                for entry in "$nvim_server_dir"/*; do
-                  [ -f "$entry" ] || continue
-                  server="$(tr -d '\n' < "$entry")"
-                  if [ -z "$server" ]; then
-                    rm -f "$entry"
-                    continue
-                  fi
-                  if [ ! -S "$server" ]; then
-                    rm -f "$entry"
-                    continue
-                  fi
-                  nvim --server "$server" --remote-expr 'execute("lua require([[config.theme]]).apply()")' >/dev/null 2>&1 || true
-                done
-              fi
+                    if [ -d "$nvim_server_dir" ]; then
+                      for entry in "$nvim_server_dir"/*; do
+                        [ -f "$entry" ] || continue
+                        server="$(tr -d '\n' < "$entry")"
+                        if [ -z "$server" ]; then
+                          rm -f "$entry"
+                          continue
+                        fi
+                        if [ ! -S "$server" ]; then
+                          rm -f "$entry"
+                          continue
+                        fi
+                        nvim --server "$server" --remote-expr 'execute("lua require([[config.theme]]).apply()")' >/dev/null 2>&1 || true
+                      done
+                    fi
 
-              if [ "$manage_gui" -eq 1 ] && command -v systemctl >/dev/null 2>&1; then
-                systemctl reload --user app-com.mitchellh.ghostty.service >/dev/null 2>&1 || true
-              fi
+                    if [ "$manage_gui" -eq 1 ] && command -v systemctl >/dev/null 2>&1; then
+                      systemctl reload --user app-com.mitchellh.ghostty.service >/dev/null 2>&1 || true
+                    fi
 
-              if [ "$manage_gui" -eq 1 ] && [ -n "''${WAYLAND_DISPLAY:-}" ] && pgrep -x dunst >/dev/null 2>&1; then
-                pkill -x dunst || true
-                nohup dunst >/dev/null 2>&1 &
-              fi
-            }
+                    if [ "$manage_gui" -eq 1 ] && [ -n "''${WAYLAND_DISPLAY:-}" ] && pgrep -x dunst >/dev/null 2>&1; then
+                      pkill -x dunst || true
+                      nohup dunst >/dev/null 2>&1 &
+                    fi
+                  }
 
-            print_waybar_json() {
-              local theme
-              theme="$(read_current_theme)"
+                  print_waybar_json() {
+                    local theme
+                    theme="$(read_current_theme)"
 
-              case "$theme" in
-      ${lib.concatMapStringsSep "\n" (theme: ''
-        ${theme.id})
-          printf '{"text":"","tooltip":"Theme: ${theme.displayName}","class":"${theme.id}"}\n'
-          ;;
-      '') themeList}
-                *)
-                  printf '{"text":"","tooltip":"Theme: %s","class":"unknown"}\n' "$theme"
-                  ;;
-              esac
-            }
-
-            case "''${1:---toggle}" in
-              --toggle)
-                apply_theme "$(next_theme)"
+                    case "$theme" in
+            ${lib.concatMapStringsSep "\n" (theme: ''
+              ${theme.id})
+                printf '{"text":"","tooltip":"Theme: ${theme.displayName}","class":"${theme.id}"}\n'
                 ;;
-              --apply-current)
-                apply_theme "$(read_current_theme)"
-                ;;
-              --apply-current-no-gui)
-                manage_gui=0
-                apply_theme "$(read_current_theme)"
-                ;;
-              --set)
-                if [ "''${2:-}" = "" ]; then
-                  echo "Usage: switch-theme --set <${themeNamesText}>" >&2
-                  exit 2
-                fi
-                apply_theme "$2"
-                ;;
-              --current)
-                read_current_theme
-                ;;
-              --waybar-json)
-                print_waybar_json
-                ;;
-              *)
-                echo "Usage: switch-theme [--toggle|--apply-current|--apply-current-no-gui|--set <${themeNamesText}>|--current|--waybar-json]" >&2
-                exit 2
-                ;;
-            esac
+            '') themeList}
+                      *)
+                        printf '{"text":"","tooltip":"Theme: %s","class":"unknown"}\n' "$theme"
+                        ;;
+                    esac
+                  }
+
+                  case "''${1:---toggle}" in
+                    --toggle)
+                      apply_theme "$(next_theme)"
+                      ;;
+                    --apply-current)
+                      apply_theme "$(read_current_theme)"
+                      ;;
+                    --apply-current-no-gui)
+                      manage_gui=0
+                      apply_theme "$(read_current_theme)"
+                      ;;
+                    --set)
+                      if [ "''${2:-}" = "" ]; then
+                        echo "Usage: switch-theme --set <${themeNamesText}>" >&2
+                        exit 2
+                      fi
+                      apply_theme "$2"
+                      ;;
+                    --current)
+                      read_current_theme
+                      ;;
+                    --waybar-json)
+                      print_waybar_json
+                      ;;
+                    *)
+                      echo "Usage: switch-theme [--toggle|--apply-current|--apply-current-no-gui|--set <${themeNamesText}>|--current|--waybar-json]" >&2
+                      exit 2
+                      ;;
+                  esac
     '';
   };
 in

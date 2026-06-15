@@ -13,6 +13,7 @@
     ./snapshots.nix
     ./compat.nix
     ./security.nix
+    ./neo4j.nix
     ./virtualization.nix
   ];
 }

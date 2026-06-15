@@ -74,6 +74,8 @@ vim.filetype.add({
   extension = {
     psql = "psql",
     pgsql = "pgsql",
+    cypher = "cypher",
+    cyp = "cypher",
     qmljs = "qmljs",
   },
   filename = {
@@ -131,6 +133,7 @@ vim.api.nvim_create_autocmd("FileType", {
     "python",
     "rust",
     "sql",
+    "cypher",
     "psql",
     "pgsql",
     "plsql",

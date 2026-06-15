@@ -41,7 +41,7 @@
   };
   systemd.sockets.docker.wantedBy = lib.mkForce [ ];
 
-  programs.gamemode.enable = true;
+  programs.gamemode.enable = false;
 
   services.logind.settings.Login.HandleLidSwitchDocked = "ignore";
 

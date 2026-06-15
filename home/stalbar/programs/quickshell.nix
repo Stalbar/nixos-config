@@ -75,6 +75,28 @@ let
   qsPowerMenu = mkQsRunner "qs-power-menu" "powermenu/shell.qml";
   qsWallpaperPicker = mkQsRunner "qs-wallpaper-picker" "wallpaper-picker/shell.qml";
   qsSystemDashboard = mkQsRunner "qs-system-dashboard" "system-dashboard/SystemDashboard.qml";
+
+  lockSession = pkgs.writeShellScriptBin "lock-session" ''
+    set -eu
+    if command -v hyprlock >/dev/null 2>&1 && pgrep -x Hyprland >/dev/null 2>&1; then
+      exec hyprlock
+    elif command -v swaylock >/dev/null 2>&1; then
+      exec swaylock
+    else
+      exec ${pkgs.systemd}/bin/loginctl lock-session
+    fi
+  '';
+
+  logoutSession = pkgs.writeShellScriptBin "logout-session" ''
+    set -eu
+    if pgrep -x Hyprland >/dev/null 2>&1; then
+      exec ${pkgs.hyprland}/bin/hyprctl dispatch exit
+    elif pgrep -x niri >/dev/null 2>&1; then
+      exec ${pkgs.niri}/bin/niri msg action quit
+    else
+      exec ${pkgs.systemd}/bin/loginctl terminate-session "$XDG_SESSION_ID"
+    fi
+  '';
 in
 {
   # Quickshell runtime with on-demand widgets (no background shell service).
@@ -112,6 +134,8 @@ in
     qsPowerMenu
     qsWallpaperPicker
     qsSystemDashboard
+    lockSession
+    logoutSession
   ];
 
   xdg.configFile."quickshell/app-launcher/shell.qml".text = ''
@@ -605,13 +629,13 @@ in
                     key: Qt.Key_L,
                     label: "Lock",
                     icon: "󰌾",
-                    command: "command -v hyprlock >/dev/null 2>&1 && hyprlock || loginctl lock-session"
+                    command: "lock-session"
                 },
                 {
                     key: Qt.Key_E,
                     label: "Logout",
                     icon: "󰍃",
-                    command: "hyprctl dispatch exit"
+                    command: "logout-session"
                 },
                 {
                     key: Qt.Key_R,

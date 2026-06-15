@@ -55,67 +55,20 @@ let
     rev = "65079305d9e996f02a0e56421d7c6d2b623fe587";
     hash = "sha256-ym+v5HMdl42rcLQPYrox1px3pntd+5txj32xFq6wDJ4=";
   };
-
-  agentmemorySrc = inputs.agentmemory;
-
-  agentmemoryPluginJs = pkgs.stdenv.mkDerivation {
-    name = "agentmemory-capture.js";
-    src = "${agentmemorySrc}/plugin/opencode/agentmemory-capture.ts";
-    dontUnpack = true;
-    buildInputs = [ pkgs.typescript ];
-
-    buildPhase = ''
-      mkdir -p node_modules/@opencode-ai/plugin
-      cat > node_modules/@opencode-ai/plugin/index.d.ts << TYPESEOF
-      export interface PluginInput {
-        worktree?: string;
-        project?: { id?: string };
-        sessionID?: string;
-        agent?: string;
-        model?: { providerID: string; id: string; api?: { url?: string }; limit?: { output?: number; context?: number }; cost?: { input?: number; output?: number } };
-        tool?: string;
-      }
-      export type Plugin = (input: PluginInput) => Promise<Record<string, any>>;
-      TYPESEOF
-      cat > node_modules/@opencode-ai/plugin/package.json << PKGEOF
-      { "name": "@opencode-ai/plugin", "types": "index.d.ts" }
-      PKGEOF
-
-      mkdir -p node_modules/@types/node
-      cat > node_modules/@types/node/index.d.ts << NTEOF
-      declare var process: {
-        env: { [key: string]: string | undefined };
-        cwd(): string;
-      };
-      NTEOF
-      cat > node_modules/@types/node/package.json << NPKGEOF
-      { "name": "@types/node", "types": "index.d.ts" }
-      NPKGEOF
-
-      cat > tsconfig.json << TSEOF
-      {
-        "compilerOptions": {
-          "target": "ES2022",
-          "module": "ES2022",
-          "moduleResolution": "node",
-          "strict": false,
-          "skipLibCheck": true,
-          "outDir": "out",
-          "declaration": false,
-          "typeRoots": ["./node_modules/@types"]
-        },
-        "include": ["."]
-      }
-      TSEOF
-
-      cp $src ./plugin.ts
-      tsc
-    '';
-
-    installPhase = ''
-      cp out/plugin.js $out
-    '';
+  cavemanSrc = pkgs.fetchFromGitHub {
+    owner = "JuliusBrussee";
+    repo = "caveman";
+    rev = "655b7d9c5431f822264b7732e9901c5578ac84cf";
+    hash = "sha256-BydREt/vai3j7kO5+e1OxsjXf6Vy+jSY1yA/yyxjHbI=";
   };
+  cavemanAgentsMd =
+    let
+      cavemanRules = builtins.readFile "${cavemanSrc}/src/rules/caveman-activate.md";
+    in
+    ''
+      <!-- caveman-begin -->
+      ${cavemanRules}<!-- caveman-end -->
+    '';
 
   opencodeConfig = {
     "$schema" = "https://opencode.ai/config.json";
@@ -130,7 +83,7 @@ let
       "superpowers@git+https://github.com/obra/superpowers.git"
       "openslimedit@latest"
       "opencode-pty"
-
+      "./plugins/caveman/plugin.js"
     ];
 
     provider = {
@@ -295,38 +248,53 @@ in
     pkgs.opencode
   ];
 
-  home.activation.agentmemoryInstall = lib.hm.dag.entryAfter [ "installPackages" ] ''
-    # Install iii-engine binary (agentmemory runtime dependency)
-    III_BIN="${home}/.local/bin/iii"
-    if [ ! -x "$III_BIN" ]; then
-      mkdir -p "${home}/.local/bin"
-      ${pkgs.curl}/bin/curl -fsSL \
-        https://github.com/iii-hq/iii/releases/download/iii/v0.11.2/iii-x86_64-unknown-linux-gnu.tar.gz \
-        | ${pkgs.gzip}/bin/gzip -d \
-        | ${pkgs.gnutar}/bin/tar -x -C "${home}/.local/bin/"
-      chmod +x "$III_BIN" 2>/dev/null || true
-    fi
-
-    # Install agentmemory globally for the server CLI
-    if ! command -v agentmemory &>/dev/null; then
-      ${pkgs.nodejs}/bin/npm install -g @agentmemory/agentmemory 2>/dev/null || true
-    fi
-
-    # Install agentmemory native skills (8 skills: recall, remember, recap, handoff, forget, commit-context, commit-history, session-history)
-    if ! [ -d "${home}/.config/opencode/skills/agentmemory-recall" ]; then
-      ${pkgs.nodejs}/bin/npx -y skills add rohitg00/agentmemory -a opencode 2>/dev/null || true
-    fi
-  '';
-
   xdg.configFile = {
     "opencode/opencode.json".text = (builtins.toJSON opencodeConfig) + "\n";
 
-    # ── agentmemory plugin ──
-    "opencode/plugins/agentmemory-capture.js".source = agentmemoryPluginJs;
+    # ── caveman plugin ──
+    "opencode/AGENTS.md" = {
+      text = cavemanAgentsMd;
+      force = true;
+    };
+    "opencode/plugins/caveman/plugin.js" = opencodeSkill "${cavemanSrc}/src/plugins/opencode/plugin.js";
+    "opencode/plugins/caveman/caveman-config.cjs" = {
+      text = builtins.readFile "${cavemanSrc}/src/hooks/caveman-config.js";
+      force = true;
+    };
 
-    # ── agentmemory slash commands ──
-    "opencode/commands/recall.md".source = "${agentmemorySrc}/plugin/opencode/commands/recall.md";
-    "opencode/commands/remember.md".source = "${agentmemorySrc}/plugin/opencode/commands/remember.md";
+    # ── caveman slash commands ──
+    "opencode/commands/caveman.md" =
+      opencodeSkill "${cavemanSrc}/src/plugins/opencode/commands/caveman.md";
+    "opencode/commands/caveman-commit.md" =
+      opencodeSkill "${cavemanSrc}/src/plugins/opencode/commands/caveman-commit.md";
+    "opencode/commands/caveman-review.md" =
+      opencodeSkill "${cavemanSrc}/src/plugins/opencode/commands/caveman-review.md";
+    "opencode/commands/caveman-help.md" =
+      opencodeSkill "${cavemanSrc}/src/plugins/opencode/commands/caveman-help.md";
+    "opencode/commands/caveman-stats.md" =
+      opencodeSkill "${cavemanSrc}/src/plugins/opencode/commands/caveman-stats.md";
+    "opencode/commands/caveman-compress.md" = {
+      text = ''
+        ---
+        description: Compress a Markdown file into caveman prose while preserving structure
+        ---
+        Compress the Markdown file at `$ARGUMENTS`.
+
+        Use the `caveman-compress` skill. Preserve headings, lists, tables, code blocks,
+        links, and frontmatter. Rewrite only natural-language text, and keep a
+        `<file>.original.md` backup before replacing the original.
+      '';
+      force = true;
+    };
+
+    # ── caveman skills ──
+    "opencode/skills/caveman" = opencodeSkill "${cavemanSrc}/skills/caveman";
+    "opencode/skills/caveman-commit" = opencodeSkill "${cavemanSrc}/skills/caveman-commit";
+    "opencode/skills/caveman-compress" = opencodeSkill "${cavemanSrc}/skills/caveman-compress";
+    "opencode/skills/caveman-help" = opencodeSkill "${cavemanSrc}/skills/caveman-help";
+    "opencode/skills/caveman-review" = opencodeSkill "${cavemanSrc}/skills/caveman-review";
+    "opencode/skills/caveman-stats" = opencodeSkill "${cavemanSrc}/skills/caveman-stats";
+    "opencode/skills/cavecrew" = opencodeSkill "${cavemanSrc}/skills/cavecrew";
 
     # ── existing skills ──
     "opencode/skills/brainstorming" = opencodeSkill "${superpowersSkills}/skills/brainstorming";

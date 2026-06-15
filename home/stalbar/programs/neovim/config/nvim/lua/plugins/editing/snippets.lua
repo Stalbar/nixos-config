@@ -16,6 +16,7 @@ return {
       ls.filetype_extend("psql", { "sql" })
       ls.filetype_extend("pgsql", { "sql" })
       ls.filetype_extend("plsql", { "sql" })
+      ls.filetype_extend("cypher", { "sql" })
       ls.filetype_extend("csharp", { "cs" })
 
       local ok_vscode, vscode_loader = pcall(require, "luasnip.loaders.from_vscode")

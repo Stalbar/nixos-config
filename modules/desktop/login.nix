@@ -6,6 +6,9 @@ let
   hyprlandLuaSession = pkgs.writeShellScriptBin "start-hyprland-lua" ''
     exec ${pkgs.hyprland}/bin/Hyprland --config "$HOME/.config/hypr/hyprland.lua"
   '';
+  niriSession = pkgs.writeShellScriptBin "start-niri" ''
+    exec ${pkgs.niri}/bin/niri --session
+  '';
 
   greetdNordBackground =
     pkgs.runCommand "greetd-regreet-nord-background" { nativeBuildInputs = [ pkgs.imagemagick ]; }
@@ -21,7 +24,10 @@ let
       '';
 in
 {
-  environment.systemPackages = [ hyprlandLuaSession ];
+  environment.systemPackages = [
+    hyprlandLuaSession
+    niriSession
+  ];
 
   programs.regreet = {
     enable = true;
@@ -191,6 +197,7 @@ in
 
   environment.etc."greetd/environments".text = ''
     ${hyprlandLuaSession}/bin/start-hyprland-lua
+    ${niriSession}/bin/start-niri
     bash
     zsh
   '';

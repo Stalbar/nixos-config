@@ -34,7 +34,7 @@ in
     cageArgs = [
       "-s"
       "-m"
-      "extend"
+      "last"
     ];
 
     theme = {
@@ -188,8 +188,13 @@ in
 
   services.greetd = {
     enable = true;
-    greeterManagesPlymouth = true;
-    settings.default_session.user = "greeter";
+    greeterManagesPlymouth = false;
+    settings = {
+      default_session = {
+        user = "greeter";
+        command = "${pkgs.dbus}/bin/dbus-run-session env GTK_USE_PORTAL=0 GDK_DEBUG=no-portals WLR_DRM_DEVICES=/dev/dri/by-path/pci-0000:00:02.0-card:/dev/dri/by-path/pci-0000:01:00.0-card AQ_DRM_DEVICES=/dev/dri/by-path/pci-0000:00:02.0-card:/dev/dri/by-path/pci-0000:01:00.0-card ${pkgs.cage}/bin/cage -s -m last -- ${pkgs.regreet}/bin/regreet";
+      };
+    };
   };
 
   environment.etc."greetd/backgrounds/nordic-login.png".source =

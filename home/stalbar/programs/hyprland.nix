@@ -142,6 +142,7 @@ in
         (bind (mod "M") (lua "hl.dsp.exec_cmd(powerMenu)") null)
         (bind (mod "N") (exec "qs-action-center") null)
         (bind (mod "A") (exec "qs-agent-hub") null)
+        (bind (mod "R") (exec "change-wallpaper") null)
         (bind (mod "F") (lua "hl.dsp.window.fullscreen()") null)
         (bind (mod "H") (focusDir "left") null)
         (bind (mod "L") (focusDir "right") null)
@@ -158,6 +159,22 @@ in
         (bind "ALT + N" (exec "neovide --no-fork") null)
         (bind "ALT + F" (lua "hl.dsp.exec_cmd(browser)") null)
         (bind "ALT + C" (exec "chromium --enable-features=UseOzonePlatform --ozone-platform=wayland") null)
+      ];
+
+      on = [
+        {
+          _args = [
+            "hyprland.start"
+            (lua ''
+              function()
+                hl.exec_cmd("change-wallpaper --reapply")
+                hl.exec_cmd(${builtins.toJSON "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"})
+                hl.exec_cmd("nm-applet --indicator")
+                hl.exec_cmd("blueman-applet")
+              end
+            '')
+          ];
+        }
       ];
     };
   };

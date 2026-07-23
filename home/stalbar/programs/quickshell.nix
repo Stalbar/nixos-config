@@ -15,51 +15,24 @@ let
     "${pkgs.qt6.qtwayland}${pkgs.qt6.qtbase.qtQmlPrefix}"
   ];
 
-  mkQsToggleRunner =
-    name: configName: ipcTarget:
+  mkQsIpcTrigger =
+    name: target: action:
     pkgs.writeShellApplication {
       inherit name;
       runtimeInputs = [
         pkgs.quickshell
-        pkgs.systemd
         pkgs.coreutils
       ];
       text = ''
         set -euo pipefail
-
-        cfg="$HOME/.config/quickshell/${configName}/shell.qml"
-        if [ ! -f "$cfg" ]; then
-          echo "Quickshell config not found: $cfg" >&2
-          exit 1
-        fi
-
-        export QML2_IMPORT_PATH="${qmlImportPath}:''${QML2_IMPORT_PATH:-}"
-        export QT_LOGGING_RULES="qt.qpa.theme.gnome.warning=false;''${QT_LOGGING_RULES:-}"
-        export QT_QUICK_CONTROLS_STYLE="Basic"
-
-        if ${pkgs.systemd}/bin/systemctl --user --quiet is-active "qs-${configName}.service"; then
-          exec quickshell ipc -c "${configName}" call "${ipcTarget}" toggle
-        fi
-
-        ${pkgs.systemd}/bin/systemctl --user start "qs-${configName}.service"
-
-        for _ in $(seq 1 40); do
-          if quickshell ipc -c "${configName}" call "${ipcTarget}" toggle >/dev/null 2>&1; then
-            exit 0
-          fi
-          sleep 0.05
-        done
-
-        exec quickshell --path "$cfg"
+        exec quickshell ipc call "${target}" "${action}"
       '';
     };
 
-  qsAppLauncher = mkQsToggleRunner "qs-app-launcher" "app-launcher" "launcher";
-  qsActionCenter = mkQsToggleRunner "qs-action-center" "action-center" "actioncenter";
-  qsAgentHub = mkQsToggleRunner "qs-agent-hub" "agent-hub" "agenthub";
-  qsPowerMenu = mkQsToggleRunner "qs-power-menu" "powermenu" "powermenu";
-  qsOsd = mkQsToggleRunner "qs-osd" "osd" "osd";
-  qsStatusBar = mkQsToggleRunner "qs-status-bar" "bar" "bar";
+  qsAppLauncher = mkQsIpcTrigger "qs-app-launcher" "launcher" "toggle";
+  qsActionCenter = mkQsIpcTrigger "qs-action-center" "actioncenter" "toggle";
+  qsAgentHub = mkQsIpcTrigger "qs-agent-hub" "agenthub" "toggle";
+  qsPowerMenu = mkQsIpcTrigger "qs-power-menu" "powermenu" "toggle";
 
   lockSession = pkgs.writeShellScriptBin "lock-session" ''
     set -eu
@@ -85,71 +58,15 @@ in
     systemd.enable = false;
   };
 
-  systemd.user.services.qs-app-launcher = {
+  # Unified Quickshell Background Service
+  systemd.user.services.quickshell = {
     Unit = {
-      Description = "Quickshell App Launcher";
+      Description = "Quickshell Unified Desktop Shell Service";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
     };
     Service = {
-      ExecStart = "${pkgs.quickshell}/bin/quickshell --config app-launcher";
-      Restart = "on-failure";
-      RestartSec = 1;
-      Environment = [
-        "QML2_IMPORT_PATH=${qmlImportPath}"
-        "QT_LOGGING_RULES=qt.qpa.theme.gnome.warning=false"
-        "QT_QUICK_CONTROLS_STYLE=Basic"
-      ];
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
-  };
-
-  systemd.user.services.qs-status-bar = {
-    Unit = {
-      Description = "Quickshell Status Bar";
-      PartOf = [ "graphical-session.target" ];
-      After = [ "graphical-session.target" ];
-    };
-    Service = {
-      ExecStart = "${pkgs.quickshell}/bin/quickshell --config bar";
-      Restart = "on-failure";
-      RestartSec = 1;
-      Environment = [
-        "QML2_IMPORT_PATH=${qmlImportPath}"
-        "QT_LOGGING_RULES=qt.qpa.theme.gnome.warning=false"
-        "QT_QUICK_CONTROLS_STYLE=Basic"
-      ];
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
-  };
-
-  systemd.user.services.qs-action-center = {
-    Unit = {
-      Description = "Quickshell Action & Notification Center";
-      PartOf = [ "graphical-session.target" ];
-      After = [ "graphical-session.target" ];
-    };
-    Service = {
-      ExecStart = "${pkgs.quickshell}/bin/quickshell --config action-center";
-      Restart = "on-failure";
-      RestartSec = 1;
-      Environment = [
-        "QML2_IMPORT_PATH=${qmlImportPath}"
-        "QT_LOGGING_RULES=qt.qpa.theme.gnome.warning=false"
-        "QT_QUICK_CONTROLS_STYLE=Basic"
-      ];
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
-  };
-
-  systemd.user.services.qs-agent-hub = {
-    Unit = {
-      Description = "Quickshell SWE Agent Hub";
-      PartOf = [ "graphical-session.target" ];
-      After = [ "graphical-session.target" ];
-    };
-    Service = {
-      ExecStart = "${pkgs.quickshell}/bin/quickshell --config agent-hub";
+      ExecStart = "${pkgs.quickshell}/bin/quickshell";
       Restart = "on-failure";
       RestartSec = 1;
       Environment = [
@@ -169,20 +86,20 @@ in
     qt6.qtimageformats
     qsAppLauncher
     qsPowerMenu
-    qsStatusBar
     qsActionCenter
     qsAgentHub
-    qsOsd
     lockSession
     logoutSession
   ];
 
-  # Main Status Bar (Section 5: Clickable UI buttons for Omnibox, Agent Hub, Action Center, Power Menu)
-  xdg.configFile."quickshell/bar/shell.qml".text = ''
+  # Main Unified Quickshell Entrypoint (~/.config/quickshell/shell.qml)
+  xdg.configFile."quickshell/shell.qml".text = ''
     import QtQuick
+    import QtQuick.Controls
     import QtQuick.Layouts
     import Quickshell
     import Quickshell.Wayland
+    import Quickshell.Hyprland
     import Quickshell.Io
 
     ShellRoot {
@@ -198,6 +115,73 @@ in
             "comment": "${colors.comment}"
         }
 
+        property bool launcherOpen: false
+        property bool actionCenterOpen: false
+        property bool agentHubOpen: false
+        property bool powerMenuOpen: false
+        property bool osdVisible: false
+        property string osdIcon: "󰕾"
+        property int osdValue: 50
+
+        # IPC Handlers for Instant Keybindings & Click Targets
+        IpcHandler {
+            enabled: true
+            target: "launcher"
+            function toggle() { shell.launcherOpen = !shell.launcherOpen; }
+            function show() { shell.launcherOpen = true; }
+            function hide() { shell.launcherOpen = false; }
+        }
+
+        IpcHandler {
+            enabled: true
+            target: "actioncenter"
+            function toggle() { shell.actionCenterOpen = !shell.actionCenterOpen; }
+            function show() { shell.actionCenterOpen = true; }
+            function hide() { shell.actionCenterOpen = false; }
+        }
+
+        IpcHandler {
+            enabled: true
+            target: "agenthub"
+            function toggle() { shell.agentHubOpen = !shell.agentHubOpen; }
+            function show() { shell.agentHubOpen = true; }
+            function hide() { shell.agentHubOpen = false; }
+        }
+
+        IpcHandler {
+            enabled: true
+            target: "powermenu"
+            function toggle() { shell.powerMenuOpen = !shell.powerMenuOpen; }
+            function show() { shell.powerMenuOpen = true; }
+            function hide() { shell.powerMenuOpen = false; }
+        }
+
+        IpcHandler {
+            enabled: true
+            target: "osd"
+            function showVolume(val) {
+                shell.osdIcon = "󰕾";
+                shell.osdValue = val;
+                shell.osdVisible = true;
+                osdTimer.restart();
+            }
+            function showBrightness(val) {
+                shell.osdIcon = "󰌵";
+                shell.osdValue = val;
+                shell.osdVisible = true;
+                osdTimer.restart();
+            }
+        }
+
+        Timer {
+            id: osdTimer
+            interval: 1500
+            onTriggered: shell.osdVisible = false
+        }
+
+        # -------------------------------------------------------------
+        # 1. MAIN STATUS BAR (Flat, opaque, pinned top, dynamic workspaces)
+        # -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
 
@@ -237,32 +221,29 @@ in
                             MouseArea {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: Quickshell.execDetached(["qs-app-launcher"])
+                                onClicked: shell.launcherOpen = !shell.launcherOpen
                             }
                         }
 
                         Repeater {
-                            model: [1, 2, 3, 4, 5]
+                            model: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
                             Rectangle {
                                 required property int modelData
-                                width: modelData === 1 ? 28 : 22
+                                readonly property bool isActive: Hyprland.focusedWorkspace ? (Hyprland.focusedWorkspace.id === modelData) : (modelData === 1)
+                                width: isActive ? 28 : 22
                                 height: 22
                                 radius: 5
-                                color: modelData === 1 ? shell.colors.magenta : "transparent"
+                                color: isActive ? shell.colors.magenta : "transparent"
                                 border.width: 1
-                                border.color: modelData === 1 ? shell.colors.cyan : shell.colors.comment
+                                border.color: isActive ? shell.colors.cyan : shell.colors.comment
 
-                                Behavior on width {
-                                    NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
-                                }
-                                Behavior on color {
-                                    ColorAnimation { duration: 180 }
-                                }
+                                Behavior on width { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+                                Behavior on color { ColorAnimation { duration: 180 } }
 
                                 Text {
                                     anchors.centerIn: parent
                                     text: String(parent.modelData)
-                                    color: parent.modelData === 1 ? shell.colors.bg : shell.colors.fg
+                                    color: parent.isActive ? shell.colors.bg : shell.colors.fg
                                     font.pixelSize: 11
                                     font.bold: true
                                     font.family: "JetBrains Mono Nerd Font"
@@ -301,7 +282,7 @@ in
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: Quickshell.execDetached(["qs-action-center"])
+                            onClicked: shell.actionCenterOpen = !shell.actionCenterOpen
                         }
                     }
 
@@ -319,7 +300,7 @@ in
                             MouseArea {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: Quickshell.execDetached(["qs-agent-hub"])
+                                onClicked: shell.agentHubOpen = !shell.agentHubOpen
                             }
                         }
 
@@ -332,7 +313,7 @@ in
                             MouseArea {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: Quickshell.execDetached(["qs-action-center"])
+                                onClicked: shell.actionCenterOpen = !shell.actionCenterOpen
                             }
                         }
 
@@ -345,7 +326,7 @@ in
                             MouseArea {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: Quickshell.execDetached(["qs-action-center"])
+                                onClicked: shell.actionCenterOpen = !shell.actionCenterOpen
                             }
                         }
 
@@ -364,53 +345,146 @@ in
                             MouseArea {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: Quickshell.execDetached(["qs-power-menu"])
+                                onClicked: shell.powerMenuOpen = !shell.powerMenuOpen
                             }
                         }
                     }
                 }
             }
         }
-    }
-  '';
 
-  # Unified Action & Notification Center (Section 5: Glassmorphism slide-out side panel with IPC)
-  xdg.configFile."quickshell/action-center/shell.qml".text = ''
-    import QtQuick
-    import QtQuick.Layouts
-    import Quickshell
-    import Quickshell.Wayland
-
-    ShellRoot {
-        id: shell
-
-        readonly property var colors: {
-            "bg": "${colors.bg}",
-            "fg": "${colors.fg}",
-            "cyan": "${colors.cyan}",
-            "magenta": "${colors.magenta}",
-            "green": "${colors.green}",
-            "red": "${colors.red}",
-            "comment": "${colors.comment}"
-        }
-
-        property bool open: false
-
-        IpcHandler {
-            enabled: true
-            target: "actioncenter"
-            function toggle() { open = !open; }
-            function show() { open = true; }
-            function hide() { open = false; }
-        }
-
+        # -------------------------------------------------------------
+        # 2. OMNIBOX LAUNCHER (Glassmorphic center floating overlay)
+        # -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
 
             PanelWindow {
                 required property var modelData
                 screen: modelData
-                visible: shell.open
+                visible: shell.launcherOpen || launcherAnim.opacity > 0.01
+
+                color: "transparent"
+                exclusionMode: ExclusionMode.Ignore
+                anchors.fill: parent
+
+                WlrLayershell.layer: WlrLayer.Overlay
+                WlrLayershell.namespace: "quickshell:launcher"
+                WlrLayershell.keyboardFocus: shell.launcherOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+
+                Item {
+                    id: launcherAnim
+                    anchors.fill: parent
+                    opacity: shell.launcherOpen ? 1.0 : 0.0
+
+                    Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+
+                    Rectangle {
+                        anchors.fill: parent
+                        color: "#aa10121d"
+                        MouseArea { anchors.fill: parent; onClicked: shell.launcherOpen = false }
+                    }
+
+                    Rectangle {
+                        width: 560
+                        height: 420
+                        anchors.centerIn: parent
+                        radius: 18
+                        color: shell.colors.bg
+                        border.width: 1
+                        border.color: shell.colors.cyan
+                        scale: shell.launcherOpen ? 1.0 : 0.94
+
+                        Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
+
+                        ColumnLayout {
+                            anchors.fill: parent
+                            anchors.margins: 14
+                            spacing: 12
+
+                            RowLayout {
+                                TextField {
+                                    id: launcherSearch
+                                    Layout.fillWidth: true
+                                    placeholderText: "Omnibox: Search desktop apps..."
+                                    color: shell.colors.fg
+                                    placeholderTextColor: shell.colors.comment
+                                    font.family: "JetBrains Mono Nerd Font"
+                                    font.pixelSize: 14
+                                    focus: shell.launcherOpen
+                                    background: Rectangle {
+                                        color: "#1f2335"
+                                        radius: 8
+                                        border.color: shell.colors.magenta
+                                        border.width: 1
+                                    }
+                                }
+                            }
+
+                            ListView {
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                                clip: true
+                                model: {
+                                    const raw = Array.from(DesktopEntries.applications.values || []);
+                                    const q = launcherSearch.text.toLowerCase();
+                                    const res = [];
+                                    for (let i = 0; i < raw.length; i++) {
+                                        const entry = raw[i];
+                                        if (!entry || entry.noDisplay) continue;
+                                        const name = entry.name || entry.id.replace(".desktop", "");
+                                        if (q && !name.toLowerCase().includes(q)) continue;
+                                        res.push({ entry: entry, name: name });
+                                    }
+                                    return res;
+                                }
+                                delegate: Rectangle {
+                                    width: ListView.view.width
+                                    height: 40
+                                    color: "transparent"
+                                    radius: 6
+
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.leftMargin: 10
+                                        anchors.rightMargin: 10
+
+                                        Text {
+                                            text: modelData.name
+                                            color: shell.colors.fg
+                                            font.family: "JetBrains Mono Nerd Font"
+                                            font.pixelSize: 13
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        onEntered: parent.color = "#24283b"
+                                        onExited: parent.color = "transparent"
+                                        onClicked: {
+                                            modelData.entry.execute();
+                                            shell.launcherOpen = false;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        # -------------------------------------------------------------
+        # 3. UNIFIED ACTION & NOTIFICATION CENTER (Slide-out side panel)
+        # -------------------------------------------------------------
+        Variants {
+            model: Quickshell.screens
+
+            PanelWindow {
+                required property var modelData
+                screen: modelData
+                visible: shell.actionCenterOpen
 
                 width: 360
                 color: shell.colors.bg
@@ -423,7 +497,7 @@ in
 
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.namespace: "quickshell:actioncenter"
-                WlrLayershell.keyboardFocus: shell.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+                WlrLayershell.keyboardFocus: shell.actionCenterOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
                 ColumnLayout {
                     anchors.fill: parent
@@ -444,7 +518,7 @@ in
                             text: "✕"
                             color: shell.colors.comment
                             font.pixelSize: 14
-                            MouseArea { anchors.fill: parent; onClicked: shell.open = false }
+                            MouseArea { anchors.fill: parent; onClicked: shell.actionCenterOpen = false }
                         }
                     }
 
@@ -485,45 +559,17 @@ in
                 }
             }
         }
-    }
-  '';
 
-  # Agent & Debugging Hub (SWE Special - Section 5 with IPC)
-  xdg.configFile."quickshell/agent-hub/shell.qml".text = ''
-    import QtQuick
-    import QtQuick.Layouts
-    import Quickshell
-    import Quickshell.Wayland
-
-    ShellRoot {
-        id: shell
-
-        readonly property var colors: {
-            "bg": "${colors.bg}",
-            "fg": "${colors.fg}",
-            "cyan": "${colors.cyan}",
-            "magenta": "${colors.magenta}",
-            "green": "${colors.green}",
-            "comment": "${colors.comment}"
-        }
-
-        property bool open: false
-
-        IpcHandler {
-            enabled: true
-            target: "agenthub"
-            function toggle() { open = !open; }
-            function show() { open = true; }
-            function hide() { open = false; }
-        }
-
+        # -------------------------------------------------------------
+        # 4. AGENT & DEBUGGING HUB (SWE Special)
+        # -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
 
             PanelWindow {
                 required property var modelData
                 screen: modelData
-                visible: shell.open
+                visible: shell.agentHubOpen
 
                 width: 520
                 height: 380
@@ -533,7 +579,7 @@ in
 
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.namespace: "quickshell:agenthub"
-                WlrLayershell.keyboardFocus: shell.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+                WlrLayershell.keyboardFocus: shell.agentHubOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
                 Rectangle {
                     anchors.fill: parent
@@ -561,7 +607,7 @@ in
                                 text: "✕"
                                 color: shell.colors.comment
                                 font.pixelSize: 14
-                                MouseArea { anchors.fill: parent; onClicked: shell.open = false }
+                                MouseArea { anchors.fill: parent; onClicked: shell.agentHubOpen = false }
                             }
                         }
 
@@ -576,7 +622,7 @@ in
                             Text {
                                 anchors.margins: 10
                                 anchors.fill: parent
-                                text: "[SYSTEM] Antigravity CLI Agent Active\n[MAPPING] Hotkeys & UI Status Bar Click Targets Mapped\n[STATUS] All Quickshell Widgets Fully Interactive"
+                                text: "[SYSTEM] Antigravity CLI Agent Active\n[IPC] Unified Single-Daemon Shell Architecture Running\n[HYPRLAND] Real-Time Focused Workspace Tracking Active\n[STATUS] All Widgets Hotkey & Click Target Interactivity Ready"
                                 color: shell.colors.green
                                 font.pixelSize: 12
                                 font.family: "JetBrains Mono Nerd Font"
@@ -586,54 +632,10 @@ in
                 }
             }
         }
-    }
-  '';
 
-  # Volatile OSD Overlay
-  xdg.configFile."quickshell/osd/shell.qml".text = ''
-    import QtQuick
-    import QtQuick.Layouts
-    import Quickshell
-    import Quickshell.Wayland
-
-    ShellRoot {
-        id: shell
-
-        readonly property var colors: {
-            "bg": "${colors.bg}",
-            "fg": "${colors.fg}",
-            "cyan": "${colors.cyan}",
-            "magenta": "${colors.magenta}",
-            "comment": "${colors.comment}"
-        }
-
-        property bool osdVisible: false
-        property string osdIcon: "󰕾"
-        property int osdValue: 50
-
-        Timer {
-            id: hideTimer
-            interval: 1500
-            onTriggered: shell.osdVisible = false
-        }
-
-        IpcHandler {
-            enabled: true
-            target: "osd"
-            function showVolume(val) {
-                shell.osdIcon = "󰕾";
-                shell.osdValue = val;
-                shell.osdVisible = true;
-                hideTimer.restart();
-            }
-            function showBrightness(val) {
-                shell.osdIcon = "󰌵";
-                shell.osdValue = val;
-                shell.osdVisible = true;
-                hideTimer.restart();
-            }
-        }
-
+        # -------------------------------------------------------------
+        # 5. VOLATILE OSD OVERLAY
+        # -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
 
@@ -698,204 +700,17 @@ in
                 }
             }
         }
-    }
-  '';
 
-  # Omnibox Launcher
-  xdg.configFile."quickshell/app-launcher/shell.qml".text = ''
-    import QtQuick
-    import QtQuick.Controls
-    import QtQuick.Layouts
-    import Quickshell
-    import Quickshell.Io
-    import Quickshell.Wayland
-
-    ShellRoot {
-        id: shell
-
-        readonly property var colors: {
-            "bg": "${colors.bg}",
-            "fg": "${colors.fg}",
-            "cyan": "${colors.cyan}",
-            "magenta": "${colors.magenta}",
-            "green": "${colors.green}",
-            "red": "${colors.red}",
-            "comment": "${colors.comment}"
-        }
-
-        property bool open: false
-        property string query: ""
-        property var allApps: []
-        property bool appsReady: false
-
-        Component.onCompleted: Qt.callLater(reloadApplications)
-
-        function reloadApplications() {
-            const raw = Array.from(DesktopEntries.applications.values || []);
-            const apps = [];
-            for (let i = 0; i < raw.length; i++) {
-                const entry = raw[i];
-                if (!entry || entry.noDisplay) continue;
-                apps.push({
-                    entry: entry,
-                    name: entry.name || entry.id.replace(".desktop", ""),
-                    id: entry.id
-                });
-            }
-            allApps = apps;
-            appsReady = true;
-        }
-
-        IpcHandler {
-            enabled: true
-            target: "launcher"
-            function toggle() { open = !open; }
-            function show() { open = true; }
-            function hide() { open = false; }
-        }
-
-        Variants {
-            model: Quickshell.screens
-
-            PanelWindow {
-                id: win
-                required property var modelData
-                screen: modelData
-                visible: shell.open || animContainer.opacity > 0.01
-
-                color: "transparent"
-                exclusionMode: ExclusionMode.Ignore
-                anchors.fill: parent
-
-                WlrLayershell.layer: WlrLayer.Overlay
-                WlrLayershell.namespace: "quickshell:launcher"
-                WlrLayershell.keyboardFocus: shell.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-
-                Item {
-                    id: animContainer
-                    anchors.fill: parent
-                    opacity: shell.open ? 1.0 : 0.0
-
-                    Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
-
-                    Rectangle {
-                        anchors.fill: parent
-                        color: "#aa10121d"
-                        MouseArea { anchors.fill: parent; onClicked: shell.open = false }
-                    }
-
-                    Rectangle {
-                        width: 560
-                        height: 420
-                        anchors.centerIn: parent
-                        radius: 18
-                        color: shell.colors.bg
-                        border.width: 1
-                        border.color: shell.colors.cyan
-                        scale: shell.open ? 1.0 : 0.94
-
-                        Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
-
-                        ColumnLayout {
-                            anchors.fill: parent
-                            anchors.margins: 14
-                            spacing: 12
-
-                            RowLayout {
-                                TextField {
-                                    Layout.fillWidth: true
-                                    placeholderText: "Omnibox: Search apps or run shell command..."
-                                    color: shell.colors.fg
-                                    placeholderTextColor: shell.colors.comment
-                                    font.family: "JetBrains Mono Nerd Font"
-                                    font.pixelSize: 14
-                                    background: Rectangle {
-                                        color: "#1f2335"
-                                        radius: 8
-                                        border.color: shell.colors.magenta
-                                        border.width: 1
-                                    }
-                                    onTextChanged: shell.query = text
-                                }
-                            }
-
-                            ListView {
-                                Layout.fillWidth: true
-                                Layout.fillHeight: true
-                                clip: true
-                                model: shell.allApps.filter(a => a.name.toLowerCase().includes(shell.query.toLowerCase()))
-                                delegate: Rectangle {
-                                    width: ListView.view.width
-                                    height: 40
-                                    color: "transparent"
-                                    radius: 6
-
-                                    RowLayout {
-                                        anchors.fill: parent
-                                        anchors.leftMargin: 10
-                                        anchors.rightMargin: 10
-
-                                        Text {
-                                            text: modelData.name
-                                            color: shell.colors.fg
-                                            font.family: "JetBrains Mono Nerd Font"
-                                            font.pixelSize: 13
-                                        }
-                                    }
-
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        onEntered: parent.color = "#24283b"
-                                        onExited: parent.color = "transparent"
-                                        onClicked: {
-                                            modelData.entry.execute();
-                                            shell.open = false;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-  '';
-
-  # Power Menu
-  xdg.configFile."quickshell/powermenu/shell.qml".text = ''
-    import QtQuick
-    import QtQuick.Layouts
-    import Quickshell
-    import Quickshell.Wayland
-
-    ShellRoot {
-        readonly property var colors: {
-            "bg": "${colors.bg}",
-            "fg": "${colors.fg}",
-            "cyan": "${colors.cyan}",
-            "red": "${colors.red}",
-            "magenta": "${colors.magenta}",
-            "comment": "${colors.comment}"
-        }
-
-        property bool open: true
-
-        IpcHandler {
-            enabled: true
-            target: "powermenu"
-            function toggle() { open = !open; }
-            function show() { open = true; }
-            function hide() { open = false; }
-        }
-
+        # -------------------------------------------------------------
+        # 6. POWER MENU
+        # -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
 
             PanelWindow {
                 required property var modelData
                 screen: modelData
+                visible: shell.powerMenuOpen
 
                 color: "transparent"
                 exclusionMode: ExclusionMode.Ignore
@@ -903,11 +718,12 @@ in
 
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.namespace: "quickshell:powermenu"
+                WlrLayershell.keyboardFocus: shell.powerMenuOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
                 Rectangle {
                     anchors.fill: parent
                     color: "#aa10121d"
-                    MouseArea { anchors.fill: parent; onClicked: Qt.quit() }
+                    MouseArea { anchors.fill: parent; onClicked: shell.powerMenuOpen = false }
                 }
 
                 Rectangle {
@@ -915,36 +731,36 @@ in
                     height: 160
                     anchors.centerIn: parent
                     radius: 20
-                    color: colors.bg
+                    color: shell.colors.bg
                     border.width: 1
-                    border.color: colors.cyan
+                    border.color: shell.colors.cyan
 
                     RowLayout {
                         anchors.centerIn: parent
                         spacing: 24
 
                         ColumnLayout {
-                            Text { text: "󰌾"; color: colors.cyan; font.pixelSize: 32; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
-                            Text { text: "Lock"; color: colors.fg; font.pixelSize: 12; font.family: "JetBrains Mono Nerd Font" }
-                            MouseArea { anchors.fill: parent; onClicked: { Quickshell.execDetached(["lock-session"]); Qt.quit(); } }
+                            Text { text: "󰌾"; color: shell.colors.cyan; font.pixelSize: 32; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
+                            Text { text: "Lock"; color: shell.colors.fg; font.pixelSize: 12; font.family: "JetBrains Mono Nerd Font" }
+                            MouseArea { anchors.fill: parent; onClicked: { Quickshell.execDetached(["lock-session"]); shell.powerMenuOpen = false; } }
                         }
 
                         ColumnLayout {
-                            Text { text: "󰍃"; color: colors.magenta; font.pixelSize: 32; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
-                            Text { text: "Logout"; color: colors.fg; font.pixelSize: 12; font.family: "JetBrains Mono Nerd Font" }
-                            MouseArea { anchors.fill: parent; onClicked: { Quickshell.execDetached(["logout-session"]); Qt.quit(); } }
+                            Text { text: "󰍃"; color: shell.colors.magenta; font.pixelSize: 32; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
+                            Text { text: "Logout"; color: shell.colors.fg; font.pixelSize: 12; font.family: "JetBrains Mono Nerd Font" }
+                            MouseArea { anchors.fill: parent; onClicked: { Quickshell.execDetached(["logout-session"]); shell.powerMenuOpen = false; } }
                         }
 
                         ColumnLayout {
-                            Text { text: "󰜉"; color: colors.cyan; font.pixelSize: 32; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
-                            Text { text: "Reboot"; color: colors.fg; font.pixelSize: 12; font.family: "JetBrains Mono Nerd Font" }
-                            MouseArea { anchors.fill: parent; onClicked: { Quickshell.execDetached(["systemctl", "reboot"]); Qt.quit(); } }
+                            Text { text: "󰜉"; color: shell.colors.cyan; font.pixelSize: 32; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
+                            Text { text: "Reboot"; color: shell.colors.fg; font.pixelSize: 12; font.family: "JetBrains Mono Nerd Font" }
+                            MouseArea { anchors.fill: parent; onClicked: { Quickshell.execDetached(["systemctl", "reboot"]); shell.powerMenuOpen = false; } }
                         }
 
                         ColumnLayout {
-                            Text { text: "󰐥"; color: colors.red; font.pixelSize: 32; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
-                            Text { text: "Shutdown"; color: colors.fg; font.pixelSize: 12; font.family: "JetBrains Mono Nerd Font" }
-                            MouseArea { anchors.fill: parent; onClicked: { Quickshell.execDetached(["systemctl", "poweroff"]); Qt.quit(); } }
+                            Text { text: "󰐥"; color: shell.colors.red; font.pixelSize: 32; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
+                            Text { text: "Shutdown"; color: shell.colors.fg; font.pixelSize: 12; font.family: "JetBrains Mono Nerd Font" }
+                            MouseArea { anchors.fill: parent; onClicked: { Quickshell.execDetached(["systemctl", "poweroff"]); shell.powerMenuOpen = false; } }
                         }
                     }
                 }

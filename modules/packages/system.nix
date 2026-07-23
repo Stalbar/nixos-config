@@ -30,6 +30,8 @@
       foot
       neovim
       neovide
+      zoxide
+      imagemagick
       nh
       sops
       curl

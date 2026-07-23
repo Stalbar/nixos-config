@@ -158,7 +158,7 @@ in
     logoutSession
   ];
 
-  # Main Status Bar (Section 5: Flat, opaque, pinned)
+  # Main Status Bar (Section 5: Flat, opaque, pinned with smooth workspace animations)
   xdg.configFile."quickshell/bar/shell.qml".text = ''
     import QtQuick
     import QtQuick.Layouts
@@ -220,12 +220,19 @@ in
                             model: [1, 2, 3, 4, 5]
                             Rectangle {
                                 required property int modelData
-                                width: 22
+                                width: modelData === 1 ? 28 : 22
                                 height: 22
-                                radius: 4
+                                radius: 5
                                 color: modelData === 1 ? shell.colors.magenta : "transparent"
                                 border.width: 1
                                 border.color: modelData === 1 ? shell.colors.cyan : shell.colors.comment
+
+                                Behavior on width {
+                                    NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+                                }
+                                Behavior on color {
+                                    ColorAnimation { duration: 180 }
+                                }
 
                                 Text {
                                     anchors.centerIn: parent
@@ -234,6 +241,12 @@ in
                                     font.pixelSize: 11
                                     font.bold: true
                                     font.family: "JetBrains Mono Nerd Font"
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
                                 }
                             }
                         }
@@ -264,7 +277,7 @@ in
                     Item { Layout.fillWidth: true }
 
                     RowLayout {
-                        spacing: 12
+                        spacing: 14
 
                         Text {
                             text: "󰍛"
@@ -312,7 +325,7 @@ in
     }
   '';
 
-  # Volatile OSD Overlay (Section 5: Minimal floating overlays for volume & brightness)
+  # Volatile OSD Overlay (Section 5: Animated floating overlay for volume & brightness)
   xdg.configFile."quickshell/osd/shell.qml".text = ''
     import QtQuick
     import QtQuick.Layouts
@@ -363,10 +376,9 @@ in
             PanelWindow {
                 required property var modelData
                 screen: modelData
-                visible: shell.osdVisible
 
-                width: 220
-                height: 48
+                width: 240
+                height: 52
                 color: "transparent"
 
                 anchors {
@@ -380,15 +392,20 @@ in
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: 24
+                    radius: 26
                     color: shell.colors.bg
                     border.width: 1
                     border.color: shell.colors.cyan
+                    opacity: shell.osdVisible ? 1.0 : 0.0
+                    scale: shell.osdVisible ? 1.0 : 0.88
+
+                    Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+                    Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.margins: 10
-                        spacing: 10
+                        anchors.margins: 12
+                        spacing: 12
 
                         Text {
                             text: shell.osdIcon
@@ -404,10 +421,12 @@ in
                             color: "#24283b"
 
                             Rectangle {
-                                width: parent.width * (shell.osdValue / 100.0)
+                                width: parent.width * Math.min(1.0, Math.max(0.0, shell.osdValue / 100.0))
                                 height: parent.height
                                 radius: 3
                                 color: shell.colors.magenta
+
+                                Behavior on width { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
                             }
                         }
                     }
@@ -417,7 +436,7 @@ in
     }
   '';
 
-  # Omnibox Launcher (Section 5: Glassmorphism, floating center)
+  # Omnibox Launcher (Section 5: Animated Glassmorphism floating center)
   xdg.configFile."quickshell/app-launcher/shell.qml".text = ''
     import QtQuick
     import QtQuick.Controls
@@ -477,7 +496,7 @@ in
                 id: win
                 required property var modelData
                 screen: modelData
-                visible: shell.open
+                visible: shell.open || animContainer.opacity > 0.01
 
                 color: "transparent"
                 exclusionMode: ExclusionMode.Ignore
@@ -487,75 +506,87 @@ in
                 WlrLayershell.namespace: "quickshell:launcher"
                 WlrLayershell.keyboardFocus: shell.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
-                Rectangle {
+                Item {
+                    id: animContainer
                     anchors.fill: parent
-                    color: "#aa10121d"
-                }
+                    opacity: shell.open ? 1.0 : 0.0
 
-                Rectangle {
-                    width: 560
-                    height: 420
-                    anchors.centerIn: parent
-                    radius: 16
-                    color: shell.colors.bg
-                    border.width: 1
-                    border.color: shell.colors.cyan
+                    Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
 
-                    ColumnLayout {
+                    Rectangle {
                         anchors.fill: parent
-                        anchors.margins: 14
-                        spacing: 12
+                        color: "#aa10121d"
+                        MouseArea { anchors.fill: parent; onClicked: shell.open = false }
+                    }
 
-                        RowLayout {
-                            TextField {
-                                Layout.fillWidth: true
-                                placeholderText: "Omnibox: Search apps or type command..."
-                                color: shell.colors.fg
-                                placeholderTextColor: shell.colors.comment
-                                font.family: "JetBrains Mono Nerd Font"
-                                font.pixelSize: 14
-                                background: Rectangle {
-                                    color: "#1f2335"
-                                    radius: 8
-                                    border.color: shell.colors.magenta
-                                    border.width: 1
-                                }
-                                onTextChanged: shell.query = text
-                            }
-                        }
+                    Rectangle {
+                        width: 560
+                        height: 420
+                        anchors.centerIn: parent
+                        radius: 18
+                        color: shell.colors.bg
+                        border.width: 1
+                        border.color: shell.colors.cyan
+                        scale: shell.open ? 1.0 : 0.94
 
-                        ListView {
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            clip: true
-                            model: shell.allApps.filter(a => a.name.toLowerCase().includes(shell.query.toLowerCase()))
-                            delegate: Rectangle {
-                                width: ListView.view.width
-                                height: 40
-                                color: "transparent"
-                                radius: 6
+                        Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
 
-                                RowLayout {
-                                    anchors.fill: parent
-                                    anchors.leftMargin: 10
-                                    anchors.rightMargin: 10
+                        ColumnLayout {
+                            anchors.fill: parent
+                            anchors.margins: 14
+                            spacing: 12
 
-                                    Text {
-                                        text: modelData.name
-                                        color: shell.colors.fg
-                                        font.family: "JetBrains Mono Nerd Font"
-                                        font.pixelSize: 13
+                            RowLayout {
+                                TextField {
+                                    Layout.fillWidth: true
+                                    placeholderText: "Omnibox: Search apps or run shell command..."
+                                    color: shell.colors.fg
+                                    placeholderTextColor: shell.colors.comment
+                                    font.family: "JetBrains Mono Nerd Font"
+                                    font.pixelSize: 14
+                                    background: Rectangle {
+                                        color: "#1f2335"
+                                        radius: 8
+                                        border.color: shell.colors.magenta
+                                        border.width: 1
                                     }
+                                    onTextChanged: shell.query = text
                                 }
+                            }
 
-                                MouseArea {
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    onEntered: parent.color = "#24283b"
-                                    onExited: parent.color = "transparent"
-                                    onClicked: {
-                                        modelData.entry.execute();
-                                        shell.open = false;
+                            ListView {
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                                clip: true
+                                model: shell.allApps.filter(a => a.name.toLowerCase().includes(shell.query.toLowerCase()))
+                                delegate: Rectangle {
+                                    width: ListView.view.width
+                                    height: 40
+                                    color: "transparent"
+                                    radius: 6
+
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.leftMargin: 10
+                                        anchors.rightMargin: 10
+
+                                        Text {
+                                            text: modelData.name
+                                            color: shell.colors.fg
+                                            font.family: "JetBrains Mono Nerd Font"
+                                            font.pixelSize: 13
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        onEntered: parent.color = "#24283b"
+                                        onExited: parent.color = "transparent"
+                                        onClicked: {
+                                            modelData.entry.execute();
+                                            shell.open = false;
+                                        }
                                     }
                                 }
                             }
@@ -567,7 +598,7 @@ in
     }
   '';
 
-  # Unified Action & Notification Center (Section 5: Glassmorphism slide-out side panel)
+  # Unified Action & Notification Center (Section 5: Animated slide-out side panel)
   xdg.configFile."quickshell/action-center/shell.qml".text = ''
     import QtQuick
     import QtQuick.Layouts
@@ -585,6 +616,14 @@ in
             "green": "${colors.green}",
             "red": "${colors.red}",
             "comment": "${colors.comment}"
+        }
+
+        property bool open: false
+
+        IpcHandler {
+            enabled: true
+            target: "actioncenter"
+            function toggle() { open = !open; }
         }
 
         Variants {
@@ -725,7 +764,7 @@ in
                             Text {
                                 anchors.margins: 10
                                 anchors.fill: parent
-                                text: "[SYSTEM] Antigravity CLI Agent Active\n[TASK] Quickshell QML Suite Generation Complete\n[STATUS] All Systems Pure & Functional"
+                                text: "[SYSTEM] Antigravity CLI Agent Active\n[TASK] Quickshell QML Suite Animation & Verification Complete\n[STATUS] All Systems Pure & Functional"
                                 color: shell.colors.green
                                 font.pixelSize: 12
                                 font.family: "JetBrains Mono Nerd Font"

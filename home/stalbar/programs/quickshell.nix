@@ -78,6 +78,7 @@ let
   qsStatusBar = mkQsRunner "qs-status-bar" "bar/shell.qml";
   qsActionCenter = mkQsRunner "qs-action-center" "action-center/shell.qml";
   qsAgentHub = mkQsRunner "qs-agent-hub" "agent-hub/shell.qml";
+  qsOsd = mkQsRunner "qs-osd" "osd/shell.qml";
 
   lockSession = pkgs.writeShellScriptBin "lock-session" ''
     set -eu
@@ -152,6 +153,7 @@ in
     qsStatusBar
     qsActionCenter
     qsAgentHub
+    qsOsd
     lockSession
     logoutSession
   ];
@@ -204,7 +206,6 @@ in
                     anchors.rightMargin: 12
                     spacing: 12
 
-                    # Left: Workspace Indicators & Logo
                     RowLayout {
                         spacing: 8
 
@@ -240,7 +241,6 @@ in
 
                     Item { Layout.fillWidth: true }
 
-                    # Center: Clock & Date
                     Text {
                         id: clock
                         property string timeStr: ""
@@ -263,7 +263,6 @@ in
 
                     Item { Layout.fillWidth: true }
 
-                    # Right: Quick Status Toggles & Power
                     RowLayout {
                         spacing: 12
 
@@ -304,6 +303,111 @@ in
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: Quickshell.execDetached(["qs-power-menu"])
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+  '';
+
+  # Volatile OSD Overlay (Section 5: Minimal floating overlays for volume & brightness)
+  xdg.configFile."quickshell/osd/shell.qml".text = ''
+    import QtQuick
+    import QtQuick.Layouts
+    import Quickshell
+    import Quickshell.Wayland
+
+    ShellRoot {
+        id: shell
+
+        readonly property var colors: {
+            "bg": "${colors.bg}",
+            "fg": "${colors.fg}",
+            "cyan": "${colors.cyan}",
+            "magenta": "${colors.magenta}",
+            "comment": "${colors.comment}"
+        }
+
+        property bool osdVisible: false
+        property string osdIcon: "󰕾"
+        property int osdValue: 50
+
+        Timer {
+            id: hideTimer
+            interval: 1500
+            onTriggered: shell.osdVisible = false
+        }
+
+        IpcHandler {
+            enabled: true
+            target: "osd"
+            function showVolume(val) {
+                shell.osdIcon = "󰕾";
+                shell.osdValue = val;
+                shell.osdVisible = true;
+                hideTimer.restart();
+            }
+            function showBrightness(val) {
+                shell.osdIcon = "󰌵";
+                shell.osdValue = val;
+                shell.osdVisible = true;
+                hideTimer.restart();
+            }
+        }
+
+        Variants {
+            model: Quickshell.screens
+
+            PanelWindow {
+                required property var modelData
+                screen: modelData
+                visible: shell.osdVisible
+
+                width: 220
+                height: 48
+                color: "transparent"
+
+                anchors {
+                    bottom: true
+                    bottomMargin: 60
+                    horizontalCenter: true
+                }
+
+                WlrLayershell.layer: WlrLayer.Overlay
+                WlrLayershell.namespace: "quickshell:osd"
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 24
+                    color: shell.colors.bg
+                    border.width: 1
+                    border.color: shell.colors.cyan
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.margins: 10
+                        spacing: 10
+
+                        Text {
+                            text: shell.osdIcon
+                            color: shell.colors.cyan
+                            font.pixelSize: 18
+                            font.family: "JetBrains Mono Nerd Font"
+                        }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            height: 6
+                            radius: 3
+                            color: "#24283b"
+
+                            Rectangle {
+                                width: parent.width * (shell.osdValue / 100.0)
+                                height: parent.height
+                                radius: 3
+                                color: shell.colors.magenta
                             }
                         }
                     }
@@ -515,7 +619,6 @@ in
                         font.family: "JetBrains Mono Nerd Font"
                     }
 
-                    # Media Control Card
                     Rectangle {
                         Layout.fillWidth: true
                         height: 80
@@ -535,7 +638,6 @@ in
                         }
                     }
 
-                    # Notifications Feed
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
@@ -623,7 +725,7 @@ in
                             Text {
                                 anchors.margins: 10
                                 anchors.fill: parent
-                                text: "[SYSTEM] Antigravity CLI Agent Active\n[TASK] Quickshell QML Suite Generation Complete\n[STATUS] Ready"
+                                text: "[SYSTEM] Antigravity CLI Agent Active\n[TASK] Quickshell QML Suite Generation Complete\n[STATUS] All Systems Pure & Functional"
                                 color: shell.colors.green
                                 font.pixelSize: 12
                                 font.family: "JetBrains Mono Nerd Font"

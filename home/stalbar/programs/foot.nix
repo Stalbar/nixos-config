@@ -11,7 +11,7 @@ in
         font = "JetBrains Mono Nerd Font:size=11";
         pad = "12x12";
       };
-      colors = {
+      colors-dark = {
         background = lib.removePrefix "#" colors.bg;
         foreground = lib.removePrefix "#" colors.fg;
         regular0 = "15161e"; # black

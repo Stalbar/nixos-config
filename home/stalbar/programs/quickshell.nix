@@ -25,7 +25,8 @@ let
       ];
       text = ''
         set -euo pipefail
-        exec quickshell ipc call "${target}" "${action}"
+        cfg_file="$HOME/.config/quickshell/shell.qml"
+        exec quickshell ipc -p "$cfg_file" call "${target}" "${action}"
       '';
     };
 
@@ -66,7 +67,7 @@ in
       After = [ "graphical-session.target" ];
     };
     Service = {
-      ExecStart = "${pkgs.quickshell}/bin/quickshell";
+      ExecStart = "${pkgs.quickshell}/bin/quickshell --path %h/.config/quickshell/shell.qml";
       Restart = "on-failure";
       RestartSec = 1;
       Environment = [
@@ -622,7 +623,7 @@ in
                             Text {
                                 anchors.margins: 10
                                 anchors.fill: parent
-                                text: "[SYSTEM] Antigravity CLI Agent Active\n[IPC] Unified Single-Daemon Shell Architecture Running\n[HYPRLAND] Real-Time Focused Workspace Tracking Active\n[STATUS] All Widgets Hotkey & Click Target Interactivity Ready"
+                                text: "[SYSTEM] Antigravity CLI Agent Active\n[IPC] Single-Daemon Quickshell IPC Service Active\n[HYPRLAND] Focused Workspace Tracking Active\n[STATUS] All Widgets Hotkey & Click Target Interactivity Ready"
                                 color: shell.colors.green
                                 font.pixelSize: 12
                                 font.family: "JetBrains Mono Nerd Font"

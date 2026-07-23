@@ -367,7 +367,12 @@ in
 
                 color: "transparent"
                 exclusionMode: ExclusionMode.Ignore
-                anchors.fill: parent
+                anchors {
+                    top: true
+                    bottom: true
+                    left: true
+                    right: true
+                }
 
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.namespace: "quickshell:launcher"
@@ -715,7 +720,12 @@ in
 
                 color: "transparent"
                 exclusionMode: ExclusionMode.Ignore
-                anchors.fill: parent
+                anchors {
+                    top: true
+                    bottom: true
+                    left: true
+                    right: true
+                }
 
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.namespace: "quickshell:powermenu"

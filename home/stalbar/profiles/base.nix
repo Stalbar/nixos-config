@@ -31,7 +31,6 @@
     swappy
     wl-clipboard
     awww
-    gowall
     vial
     qmk
     qt6.qtwayland

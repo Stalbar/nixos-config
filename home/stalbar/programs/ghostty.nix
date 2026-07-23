@@ -38,7 +38,7 @@
       "window-inherit-font-size" = true;
 
       "background-opacity-cells" = true;
-      "unfocused-split-opacity" = 0.92;
+      "unfocused-split-opacity" = 1.0;
       "split-preserve-zoom" = true;
 
       "confirm-close-surface" = false;
@@ -47,11 +47,12 @@
       "app-notifications" = "no-clipboard-copy,config-reload";
 
       keybind = [
-        "f1=new_window"
+        "f1=new_split:auto"
         "f2=new_tab"
         "ctrl+shift+r=reload_config"
         "ctrl+shift+enter=new_split:auto"
         "ctrl+shift+backspace=toggle_split_zoom"
+        "ctrl+shift+l=toggle_split_zoom"
       ];
     };
   };

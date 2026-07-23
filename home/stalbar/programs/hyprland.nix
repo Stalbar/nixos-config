@@ -157,10 +157,10 @@ in
 
         decoration = {
           rounding = 12;
-          active_opacity = 0.98;
-          inactive_opacity = 0.94;
-          dim_inactive = true;
-          dim_strength = 0.06;
+          active_opacity = 1.0;
+          inactive_opacity = 1.0;
+          dim_inactive = false;
+          dim_strength = 0.0;
 
           blur = {
             enabled = true;
@@ -380,21 +380,7 @@ in
           match = {
             class = "^\\.?((com\\.mitchellh\\.ghostty|ghostty)(\\.wrapped|-wrapped)?)$";
           };
-          opacity = "0.95 0.93";
-        }
-        {
-          name = "okular-opacity";
-          match = {
-            class = "^\\.?org\\.kde\\.okular(\\.wrapped|-wrapped)?$";
-          };
-          opacity = "1.0 1.0";
-        }
-        {
-          name = "neovide-opacity";
-          match = {
-            class = "^\\.?neovide(\\.wrapped|-wrapped)?$";
-          };
-          opacity = "0.96 0.94";
+          opacity = "0.9 0.9";
         }
       ];
 

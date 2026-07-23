@@ -37,6 +37,28 @@
       libxrandr
       libxext
       wayland
+
+      # Language Servers & Formatters for better code understanding
+      nixd
+      nixfmt-rfc-style
+      gopls
+      go
+      lua-language-server
+      bash-language-server
+      pyright
+      ruff
+      typescript-language-server
+      vscode-langservers-extracted
+      dockerfile-language-server
+      protols
+      postgres-language-server
+      roslyn-ls
+      tree-sitter
+      stylua
+      shfmt
+      prettierd
+      csharpier
+      pgformatter
     ])
     ++ lib.optionals config.services.postgresql.enable [
       config.services.postgresql.package

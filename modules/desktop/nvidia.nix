@@ -7,9 +7,14 @@
 
   services.xserver.videoDrivers = [ "modesetting" "nvidia" ];
 
+  services.udev.extraRules = ''
+    SUBSYSTEM=="drm", KERNEL=="card*", KERNELS=="0000:00:02.0", SYMLINK+="dri/by-name/igpu"
+    SUBSYSTEM=="drm", KERNEL=="card*", KERNELS=="0000:01:00.0", SYMLINK+="dri/by-name/dgpu"
+  '';
+
   environment.sessionVariables = {
-    AQ_DRM_DEVICES = "/dev/dri/by-path/pci-0000:00:02.0-card:/dev/dri/by-path/pci-0000:01:00.0-card";
-    WLR_DRM_DEVICES = "/dev/dri/by-path/pci-0000:00:02.0-card:/dev/dri/by-path/pci-0000:01:00.0-card";
+    AQ_DRM_DEVICES = "/dev/dri/by-name/dgpu:/dev/dri/by-name/igpu";
+    WLR_DRM_DEVICES = "/dev/dri/by-name/dgpu:/dev/dri/by-name/igpu";
   };
 
   hardware.nvidia = {

@@ -112,12 +112,12 @@ in
     useOSProber = true;
     configurationLimit = 10;
     extraEntries = ''
-      menuentry "CachyOS" {
+      menuentry "Windows 10" {
         insmod part_gpt
         insmod fat
         insmod chain
         search --no-floppy --fs-uuid --set=root 2B7B-F2F7
-        chainloader /EFI/CACHYOS/GRUBX64.EFI
+        chainloader /EFI/Microsoft/Boot/bootmgfw.efi
       }
     '';
   };

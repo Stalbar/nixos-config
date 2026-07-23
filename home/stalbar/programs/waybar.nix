@@ -70,6 +70,7 @@ in
         modules-left = [
           "hyprland/workspaces"
           "wlr/workspaces"
+          "niri/workspaces"
         ];
         modules-center = [
           "wlr/taskbar"
@@ -97,6 +98,11 @@ in
           all-outputs = true;
           sort-by-number = true;
           format = "{id}";
+        };
+
+        "niri/workspaces" = {
+          all-outputs = true;
+          format = "{value}";
         };
 
         "custom/theme" = {

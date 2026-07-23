@@ -72,7 +72,7 @@ let
         }
 
         struts {
-            right 38
+            right 44
         }
     }
 
@@ -113,28 +113,13 @@ let
     }
 
     window-rule {
-        match is-active-modal=true
-        open-floating true
-    }
-
-    window-rule {
         geometry-corner-radius 12
         clip-to-geometry true
     }
 
     window-rule {
         match app-id=r#"^((com\.mitchellh\.ghostty|ghostty)(\.wrapped|-wrapped)?)$"#
-        opacity 0.95
-    }
-
-    window-rule {
-        match app-id=r#"^(neovide)(\.wrapped|-wrapped)?$"#
-        opacity 0.96
-    }
-
-    window-rule {
-        match app-id=r#"^(org\.kde\.okular)(\.wrapped|-wrapped)?$"#
-        opacity 1.0
+        opacity 0.9
     }
 
     // ── Keybinds ───────────────────────────────────────────
@@ -147,9 +132,15 @@ let
         Mod+F { fullscreen-window; }
 
         // Screenshot, wallpaper, lock
-        Mod+S { spawn "sh" "-c" "grimblast --freeze --wait 0.60 save area - | swappy -f -"; }
+        Mod+S { screenshot; }
+        Print { screenshot; }
+        Ctrl+Print { screenshot-screen; }
+        Alt+Print { screenshot-window; }
         Mod+R { spawn "change-wallpaper"; }
         Mod+O { spawn "hyprlock"; }
+
+        // Overview
+        Mod+D { toggle-overview; }
 
         // Launchers
         Alt+Space { spawn "qs-app-launcher"; }
@@ -241,7 +232,9 @@ let
         Mod+Shift+E { quit; }
     }
 
-    environment NIXOS_OZONE_WL "1"
+    environment {
+        NIXOS_OZONE_WL "1"
+    }
   '';
 in
 {

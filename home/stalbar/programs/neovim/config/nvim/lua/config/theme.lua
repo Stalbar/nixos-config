@@ -756,8 +756,8 @@ function M.apply(theme_name)
 
 	if vim.g.neovide then
 		local light = mode == "light"
-		vim.g.neovide_opacity = light and 1.0 or 0.96
-		vim.g.neovide_normal_opacity = vim.g.neovide_opacity
+		vim.g.neovide_opacity = 1.0
+		vim.g.neovide_normal_opacity = 1.0
 		vim.opt.winblend = light and 0 or 12
 		vim.opt.pumblend = light and 0 or 12
 	end

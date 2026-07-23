@@ -52,8 +52,8 @@ if is_neovide then
   vim.g.neovide_font_features = { "liga", "calt" }
   vim.opt.linespace = 1
 
-  vim.g.neovide_opacity = 0.96
-  vim.g.neovide_normal_opacity = 0.96
+  vim.g.neovide_opacity = 1.0
+  vim.g.neovide_normal_opacity = 1.0
   vim.g.neovide_scale_factor = 1.0
   vim.g.neovide_hide_mouse_when_typing = true
   vim.g.neovide_remember_window_size = true

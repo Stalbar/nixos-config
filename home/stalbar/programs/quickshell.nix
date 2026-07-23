@@ -157,8 +157,6 @@ in
         property string query: ""
         property var allApps: []
         property bool appsReady: false
-        property int maxInitialResults: 24
-        property int maxSearchResults: 48
 
         Component.onCompleted: Qt.callLater(reloadApplications)
 
@@ -328,7 +326,7 @@ in
 
                         const q = shell.query.trim().toLowerCase();
                         if (!q)
-                            return all.slice(0, shell.maxInitialResults);
+                            return all;
 
                         const matches = [];
                         for (let i = 0; i < all.length; i++) {
@@ -343,7 +341,7 @@ in
 
                         matches.sort((a, b) => b.score - a.score);
                         const top = [];
-                        for (let i = 0; i < matches.length && i < shell.maxSearchResults; i++)
+                        for (let i = 0; i < matches.length; i++)
                             top.push(matches[i].app);
                         return top;
                     }

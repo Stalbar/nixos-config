@@ -31,11 +31,11 @@
       SOUND_POWER_SAVE_ON_AC = 0;
 
       # balanced profile -> quiet default with enough headroom for desktop/dev work
-      PLATFORM_PROFILE_ON_BAT = "balanced";
+      PLATFORM_PROFILE_ON_BAT = "quiet";
       CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
-      CPU_ENERGY_PERF_POLICY_ON_BAT = "balance_power";
+      CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
       CPU_MIN_PERF_ON_BAT = 0;
-      CPU_MAX_PERF_ON_BAT = 70;
+      CPU_MAX_PERF_ON_BAT = 60;
       CPU_BOOST_ON_BAT = 0;
       CPU_HWP_DYN_BOOST_ON_BAT = 0;
       AHCI_RUNTIME_PM_ON_BAT = "auto";
@@ -45,7 +45,7 @@
       SOUND_POWER_SAVE_ON_BAT = 1;
 
       # power-saver profile -> stricter cap for battery/very quiet mode
-      PLATFORM_PROFILE_ON_SAV = "low-power";
+      PLATFORM_PROFILE_ON_SAV = "quiet";
       CPU_SCALING_GOVERNOR_ON_SAV = "powersave";
       CPU_ENERGY_PERF_POLICY_ON_SAV = "power";
       CPU_MIN_PERF_ON_SAV = 0;

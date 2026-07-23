@@ -12,13 +12,14 @@ let
   ];
   # podman-desktop tracks Electron aggressively on unstable; keep using the binary runtime.
   podmanDesktop = pkgs.podman-desktop.override {
-    electron_41 = pkgs.electron_41-bin;
+    electron_42 = pkgs.electron_42-bin;
   };
 in
 {
   config = lib.mkIf cfg.enable {
     home.packages = with pkgs; [
       nodejs
+      pi-coding-agent
       gnumake
       gcc
       pnpm

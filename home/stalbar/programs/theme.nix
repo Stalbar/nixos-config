@@ -553,7 +553,6 @@ let
         padding: 2px 0;
       }
 
-      #taskbar button,
       #workspaces button {
         background: ${chipBg};
         background-color: ${chipBg};
@@ -566,6 +565,20 @@ let
         min-height: 22px;
         padding: 0;
         margin: 1px 0;
+      }
+
+      #taskbar button {
+        background: ${chipBg};
+        background-color: ${chipBg};
+        background-image: none;
+        border: none;
+        box-shadow: none;
+        outline: none;
+        border-radius: 10px;
+        min-width: 28px;
+        min-height: 28px;
+        padding: 0;
+        margin: 2px 0;
       }
 
       #taskbar button,
@@ -584,7 +597,8 @@ let
 
       #taskbar button:hover,
       #workspaces button:hover,
-      #workspaces button.active {
+      #workspaces button.active,
+      #workspaces button.focused {
         background-image: none;
         border: none;
         box-shadow: none;
@@ -597,7 +611,8 @@ let
         color: #${c.fg0};
       }
 
-      #workspaces button.active {
+      #workspaces button.active,
+      #workspaces button.focused {
         background: #${c.accent2};
         background-color: #${c.accent2};
         color: #${c.bg0};
@@ -614,6 +629,11 @@ let
       #workspaces button label {
         padding: 0;
         margin: 0;
+      }
+
+      #taskbar button image {
+        min-width: 18px;
+        min-height: 18px;
       }
 
       #taskbar button box,
@@ -732,7 +752,7 @@ let
     theme:
     let
       c = theme.colors;
-      ghosttyOpacity = if theme.mode == "light" then "0.985" else "0.95";
+      ghosttyOpacity = "0.9";
     in
     ''
       foreground = #${c.fg0}
@@ -1337,6 +1357,18 @@ let
                     if [ "$manage_gui" -eq 1 ] && [ -n "''${WAYLAND_DISPLAY:-}" ] && pgrep -x dunst >/dev/null 2>&1; then
                       pkill -x dunst || true
                       nohup dunst >/dev/null 2>&1 &
+                    fi
+
+                    if [ "$manage_gui" -eq 1 ]; then
+                      if [ -x "/etc/profiles/per-user/$USER/bin/change-wallpaper" ]; then
+                        "/etc/profiles/per-user/$USER/bin/change-wallpaper" --reapply >/dev/null 2>&1 || true
+                      elif [ -x "/etc/profiles/per-user/stalbar/bin/change-wallpaper" ]; then
+                        "/etc/profiles/per-user/stalbar/bin/change-wallpaper" --reapply >/dev/null 2>&1 || true
+                      elif [ -x "$HOME/.nix-profile/bin/change-wallpaper" ]; then
+                        "$HOME/.nix-profile/bin/change-wallpaper" --reapply >/dev/null 2>&1 || true
+                      elif command -v change-wallpaper >/dev/null 2>&1; then
+                        change-wallpaper --reapply >/dev/null 2>&1 || true
+                      fi
                     fi
                   }
 

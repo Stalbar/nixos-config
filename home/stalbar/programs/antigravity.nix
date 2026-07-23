@@ -55,6 +55,12 @@ let
     rev = "655b7d9c5431f822264b7732e9901c5578ac84cf";
     hash = "sha256-BydREt/vai3j7kO5+e1OxsjXf6Vy+jSY1yA/yyxjHbI=";
   };
+  ponytailSrc = pkgs.fetchFromGitHub {
+    owner = "DietrichGebert";
+    repo = "ponytail";
+    rev = "dedc97ca7c8a1e7463ac5b36f7fe4b28c3c435a2";
+    hash = "sha256-YUHjZfCTOIWrHJUUvnuoRSNG/l7wBuMQx/EdRdbLO3w=";
+  };
   cavemanAgentsMd =
     let
       cavemanRules = builtins.readFile "${cavemanSrc}/src/rules/caveman-activate.md";
@@ -68,6 +74,30 @@ let
     inherit source;
     force = true;
   };
+
+  skills = {
+    "brainstorming" = "${superpowersSkills}/skills/brainstorming";
+    "frontend-design" = "${anthropicsSkills}/skills/frontend-design";
+    "grill-me" = "${mattPocockSkills}/skills/productivity/grill-me";
+    "improve-codebase-architecture" = "${mattPocockSkills}/skills/engineering/improve-codebase-architecture";
+    "next-best-practices" = "${vercelNextSkills}/skills/next-best-practices";
+    "supabase-postgres-best-practices" = "${supabaseSkills}/skills/supabase-postgres-best-practices";
+    "using-superpowers" = "${superpowersSkills}/skills/using-superpowers";
+    "vercel-react-best-practices" = "${vercelAgentSkills}/skills/react-best-practices";
+    "code-review-skill" = codeReviewSkill;
+    "caveman" = "${cavemanSrc}/skills/caveman";
+    "caveman-commit" = "${cavemanSrc}/skills/caveman-commit";
+    "caveman-compress" = "${cavemanSrc}/skills/caveman-compress";
+    "caveman-help" = "${cavemanSrc}/skills/caveman-help";
+    "caveman-review" = "${cavemanSrc}/skills/caveman-review";
+    "caveman-stats" = "${cavemanSrc}/skills/caveman-stats";
+    "cavecrew" = "${cavemanSrc}/skills/cavecrew";
+    "ponytail" = "${ponytailSrc}/skills/ponytail";
+    "ponytail-review" = "${ponytailSrc}/skills/ponytail-review";
+  };
+
+  cliSkills = lib.mapAttrs' (name: path: lib.nameValuePair ".gemini/antigravity-cli/skills/${name}" (mkSkill path)) skills;
+  globalSkills = lib.mapAttrs' (name: path: lib.nameValuePair ".gemini/config/skills/${name}" (mkSkill path)) skills;
 in
 {
   home.file = {
@@ -75,31 +105,5 @@ in
       text = cavemanAgentsMd;
       force = true;
     };
-
-    ".gemini/antigravity-cli/skills/brainstorming" =
-      mkSkill "${superpowersSkills}/skills/brainstorming";
-    ".gemini/antigravity-cli/skills/frontend-design" =
-      mkSkill "${anthropicsSkills}/skills/frontend-design";
-    ".gemini/antigravity-cli/skills/grill-me" =
-      mkSkill "${mattPocockSkills}/skills/productivity/grill-me";
-    ".gemini/antigravity-cli/skills/improve-codebase-architecture" =
-      mkSkill "${mattPocockSkills}/skills/engineering/improve-codebase-architecture";
-    ".gemini/antigravity-cli/skills/next-best-practices" =
-      mkSkill "${vercelNextSkills}/skills/next-best-practices";
-    ".gemini/antigravity-cli/skills/supabase-postgres-best-practices" =
-      mkSkill "${supabaseSkills}/skills/supabase-postgres-best-practices";
-    ".gemini/antigravity-cli/skills/using-superpowers" =
-      mkSkill "${superpowersSkills}/skills/using-superpowers";
-    ".gemini/antigravity-cli/skills/vercel-react-best-practices" =
-      mkSkill "${vercelAgentSkills}/skills/react-best-practices";
-    ".gemini/antigravity-cli/skills/code-review-skill" = mkSkill "${codeReviewSkill}";
-
-    ".gemini/antigravity-cli/skills/caveman" = mkSkill "${cavemanSrc}/skills/caveman";
-    ".gemini/antigravity-cli/skills/caveman-commit" = mkSkill "${cavemanSrc}/skills/caveman-commit";
-    ".gemini/antigravity-cli/skills/caveman-compress" = mkSkill "${cavemanSrc}/skills/caveman-compress";
-    ".gemini/antigravity-cli/skills/caveman-help" = mkSkill "${cavemanSrc}/skills/caveman-help";
-    ".gemini/antigravity-cli/skills/caveman-review" = mkSkill "${cavemanSrc}/skills/caveman-review";
-    ".gemini/antigravity-cli/skills/caveman-stats" = mkSkill "${cavemanSrc}/skills/caveman-stats";
-    ".gemini/antigravity-cli/skills/cavecrew" = mkSkill "${cavemanSrc}/skills/cavecrew";
-  };
+  } // cliSkills // globalSkills;
 }

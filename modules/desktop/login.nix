@@ -1,7 +1,8 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 
 let
   nord = (import ../../home/stalbar/theme/nord.nix { })._module.args.nord;
+  regreetPkg = inputs.nixpkgs-regreet.legacyPackages.${pkgs.system}.regreet;
   hex = name: "#${nord.${name}}";
   hyprlandLuaSession = pkgs.writeShellScriptBin "start-hyprland-lua" ''
     exec ${pkgs.hyprland}/bin/Hyprland --config "$HOME/.config/hypr/hyprland.lua"
@@ -31,6 +32,7 @@ in
 
   programs.regreet = {
     enable = true;
+    package = regreetPkg;
     cageArgs = [
       "-s"
       "-m"
@@ -188,11 +190,11 @@ in
 
   services.greetd = {
     enable = true;
-    greeterManagesPlymouth = false;
+    greeterManagesPlymouth = true;
     settings = {
       default_session = {
         user = "greeter";
-        command = "${pkgs.dbus}/bin/dbus-run-session env GTK_USE_PORTAL=0 GDK_DEBUG=no-portals WLR_DRM_DEVICES=/dev/dri/by-path/pci-0000:00:02.0-card:/dev/dri/by-path/pci-0000:01:00.0-card AQ_DRM_DEVICES=/dev/dri/by-path/pci-0000:00:02.0-card:/dev/dri/by-path/pci-0000:01:00.0-card ${pkgs.cage}/bin/cage -s -m last -- ${pkgs.regreet}/bin/regreet";
+        command = "${pkgs.dbus}/bin/dbus-run-session env GTK_USE_PORTAL=0 GDK_DEBUG=no-portals WLR_DRM_DEVICES=/dev/dri/by-name/igpu:/dev/dri/by-name/dgpu AQ_DRM_DEVICES=/dev/dri/by-name/igpu:/dev/dri/by-name/dgpu ${pkgs.cage}/bin/cage -s -m last -- ${regreetPkg}/bin/regreet";
       };
     };
   };

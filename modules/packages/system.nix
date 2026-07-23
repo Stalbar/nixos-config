@@ -10,7 +10,7 @@
     enableDefaultPackages = true;
     packages = with pkgs; [
       nerd-fonts.jetbrains-mono
-      geist
+      geist-font
       noto-fonts-color-emoji
       symbola
     ];

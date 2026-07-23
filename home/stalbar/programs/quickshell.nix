@@ -124,7 +124,7 @@ in
         property string osdIcon: "󰕾"
         property int osdValue: 50
 
-        # IPC Handlers for Instant Keybindings & Click Targets
+        // IPC Handlers for Instant Keybindings & Click Targets
         IpcHandler {
             enabled: true
             target: "launcher"
@@ -180,9 +180,9 @@ in
             onTriggered: shell.osdVisible = false
         }
 
-        # -------------------------------------------------------------
-        # 1. MAIN STATUS BAR (Flat, opaque, pinned top, dynamic workspaces)
-        # -------------------------------------------------------------
+        // -------------------------------------------------------------
+        // 1. MAIN STATUS BAR (Flat, opaque, pinned top, dynamic workspaces)
+        // -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
 
@@ -354,9 +354,9 @@ in
             }
         }
 
-        # -------------------------------------------------------------
-        # 2. OMNIBOX LAUNCHER (Glassmorphic center floating overlay)
-        # -------------------------------------------------------------
+        // -------------------------------------------------------------
+        // 2. OMNIBOX LAUNCHER (Glassmorphic center floating overlay)
+        // -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
 
@@ -476,9 +476,9 @@ in
             }
         }
 
-        # -------------------------------------------------------------
-        # 3. UNIFIED ACTION & NOTIFICATION CENTER (Slide-out side panel)
-        # -------------------------------------------------------------
+        // -------------------------------------------------------------
+        // 3. UNIFIED ACTION & NOTIFICATION CENTER (Slide-out side panel)
+        // -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
 
@@ -561,9 +561,9 @@ in
             }
         }
 
-        # -------------------------------------------------------------
-        # 4. AGENT & DEBUGGING HUB (SWE Special)
-        # -------------------------------------------------------------
+        // -------------------------------------------------------------
+        // 4. AGENT & DEBUGGING HUB (SWE Special)
+        // -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
 
@@ -634,9 +634,9 @@ in
             }
         }
 
-        # -------------------------------------------------------------
-        # 5. VOLATILE OSD OVERLAY
-        # -------------------------------------------------------------
+        // -------------------------------------------------------------
+        // 5. VOLATILE OSD OVERLAY
+        // -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
 
@@ -702,9 +702,9 @@ in
             }
         }
 
-        # -------------------------------------------------------------
-        # 6. POWER MENU
-        # -------------------------------------------------------------
+        // -------------------------------------------------------------
+        // 6. POWER MENU
+        // -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
 

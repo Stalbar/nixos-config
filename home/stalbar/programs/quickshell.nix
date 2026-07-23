@@ -577,18 +577,23 @@ in
                 screen: modelData
                 visible: shell.agentHubOpen
 
-                width: 520
-                height: 380
-                color: shell.colors.bg
-
-                anchors.centerIn: parent
+                color: "transparent"
+                exclusionMode: ExclusionMode.Ignore
+                anchors {
+                    top: true
+                    bottom: true
+                    left: true
+                    right: true
+                }
 
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.namespace: "quickshell:agenthub"
                 WlrLayershell.keyboardFocus: shell.agentHubOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
                 Rectangle {
-                    anchors.fill: parent
+                    width: 520
+                    height: 380
+                    anchors.centerIn: parent
                     radius: 16
                     color: shell.colors.bg
                     border.width: 1
@@ -657,7 +662,6 @@ in
                 anchors {
                     bottom: true
                     bottomMargin: 60
-                    horizontalCenter: true
                 }
 
                 WlrLayershell.layer: WlrLayer.Overlay

@@ -661,7 +661,9 @@ in
 
                 anchors {
                     bottom: true
-                    bottomMargin: 60
+                }
+                margins {
+                    bottom: 60
                 }
 
                 WlrLayershell.layer: WlrLayer.Overlay

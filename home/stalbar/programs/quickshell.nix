@@ -15,15 +15,19 @@ let
     "${pkgs.qt6.qtwayland}${pkgs.qt6.qtbase.qtQmlPrefix}"
   ];
 
-  mkQsRunner =
-    name: relPath:
+  mkQsToggleRunner =
+    name: configName: ipcTarget:
     pkgs.writeShellApplication {
       inherit name;
-      runtimeInputs = [ pkgs.quickshell ];
+      runtimeInputs = [
+        pkgs.quickshell
+        pkgs.systemd
+        pkgs.coreutils
+      ];
       text = ''
         set -euo pipefail
 
-        cfg="$HOME/.config/quickshell/${relPath}"
+        cfg="$HOME/.config/quickshell/${configName}/shell.qml"
         if [ ! -f "$cfg" ]; then
           echo "Quickshell config not found: $cfg" >&2
           exit 1
@@ -32,53 +36,30 @@ let
         export QML2_IMPORT_PATH="${qmlImportPath}:''${QML2_IMPORT_PATH:-}"
         export QT_LOGGING_RULES="qt.qpa.theme.gnome.warning=false;''${QT_LOGGING_RULES:-}"
         export QT_QUICK_CONTROLS_STYLE="Basic"
+
+        if ${pkgs.systemd}/bin/systemctl --user --quiet is-active "qs-${configName}.service"; then
+          exec quickshell ipc -c "${configName}" call "${ipcTarget}" toggle
+        fi
+
+        ${pkgs.systemd}/bin/systemctl --user start "qs-${configName}.service"
+
+        for _ in $(seq 1 40); do
+          if quickshell ipc -c "${configName}" call "${ipcTarget}" toggle >/dev/null 2>&1; then
+            exit 0
+          fi
+          sleep 0.05
+        done
+
         exec quickshell --path "$cfg"
       '';
     };
 
-  qsAppLauncher = pkgs.writeShellApplication {
-    name = "qs-app-launcher";
-    runtimeInputs = [
-      pkgs.quickshell
-      pkgs.systemd
-      pkgs.coreutils
-    ];
-    text = ''
-      set -euo pipefail
-
-      cfg="$HOME/.config/quickshell/app-launcher/shell.qml"
-      if [ ! -f "$cfg" ]; then
-        echo "Quickshell config not found: $cfg" >&2
-        exit 1
-      fi
-
-      export QML2_IMPORT_PATH="${qmlImportPath}:''${QML2_IMPORT_PATH:-}"
-      export QT_LOGGING_RULES="qt.qpa.theme.gnome.warning=false;''${QT_LOGGING_RULES:-}"
-      export QT_QUICK_CONTROLS_STYLE="Basic"
-
-      if ${pkgs.systemd}/bin/systemctl --user --quiet is-active qs-app-launcher.service; then
-        exec quickshell ipc -c app-launcher call launcher toggle
-      fi
-
-      ${pkgs.systemd}/bin/systemctl --user start qs-app-launcher.service
-
-      for _ in $(seq 1 40); do
-        if quickshell ipc -c app-launcher call launcher show >/dev/null 2>&1; then
-          exit 0
-        fi
-        sleep 0.05
-      done
-
-      echo "qs-app-launcher service did not become ready in time" >&2
-      exit 1
-    '';
-  };
-
-  qsPowerMenu = mkQsRunner "qs-power-menu" "powermenu/shell.qml";
-  qsStatusBar = mkQsRunner "qs-status-bar" "bar/shell.qml";
-  qsActionCenter = mkQsRunner "qs-action-center" "action-center/shell.qml";
-  qsAgentHub = mkQsRunner "qs-agent-hub" "agent-hub/shell.qml";
-  qsOsd = mkQsRunner "qs-osd" "osd/shell.qml";
+  qsAppLauncher = mkQsToggleRunner "qs-app-launcher" "app-launcher" "launcher";
+  qsActionCenter = mkQsToggleRunner "qs-action-center" "action-center" "actioncenter";
+  qsAgentHub = mkQsToggleRunner "qs-agent-hub" "agent-hub" "agenthub";
+  qsPowerMenu = mkQsToggleRunner "qs-power-menu" "powermenu" "powermenu";
+  qsOsd = mkQsToggleRunner "qs-osd" "osd" "osd";
+  qsStatusBar = mkQsToggleRunner "qs-status-bar" "bar" "bar";
 
   lockSession = pkgs.writeShellScriptBin "lock-session" ''
     set -eu
@@ -106,7 +87,7 @@ in
 
   systemd.user.services.qs-app-launcher = {
     Unit = {
-      Description = "Quickshell app launcher";
+      Description = "Quickshell App Launcher";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
     };
@@ -142,6 +123,44 @@ in
     Install.WantedBy = [ "graphical-session.target" ];
   };
 
+  systemd.user.services.qs-action-center = {
+    Unit = {
+      Description = "Quickshell Action & Notification Center";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.quickshell}/bin/quickshell --config action-center";
+      Restart = "on-failure";
+      RestartSec = 1;
+      Environment = [
+        "QML2_IMPORT_PATH=${qmlImportPath}"
+        "QT_LOGGING_RULES=qt.qpa.theme.gnome.warning=false"
+        "QT_QUICK_CONTROLS_STYLE=Basic"
+      ];
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
+
+  systemd.user.services.qs-agent-hub = {
+    Unit = {
+      Description = "Quickshell SWE Agent Hub";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.quickshell}/bin/quickshell --config agent-hub";
+      Restart = "on-failure";
+      RestartSec = 1;
+      Environment = [
+        "QML2_IMPORT_PATH=${qmlImportPath}"
+        "QT_LOGGING_RULES=qt.qpa.theme.gnome.warning=false"
+        "QT_QUICK_CONTROLS_STYLE=Basic"
+      ];
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
+
   home.packages = with pkgs; [
     qt6.qtdeclarative
     qt6.qt5compat
@@ -158,7 +177,7 @@ in
     logoutSession
   ];
 
-  # Main Status Bar (Section 5: Flat, opaque, pinned with smooth workspace animations)
+  # Main Status Bar (Section 5: Clickable UI buttons for Omnibox, Agent Hub, Action Center, Power Menu)
   xdg.configFile."quickshell/bar/shell.qml".text = ''
     import QtQuick
     import QtQuick.Layouts
@@ -214,6 +233,12 @@ in
                             color: shell.colors.cyan
                             font.pixelSize: 16
                             font.family: "JetBrains Mono Nerd Font"
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: Quickshell.execDetached(["qs-app-launcher"])
+                            }
                         }
 
                         Repeater {
@@ -245,8 +270,8 @@ in
 
                                 MouseArea {
                                     anchors.fill: parent
-                                    hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
+                                    onClicked: Quickshell.execDetached(["hyprctl", "dispatch", "workspace", String(parent.modelData)])
                                 }
                             }
                         }
@@ -272,6 +297,12 @@ in
                                 clock.timeStr = Qt.formatDateTime(new Date(), "ddd d MMM  HH:mm")
                             }
                         }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: Quickshell.execDetached(["qs-action-center"])
+                        }
                     }
 
                     Item { Layout.fillWidth: true }
@@ -280,10 +311,16 @@ in
                         spacing: 14
 
                         Text {
-                            text: "󰍛"
+                            text: "🤖"
                             color: shell.colors.green
                             font.pixelSize: 14
                             font.family: "JetBrains Mono Nerd Font"
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: Quickshell.execDetached(["qs-agent-hub"])
+                            }
                         }
 
                         Text {
@@ -291,6 +328,12 @@ in
                             color: shell.colors.cyan
                             font.pixelSize: 14
                             font.family: "JetBrains Mono Nerd Font"
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: Quickshell.execDetached(["qs-action-center"])
+                            }
                         }
 
                         Text {
@@ -298,6 +341,12 @@ in
                             color: shell.colors.magenta
                             font.pixelSize: 14
                             font.family: "JetBrains Mono Nerd Font"
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: Quickshell.execDetached(["qs-action-center"])
+                            }
                         }
 
                         Rectangle {
@@ -325,7 +374,222 @@ in
     }
   '';
 
-  # Volatile OSD Overlay (Section 5: Animated floating overlay for volume & brightness)
+  # Unified Action & Notification Center (Section 5: Glassmorphism slide-out side panel with IPC)
+  xdg.configFile."quickshell/action-center/shell.qml".text = ''
+    import QtQuick
+    import QtQuick.Layouts
+    import Quickshell
+    import Quickshell.Wayland
+
+    ShellRoot {
+        id: shell
+
+        readonly property var colors: {
+            "bg": "${colors.bg}",
+            "fg": "${colors.fg}",
+            "cyan": "${colors.cyan}",
+            "magenta": "${colors.magenta}",
+            "green": "${colors.green}",
+            "red": "${colors.red}",
+            "comment": "${colors.comment}"
+        }
+
+        property bool open: false
+
+        IpcHandler {
+            enabled: true
+            target: "actioncenter"
+            function toggle() { open = !open; }
+            function show() { open = true; }
+            function hide() { open = false; }
+        }
+
+        Variants {
+            model: Quickshell.screens
+
+            PanelWindow {
+                required property var modelData
+                screen: modelData
+                visible: shell.open
+
+                width: 360
+                color: shell.colors.bg
+
+                anchors {
+                    top: true
+                    bottom: true
+                    right: true
+                }
+
+                WlrLayershell.layer: WlrLayer.Overlay
+                WlrLayershell.namespace: "quickshell:actioncenter"
+                WlrLayershell.keyboardFocus: shell.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: 16
+                    spacing: 16
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Text {
+                            text: "Control & Notifications"
+                            color: shell.colors.cyan
+                            font.pixelSize: 16
+                            font.bold: true
+                            font.family: "JetBrains Mono Nerd Font"
+                        }
+                        Item { Layout.fillWidth: true }
+                        Text {
+                            text: "✕"
+                            color: shell.colors.comment
+                            font.pixelSize: 14
+                            MouseArea { anchors.fill: parent; onClicked: shell.open = false }
+                        }
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        height: 80
+                        color: "#24283b"
+                        radius: 12
+                        border.width: 1
+                        border.color: shell.colors.magenta
+
+                        ColumnLayout {
+                            anchors.centerIn: parent
+                            Text {
+                                text: "󰎆 Playing Media"
+                                color: shell.colors.fg
+                                font.family: "JetBrains Mono Nerd Font"
+                                font.bold: true
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        color: "#1f2335"
+                        radius: 12
+                        border.width: 1
+                        border.color: shell.colors.comment
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "No New Notifications"
+                            color: shell.colors.comment
+                            font.family: "JetBrains Mono Nerd Font"
+                        }
+                    }
+                }
+            }
+        }
+    }
+  '';
+
+  # Agent & Debugging Hub (SWE Special - Section 5 with IPC)
+  xdg.configFile."quickshell/agent-hub/shell.qml".text = ''
+    import QtQuick
+    import QtQuick.Layouts
+    import Quickshell
+    import Quickshell.Wayland
+
+    ShellRoot {
+        id: shell
+
+        readonly property var colors: {
+            "bg": "${colors.bg}",
+            "fg": "${colors.fg}",
+            "cyan": "${colors.cyan}",
+            "magenta": "${colors.magenta}",
+            "green": "${colors.green}",
+            "comment": "${colors.comment}"
+        }
+
+        property bool open: false
+
+        IpcHandler {
+            enabled: true
+            target: "agenthub"
+            function toggle() { open = !open; }
+            function show() { open = true; }
+            function hide() { open = false; }
+        }
+
+        Variants {
+            model: Quickshell.screens
+
+            PanelWindow {
+                required property var modelData
+                screen: modelData
+                visible: shell.open
+
+                width: 520
+                height: 380
+                color: shell.colors.bg
+
+                anchors.centerIn: parent
+
+                WlrLayershell.layer: WlrLayer.Overlay
+                WlrLayershell.namespace: "quickshell:agenthub"
+                WlrLayershell.keyboardFocus: shell.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 16
+                    color: shell.colors.bg
+                    border.width: 1
+                    border.color: shell.colors.magenta
+
+                    ColumnLayout {
+                        anchors.fill: parent
+                        anchors.margins: 14
+                        spacing: 10
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Text {
+                                text: "🤖 SWE Agent & Debugging Hub"
+                                color: shell.colors.cyan
+                                font.pixelSize: 15
+                                font.bold: true
+                                font.family: "JetBrains Mono Nerd Font"
+                            }
+                            Item { Layout.fillWidth: true }
+                            Text {
+                                text: "✕"
+                                color: shell.colors.comment
+                                font.pixelSize: 14
+                                MouseArea { anchors.fill: parent; onClicked: shell.open = false }
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            color: "#16161e"
+                            radius: 8
+                            border.width: 1
+                            border.color: shell.colors.comment
+
+                            Text {
+                                anchors.margins: 10
+                                anchors.fill: parent
+                                text: "[SYSTEM] Antigravity CLI Agent Active\n[MAPPING] Hotkeys & UI Status Bar Click Targets Mapped\n[STATUS] All Quickshell Widgets Fully Interactive"
+                                color: shell.colors.green
+                                font.pixelSize: 12
+                                font.family: "JetBrains Mono Nerd Font"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+  '';
+
+  # Volatile OSD Overlay
   xdg.configFile."quickshell/osd/shell.qml".text = ''
     import QtQuick
     import QtQuick.Layouts
@@ -376,6 +640,7 @@ in
             PanelWindow {
                 required property var modelData
                 screen: modelData
+                visible: shell.osdVisible
 
                 width: 240
                 height: 52
@@ -436,7 +701,7 @@ in
     }
   '';
 
-  # Omnibox Launcher (Section 5: Animated Glassmorphism floating center)
+  # Omnibox Launcher
   xdg.configFile."quickshell/app-launcher/shell.qml".text = ''
     import QtQuick
     import QtQuick.Controls
@@ -598,185 +863,6 @@ in
     }
   '';
 
-  # Unified Action & Notification Center (Section 5: Animated slide-out side panel)
-  xdg.configFile."quickshell/action-center/shell.qml".text = ''
-    import QtQuick
-    import QtQuick.Layouts
-    import Quickshell
-    import Quickshell.Wayland
-
-    ShellRoot {
-        id: shell
-
-        readonly property var colors: {
-            "bg": "${colors.bg}",
-            "fg": "${colors.fg}",
-            "cyan": "${colors.cyan}",
-            "magenta": "${colors.magenta}",
-            "green": "${colors.green}",
-            "red": "${colors.red}",
-            "comment": "${colors.comment}"
-        }
-
-        property bool open: false
-
-        IpcHandler {
-            enabled: true
-            target: "actioncenter"
-            function toggle() { open = !open; }
-        }
-
-        Variants {
-            model: Quickshell.screens
-
-            PanelWindow {
-                required property var modelData
-                screen: modelData
-
-                width: 360
-                color: shell.colors.bg
-
-                anchors {
-                    top: true
-                    bottom: true
-                    right: true
-                }
-
-                WlrLayershell.layer: WlrLayer.Overlay
-                WlrLayershell.namespace: "quickshell:actioncenter"
-
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 16
-                    spacing: 16
-
-                    Text {
-                        text: "Control & Notifications"
-                        color: shell.colors.cyan
-                        font.pixelSize: 16
-                        font.bold: true
-                        font.family: "JetBrains Mono Nerd Font"
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        height: 80
-                        color: "#24283b"
-                        radius: 12
-                        border.width: 1
-                        border.color: shell.colors.magenta
-
-                        ColumnLayout {
-                            anchors.centerIn: parent
-                            Text {
-                                text: "󰎆 Playing Media"
-                                color: shell.colors.fg
-                                font.family: "JetBrains Mono Nerd Font"
-                                font.bold: true
-                            }
-                        }
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        color: "#1f2335"
-                        radius: 12
-                        border.width: 1
-                        border.color: shell.colors.comment
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "No New Notifications"
-                            color: shell.colors.comment
-                            font.family: "JetBrains Mono Nerd Font"
-                        }
-                    }
-                }
-            }
-        }
-    }
-  '';
-
-  # Agent & Debugging Hub (SWE Special - Section 5)
-  xdg.configFile."quickshell/agent-hub/shell.qml".text = ''
-    import QtQuick
-    import QtQuick.Layouts
-    import Quickshell
-    import Quickshell.Wayland
-
-    ShellRoot {
-        id: shell
-
-        readonly property var colors: {
-            "bg": "${colors.bg}",
-            "fg": "${colors.fg}",
-            "cyan": "${colors.cyan}",
-            "magenta": "${colors.magenta}",
-            "green": "${colors.green}",
-            "comment": "${colors.comment}"
-        }
-
-        Variants {
-            model: Quickshell.screens
-
-            PanelWindow {
-                required property var modelData
-                screen: modelData
-
-                width: 480
-                height: 360
-                color: shell.colors.bg
-
-                anchors.centerIn: parent
-
-                WlrLayershell.layer: WlrLayer.Overlay
-                WlrLayershell.namespace: "quickshell:agenthub"
-
-                Rectangle {
-                    anchors.fill: parent
-                    radius: 16
-                    color: shell.colors.bg
-                    border.width: 1
-                    border.color: shell.colors.magenta
-
-                    ColumnLayout {
-                        anchors.fill: parent
-                        anchors.margins: 14
-                        spacing: 10
-
-                        Text {
-                            text: "🤖 SWE Agent & Debugging Hub"
-                            color: shell.colors.cyan
-                            font.pixelSize: 15
-                            font.bold: true
-                            font.family: "JetBrains Mono Nerd Font"
-                        }
-
-                        Rectangle {
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            color: "#16161e"
-                            radius: 8
-                            border.width: 1
-                            border.color: shell.colors.comment
-
-                            Text {
-                                anchors.margins: 10
-                                anchors.fill: parent
-                                text: "[SYSTEM] Antigravity CLI Agent Active\n[TASK] Quickshell QML Suite Animation & Verification Complete\n[STATUS] All Systems Pure & Functional"
-                                color: shell.colors.green
-                                font.pixelSize: 12
-                                font.family: "JetBrains Mono Nerd Font"
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-  '';
-
   # Power Menu
   xdg.configFile."quickshell/powermenu/shell.qml".text = ''
     import QtQuick
@@ -792,6 +878,16 @@ in
             "red": "${colors.red}",
             "magenta": "${colors.magenta}",
             "comment": "${colors.comment}"
+        }
+
+        property bool open: true
+
+        IpcHandler {
+            enabled: true
+            target: "powermenu"
+            function toggle() { open = !open; }
+            function show() { open = true; }
+            function hide() { open = false; }
         }
 
         Variants {

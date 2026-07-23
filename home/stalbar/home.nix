@@ -3,7 +3,6 @@
 {
   imports = [
     ./packages.nix
-    ./theme/nord.nix
     ./programs/default.nix
   ];
 

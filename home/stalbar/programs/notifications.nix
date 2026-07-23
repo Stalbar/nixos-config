@@ -1,6 +1,8 @@
-{ pkgs, nord, ... }:
+{ pkgs, ... }:
 
 let
+  colors = import ../theme/colors.nix;
+
   volumeScript = pkgs.writeShellApplication {
     name = "volume";
     runtimeInputs = with pkgs; [ pamixer dunst ];
@@ -172,37 +174,37 @@ in
         progress_bar_max_width = 250;
         progress_bar_corner_radius = 4;
         transparency = 8;
-        background = "#${nord.nord0}";
-        foreground = "#${nord.nord4}";
-        frame_color = "#${nord.nord3}";
+        background = colors.bg;
+        foreground = colors.fg;
+        frame_color = colors.comment;
         separator_color = "frame";
-        highlight = "#${nord.nord10}";
+        highlight = colors.cyan;
         mouse_left_click = "close_current";
         mouse_middle_click = "do_action, close_current";
         mouse_right_click = "close_all";
       };
 
       urgency_low = {
-        background = "#${nord.nord0}";
-        foreground = "#${nord.nord4}";
-        frame_color = "#${nord.nord3}";
-        highlight = "#${nord.nord10}";
+        background = colors.bg;
+        foreground = colors.fg;
+        frame_color = colors.comment;
+        highlight = colors.cyan;
         timeout = 3;
       };
 
       urgency_normal = {
-        background = "#${nord.nord0}";
-        foreground = "#${nord.nord4}";
-        frame_color = "#${nord.nord9}";
-        highlight = "#${nord.nord8}";
+        background = colors.bg;
+        foreground = colors.fg;
+        frame_color = colors.magenta;
+        highlight = colors.cyan;
         timeout = 5;
       };
 
       urgency_critical = {
-        background = "#${nord.nord0}";
-        foreground = "#${nord.nord6}";
-        frame_color = "#${nord.nord11}";
-        highlight = "#${nord.nord11}";
+        background = colors.bg;
+        foreground = colors.fg;
+        frame_color = colors.red;
+        highlight = colors.red;
         timeout = 0;
       };
     };

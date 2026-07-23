@@ -1,35 +1,37 @@
 { pkgs, ... }:
 
 let
-  plymouthNordTheme = pkgs.runCommand "plymouth-theme-nord-dynamic" { nativeBuildInputs = [ pkgs.imagemagick ]; } ''
-    theme_dir="$out/share/plymouth/themes/nord-dynamic"
+  plymouthTokyoNightTheme = pkgs.runCommand "plymouth-theme-tokyo-night" { nativeBuildInputs = [ pkgs.imagemagick ]; } ''
+    theme_dir="$out/share/plymouth/themes/tokyo-night"
     mkdir -p "$theme_dir"
 
+    # Neon Cyan circle logo
     ${pkgs.imagemagick}/bin/convert -size 240x240 xc:none \
-      -stroke "#88C0D0" -strokewidth 10 -fill none \
+      -stroke "#7dcfff" -strokewidth 10 -fill none \
       -draw "circle 120,120 120,38" \
-      -stroke "#81A1C1" -strokewidth 2 -fill none \
+      -stroke "#bb9af7" -strokewidth 2 -fill none \
       -draw "circle 120,120 120,58" \
       "$theme_dir/logo.png"
 
+    # Neon Green loading dot
     ${pkgs.imagemagick}/bin/convert -size 16x16 xc:none \
-      -fill "#8FBCBB" -draw "circle 8,8 8,1" \
+      -fill "#9ece6a" -draw "circle 8,8 8,1" \
       "$theme_dir/dot.png"
 
-    cat > "$theme_dir/nord-dynamic.plymouth" <<EOF
+    cat > "$theme_dir/tokyo-night.plymouth" <<EOF
 [Plymouth Theme]
-Name=Nord Dynamic
-Description=Dynamic Nord splash theme
+Name=Tokyo Night Neon
+Description=Tokyo Night Neon splash theme
 ModuleName=script
 
 [script]
 ImageDir=$theme_dir
-ScriptFile=$theme_dir/nord-dynamic.script
+ScriptFile=$theme_dir/tokyo-night.script
 EOF
 
-    cat > "$theme_dir/nord-dynamic.script" <<'EOF'
-Window.SetBackgroundTopColor(0.18, 0.20, 0.25);
-Window.SetBackgroundBottomColor(0.18, 0.20, 0.25);
+    cat > "$theme_dir/tokyo-night.script" <<'EOF'
+Window.SetBackgroundTopColor(0.10, 0.11, 0.15);
+Window.SetBackgroundBottomColor(0.10, 0.11, 0.15);
 
 logo_image = Image("logo.png");
 dot_image = Image("dot.png");
@@ -103,7 +105,6 @@ EOF
 in
 {
   boot.loader.efi.canTouchEfiVariables = true;
-  # Keep the shared EFI system partition explicit here for dual-boot installs.
   boot.loader.efi.efiSysMountPoint = "/boot";
   boot.loader.grub = {
     enable = true;
@@ -137,8 +138,8 @@ in
 
   boot.plymouth = {
     enable = true;
-    theme = "nord-dynamic";
-    themePackages = [ plymouthNordTheme ];
+    theme = "tokyo-night";
+    themePackages = [ plymouthTokyoNightTheme ];
   };
 
   boot.initrd.verbose = false;

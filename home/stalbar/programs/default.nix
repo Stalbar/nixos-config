@@ -5,13 +5,13 @@
     ./theme.nix
     ./thunar.nix
     ./git.nix
-    ./zsh.nix
+    ./fish.nix
+    ./foot.nix
     ./psql.nix
     ./neovim.nix
     ./opencode.nix
     ./antigravity.nix
     ./graphify.nix
-    ./ghostty.nix
     ./firefox.nix
     ./obsidian.nix
     ./cool-retro-term.nix
@@ -20,10 +20,7 @@
     ./quickshell.nix
     ./fastfetch.nix
     ./btop.nix
-    ./waybar.nix
     ./wallpaper.nix
     ./hyprland.nix
-    ./niri.nix
-    ./swaylock.nix
   ];
 }

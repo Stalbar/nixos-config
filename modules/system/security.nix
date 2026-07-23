@@ -3,8 +3,13 @@
 {
   security.sudo.execWheelOnly = true;
 
+  sops = {
+    age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+    gnupg.home = "/var/lib/sops";
+  };
+
   services.openssh = {
-    enable = false;
+    enable = true;
     openFirewall = false;
     settings = {
       PasswordAuthentication = false;

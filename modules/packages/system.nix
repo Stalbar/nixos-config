@@ -6,11 +6,32 @@
 }:
 
 {
+  fonts = {
+    enableDefaultPackages = true;
+    packages = with pkgs; [
+      nerd-fonts.jetbrains-mono
+      geist
+      noto-fonts-color-emoji
+      symbola
+    ];
+    fontconfig = {
+      defaultFonts = {
+        monospace = [ "JetBrains Mono Nerd Font" ];
+        sansSerif = [ "Geist" "Inter" ];
+        emoji = [ "Noto Color Emoji" ];
+      };
+    };
+  };
+
   environment.systemPackages =
     (with pkgs; [
       git
+      fish
+      foot
       neovim
       neovide
+      nh
+      sops
       curl
       wget
       ripgrep
@@ -20,27 +41,13 @@
       pciutils
       usbutils
       btrfs-progs
-      snapper
       openssl
-      efibootmgr
-      os-prober
       wireguard-tools
       bubblewrap
 
-      # factorio runtime deps (SDL display backends)
-      libxscrnsaver
-      libxkbcommon
-      libxcb
-      libx11
-      libxcursor
-      libxi
-      libxrandr
-      libxext
-      wayland
-
-      # Language Servers & Formatters for better code understanding
+      # Language Servers & Formatters
       nixd
-      nixfmt-rfc-style
+      nixfmt
       gopls
       go
       lua-language-server
@@ -49,16 +56,10 @@
       ruff
       typescript-language-server
       vscode-langservers-extracted
-      dockerfile-language-server
-      protols
-      postgres-language-server
-      roslyn-ls
       tree-sitter
       stylua
       shfmt
       prettierd
-      csharpier
-      pgformatter
     ])
     ++ lib.optionals config.services.postgresql.enable [
       config.services.postgresql.package

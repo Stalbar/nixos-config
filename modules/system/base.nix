@@ -1,4 +1,4 @@
-{ lib, pkgs, ...}:
+{ lib, pkgs, ... }:
 
 {
   system.stateVersion = "25.11";
@@ -20,19 +20,7 @@
     max-jobs = "auto";
   };
 
-  fonts.packages = with pkgs; [
-    nerd-fonts.jetbrains-mono
-    nerd-fonts.symbols-only
-    source-code-pro
-    noto-fonts-color-emoji
-  ];
 
-  fonts.fontconfig.defaultFonts = {
-    monospace = [ "JetBrainsMono Nerd Font Mono" "Symbols Nerd Font Mono" ];
-    sansSerif = [ "JetBrainsMono Nerd Font Mono" ];
-    serif = [ "JetBrainsMono Nerd Font Mono" ];
-    emoji = [ "Noto Color Emoji" ];
-  };
 
   virtualisation.docker.enable = true;
   virtualisation.docker.enableOnBoot = false;
@@ -41,12 +29,10 @@
   };
   systemd.sockets.docker.wantedBy = lib.mkForce [ ];
 
-  programs.gamemode.enable = false;
-
   services.logind.settings.Login.HandleLidSwitchDocked = "ignore";
 
   nixpkgs.config.allowUnfree = true;
 
-  programs.zsh.enable = true;
-  users.defaultUserShell = pkgs.zsh;
+  programs.fish.enable = true;
+  users.defaultUserShell = pkgs.fish;
 }

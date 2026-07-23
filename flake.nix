@@ -1,13 +1,14 @@
 {
-  description = "NixOS";
+  description = "NixOS Config with Hyprland Architecture Blueprint";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager.url = "github:nix-community/home-manager/master";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    sops-nix.url = "github:Mic92/sops-nix";
+    sops-nix.inputs.nixpkgs.follows = "nixpkgs";
     antigravity-nix.url = "github:jacopone/antigravity-nix";
     antigravity-nix.inputs.nixpkgs.follows = "nixpkgs";
-    nixpkgs-regreet.url = "github:NixOS/nixpkgs/a799d3e3886da994fa307f817a6bc705ae538eeb";
   };
 
   outputs =
@@ -15,6 +16,7 @@
       self,
       nixpkgs,
       home-manager,
+      sops-nix,
       ...
     }:
     let
@@ -26,6 +28,7 @@
         specialArgs = { inherit inputs; };
         modules = [
           ./hosts/laptop/default.nix
+          sops-nix.nixosModules.sops
           home-manager.nixosModules.home-manager
           (
             { inputs, ... }:

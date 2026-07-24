@@ -103,7 +103,7 @@ in
       };
 
       bind = [
-        # Core App Binds (Lua function wrappers for exec_cmd)
+        # Core App Binds
         (bind "SUPER + Q" (lua ''function() hl.exec_cmd("foot") end'') null)
         (bind "SUPER + F4" (lua ''hl.dsp.window.close()'') null)
         (bind "SUPER + V" (lua ''hl.dsp.window.float({ toggle = true })'') null)
@@ -125,7 +125,7 @@ in
         (bind "SUPER + ALT + K" (lua ''hl.dsp.window.move({ direction = "u" })'') null)
         (bind "SUPER + ALT + J" (lua ''hl.dsp.window.move({ direction = "d" })'') null)
 
-        # Virtual Desktops Focus
+        # Virtual Desktops Focus (Native HL.Dispatcher objects)
         (bind "SUPER + 1" (lua ''hl.dsp.focus({ workspace = 1 })'') null)
         (bind "SUPER + 2" (lua ''hl.dsp.focus({ workspace = 2 })'') null)
         (bind "SUPER + 3" (lua ''hl.dsp.focus({ workspace = 3 })'') null)
@@ -137,7 +137,7 @@ in
         (bind "SUPER + 9" (lua ''hl.dsp.focus({ workspace = 9 })'') null)
         (bind "SUPER + 0" (lua ''hl.dsp.focus({ workspace = 11 })'') null)
 
-        # Virtual Desktops Window Movement (Super + Shift + 1..5 AND Super + Alt + 1..5)
+        # Virtual Desktops Window Movement
         (bind "SUPER + SHIFT + 1" (lua ''hl.dsp.window.move({ workspace = 1 })'') null)
         (bind "SUPER + SHIFT + 2" (lua ''hl.dsp.window.move({ workspace = 2 })'') null)
         (bind "SUPER + SHIFT + 3" (lua ''hl.dsp.window.move({ workspace = 3 })'') null)
@@ -160,9 +160,9 @@ in
         (bind "SUPER + ALT + 9" (lua ''hl.dsp.window.move({ workspace = 9 })'') null)
         (bind "SUPER + ALT + 0" (lua ''hl.dsp.window.move({ workspace = 11 })'') null)
 
-        # Applications Shortcuts
+        # Applications Shortcuts (zen-beta binary for Zen browser)
         (bind "ALT + N" (lua ''function() hl.exec_cmd("neovide --no-fork") end'') null)
-        (bind "ALT + F" (lua ''function() hl.exec_cmd("zen") end'') null)
+        (bind "ALT + F" (lua ''function() hl.exec_cmd("zen-beta") end'') null)
         (bind "ALT + C" (lua ''function() hl.exec_cmd("chromium --enable-features=UseOzonePlatform --ozone-platform=wayland") end'') null)
         (bind "ALT + B" (lua ''function() hl.exec_cmd("blueman-manager") end'') null)
 

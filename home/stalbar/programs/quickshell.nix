@@ -182,16 +182,6 @@ in
             }
         }
 
-        IpcHandler {
-            enabled: true
-            target: "notify"
-            function add(title, body) {
-                const list = shell.notificationList.slice();
-                list.unshift({ title: title, body: body, time: Qt.formatDateTime(new Date(), "HH:mm") });
-                shell.notificationList = list;
-            }
-        }
-
         Timer {
             id: osdTimer
             interval: 1500
@@ -243,7 +233,7 @@ in
                 required property var modelData
                 screen: modelData
 
-                height: 32
+                implicitHeight: 32
                 color: shell.colors.bg
 
                 anchors {
@@ -315,7 +305,7 @@ in
                                 MouseArea {
                                     anchors.fill: parent
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: Quickshell.execDetached(["hyprctl", "dispatch", "workspace", String(parent.wsId)])
+                                    onClicked: Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.focus({ workspace = " + String(parent.wsId) + " })"])
                                 }
                             }
                         }
@@ -698,7 +688,7 @@ in
                 screen: modelData
                 visible: shell.actionCenterOpen
 
-                width: 380
+                implicitWidth: 380
                 color: shell.colors.bg
 
                 anchors {
@@ -894,8 +884,8 @@ in
                 screen: modelData
                 visible: shell.osdVisible
 
-                width: 240
-                height: 52
+                implicitWidth: 240
+                implicitHeight: 52
                 color: "transparent"
 
                 anchors {
@@ -989,8 +979,8 @@ in
                 }
 
                 Rectangle {
-                    width: 320
-                    height: 72
+                    implicitWidth: 320
+                    implicitHeight: 72
                     anchors.centerIn: parent
                     radius: 12
                     color: shell.colors.bg

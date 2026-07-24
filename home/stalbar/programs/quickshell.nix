@@ -101,6 +101,7 @@ in
     import Quickshell.Wayland
     import Quickshell.Hyprland
     import Quickshell.Services.Mpris
+    import Quickshell.Services.SystemTray
     import Quickshell.Io
 
     ShellRoot {
@@ -373,6 +374,31 @@ in
 
                     RowLayout {
                         spacing: 12
+
+                        // Native System Tray (SNI Applets like nm-applet, blueman)
+                        RowLayout {
+                            spacing: 8
+                            Repeater {
+                                model: SystemTray.items.values
+                                IconImage {
+                                    required property var modelData
+                                    source: modelData.icon
+                                    width: 18
+                                    height: 18
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: parent.modelData.activate()
+                                    }
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            width: 1
+                            height: 14
+                            color: shell.colors.comment
+                        }
 
                         // Current Date & Time Aligned Near CPU Usage
                         Text {

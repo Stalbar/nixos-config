@@ -13,8 +13,8 @@ in
       "$mainMod" = "SUPER";
 
       monitor = [
-        "HDMI-A-1, highres, auto, 1.25"
-        "eDP-1, highrr, 0x0, 1"
+        "HDMI-A-1, 2560x1440@59.95, 1920x0, 1.25"
+        "eDP-1, 1920x1080@120.035, 0x0, 1"
         ", preferred, auto, 1"
       ];
 

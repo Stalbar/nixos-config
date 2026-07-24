@@ -125,20 +125,28 @@ in
         (bind "SUPER + ALT + K" (lua ''hl.dsp.window.move({ direction = "u" })'') null)
         (bind "SUPER + ALT + J" (lua ''hl.dsp.window.move({ direction = "d" })'') null)
 
-        # Virtual Desktops Focus (Super + 1..5, Super + 0)
+        # Virtual Desktops Focus
         (bind "SUPER + 1" (lua ''hl.dsp.focus({ workspace = 1 })'') null)
         (bind "SUPER + 2" (lua ''hl.dsp.focus({ workspace = 2 })'') null)
         (bind "SUPER + 3" (lua ''hl.dsp.focus({ workspace = 3 })'') null)
         (bind "SUPER + 4" (lua ''hl.dsp.focus({ workspace = 4 })'') null)
         (bind "SUPER + 5" (lua ''hl.dsp.focus({ workspace = 5 })'') null)
+        (bind "SUPER + 6" (lua ''hl.dsp.focus({ workspace = 6 })'') null)
+        (bind "SUPER + 7" (lua ''hl.dsp.focus({ workspace = 7 })'') null)
+        (bind "SUPER + 8" (lua ''hl.dsp.focus({ workspace = 8 })'') null)
+        (bind "SUPER + 9" (lua ''hl.dsp.focus({ workspace = 9 })'') null)
         (bind "SUPER + 0" (lua ''hl.dsp.focus({ workspace = 11 })'') null)
 
-        # Virtual Desktops Window Movement (Super + Shift + 1..5 AND Super + Alt + 1..5)
+        # Virtual Desktops Window Movement
         (bind "SUPER + SHIFT + 1" (lua ''hl.dsp.window.move({ workspace = 1 })'') null)
         (bind "SUPER + SHIFT + 2" (lua ''hl.dsp.window.move({ workspace = 2 })'') null)
         (bind "SUPER + SHIFT + 3" (lua ''hl.dsp.window.move({ workspace = 3 })'') null)
         (bind "SUPER + SHIFT + 4" (lua ''hl.dsp.window.move({ workspace = 4 })'') null)
         (bind "SUPER + SHIFT + 5" (lua ''hl.dsp.window.move({ workspace = 5 })'') null)
+        (bind "SUPER + SHIFT + 6" (lua ''hl.dsp.window.move({ workspace = 6 })'') null)
+        (bind "SUPER + SHIFT + 7" (lua ''hl.dsp.window.move({ workspace = 7 })'') null)
+        (bind "SUPER + SHIFT + 8" (lua ''hl.dsp.window.move({ workspace = 8 })'') null)
+        (bind "SUPER + SHIFT + 9" (lua ''hl.dsp.window.move({ workspace = 9 })'') null)
         (bind "SUPER + SHIFT + 0" (lua ''hl.dsp.window.move({ workspace = 11 })'') null)
 
         (bind "SUPER + ALT + 1" (lua ''hl.dsp.window.move({ workspace = 1 })'') null)
@@ -146,6 +154,10 @@ in
         (bind "SUPER + ALT + 3" (lua ''hl.dsp.window.move({ workspace = 3 })'') null)
         (bind "SUPER + ALT + 4" (lua ''hl.dsp.window.move({ workspace = 4 })'') null)
         (bind "SUPER + ALT + 5" (lua ''hl.dsp.window.move({ workspace = 5 })'') null)
+        (bind "SUPER + ALT + 6" (lua ''hl.dsp.window.move({ workspace = 6 })'') null)
+        (bind "SUPER + ALT + 7" (lua ''hl.dsp.window.move({ workspace = 7 })'') null)
+        (bind "SUPER + ALT + 8" (lua ''hl.dsp.window.move({ workspace = 8 })'') null)
+        (bind "SUPER + ALT + 9" (lua ''hl.dsp.window.move({ workspace = 9 })'') null)
         (bind "SUPER + ALT + 0" (lua ''hl.dsp.window.move({ workspace = 11 })'') null)
 
         # Applications Shortcuts
@@ -178,6 +190,16 @@ in
                 hl.exec_cmd("nm-applet --indicator")
                 hl.exec_cmd("blueman-applet")
                 hl.exec_cmd("mkdir -p $HOME/Pictures/Screenshots")
+                hl.exec_cmd("hyprctl keyword workspace 1,monitor:HDMI-A-1,default:true")
+                hl.exec_cmd("hyprctl keyword workspace 2,monitor:HDMI-A-1")
+                hl.exec_cmd("hyprctl keyword workspace 3,monitor:HDMI-A-1")
+                hl.exec_cmd("hyprctl keyword workspace 4,monitor:HDMI-A-1")
+                hl.exec_cmd("hyprctl keyword workspace 5,monitor:HDMI-A-1")
+                hl.exec_cmd("hyprctl keyword workspace 6,monitor:HDMI-A-1")
+                hl.exec_cmd("hyprctl keyword workspace 7,monitor:HDMI-A-1")
+                hl.exec_cmd("hyprctl keyword workspace 8,monitor:HDMI-A-1")
+                hl.exec_cmd("hyprctl keyword workspace 9,monitor:HDMI-A-1")
+                hl.exec_cmd("hyprctl keyword workspace 11,monitor:eDP-1,default:true")
               end
             '')
           ];

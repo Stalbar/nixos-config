@@ -254,7 +254,7 @@ in
         }
 
         // -------------------------------------------------------------
-        // 1. MAIN STATUS BAR (Workspaces 1-5, System Tray, Metrics, Date, Status Icons)
+        // 1. MAIN STATUS BAR (Only Active Workspaces + Running Apps Tray to the right)
         // -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
@@ -299,12 +299,21 @@ in
                             }
                         }
 
-                        // Workspaces (Only 5 virtual desktops as requested)
+                        // Virtual Desktops (Only show used / existing workspaces)
                         Repeater {
-                            model: [1, 2, 3, 4, 5]
+                            model: {
+                                if (Hyprland.workspaces && Hyprland.workspaces.values) {
+                                    const ws = Array.from(Hyprland.workspaces.values)
+                                        .filter(w => w && w.id > 0)
+                                        .sort((a, b) => a.id - b.id);
+                                    if (ws.length > 0) return ws;
+                                }
+                                return [{ id: 1 }];
+                            }
                             Rectangle {
-                                required property int modelData
-                                readonly property bool isActive: Hyprland.focusedWorkspace ? (Hyprland.focusedWorkspace.id === modelData) : (modelData === 1)
+                                required property var modelData
+                                readonly property int wsId: modelData.id
+                                readonly property bool isActive: Hyprland.focusedWorkspace ? (Hyprland.focusedWorkspace.id === wsId) : (wsId === 1)
                                 width: isActive ? 28 : 22
                                 height: 22
                                 radius: 5
@@ -317,7 +326,7 @@ in
 
                                 Text {
                                     anchors.centerIn: parent
-                                    text: String(parent.modelData)
+                                    text: String(parent.wsId)
                                     color: parent.isActive ? shell.colors.bg : shell.colors.fg
                                     font.pixelSize: 11
                                     font.bold: true
@@ -327,42 +336,53 @@ in
                                 MouseArea {
                                     anchors.fill: parent
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: Quickshell.execDetached(["hyprctl", "dispatch", "workspace", String(parent.modelData)])
+                                    onClicked: Quickshell.execDetached(["hyprctl", "dispatch", "workspace", String(parent.wsId)])
                                 }
                             }
                         }
-                    }
 
-                    // Running Applications Taskbar Tray
-                    RowLayout {
-                        spacing: 6
-                        Repeater {
-                            model: shell.runningAppsList
-                            Rectangle {
-                                required property var modelData
-                                width: 110
-                                height: 22
-                                radius: 4
-                                color: "#1f2335"
-                                border.width: 1
-                                border.color: shell.colors.comment
+                        // Running Applications Taskbar Tray directly to the right of virtual desktops
+                        RowLayout {
+                            spacing: 6
+                            Repeater {
+                                model: shell.runningAppsList
+                                Rectangle {
+                                    required property var modelData
+                                    width: 110
+                                    height: 22
+                                    radius: 4
+                                    color: "#1f2335"
+                                    border.width: 1
+                                    border.color: shell.colors.comment
 
-                                Text {
-                                    anchors.fill: parent
-                                    anchors.margins: 4
-                                    text: modelData.title || modelData.initialClass || "App"
-                                    color: shell.colors.fg
-                                    font.pixelSize: 10
-                                    elide: Text.ElideRight
-                                    font.family: "JetBrains Mono Nerd Font"
-                                }
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.margins: 3
+                                        spacing: 4
 
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        if (modelData.address) {
-                                            Quickshell.execDetached(["hyprctl", "dispatch", "focuswindow", "address:" + modelData.address]);
+                                        IconImage {
+                                            source: modelData.initialClass ? "image://icon/" + modelData.initialClass.toLowerCase() : "application-x-executable"
+                                            width: 14
+                                            height: 14
+                                        }
+
+                                        Text {
+                                            text: modelData.title || modelData.initialClass || "App"
+                                            color: shell.colors.fg
+                                            font.pixelSize: 10
+                                            elide: Text.ElideRight
+                                            font.family: "JetBrains Mono Nerd Font"
+                                            Layout.fillWidth: true
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            if (modelData.address) {
+                                                Quickshell.execDetached(["hyprctl", "dispatch", "focuswindow", "address:" + modelData.address]);
+                                            }
                                         }
                                     }
                                 }

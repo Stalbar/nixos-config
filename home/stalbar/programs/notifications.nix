@@ -5,7 +5,7 @@ let
 
   volumeScript = pkgs.writeShellApplication {
     name = "volume";
-    runtimeInputs = with pkgs; [ pamixer dunst ];
+    runtimeInputs = with pkgs; [ pamixer dunst quickshell coreutils ];
     text = ''
       set -euo pipefail
 
@@ -13,6 +13,8 @@ let
         local volume muted icon
         volume="$(pamixer --get-volume)"
         muted="$(pamixer --get-mute)"
+
+        quickshell ipc -p "$HOME/.config/quickshell/shell.qml" call osd showVolume "$volume" || true
 
         if [ "$muted" = "true" ]; then
           dunstify \
@@ -92,7 +94,7 @@ let
 
   brightnessScript = pkgs.writeShellApplication {
     name = "brightness";
-    runtimeInputs = with pkgs; [ brightnessctl dunst gnused coreutils ];
+    runtimeInputs = with pkgs; [ brightnessctl dunst gnused coreutils quickshell ];
     text = ''
       set -euo pipefail
 
@@ -103,6 +105,8 @@ let
         if [ -z "$percent" ]; then
           percent=0
         fi
+
+        quickshell ipc -p "$HOME/.config/quickshell/shell.qml" call osd showBrightness "$percent" || true
 
         dunstify \
           -a "brightness" \

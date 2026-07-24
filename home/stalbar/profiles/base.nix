@@ -15,6 +15,7 @@
     pavucontrol
     pulseaudio
     chromium
+    inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
     libreoffice-fresh
     telegram-desktop
     bruno

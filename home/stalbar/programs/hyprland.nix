@@ -68,6 +68,15 @@ in
         }
       ];
 
+      workspace = [
+        "1, monitor:HDMI-A-1, default:true"
+        "2, monitor:HDMI-A-1"
+        "3, monitor:HDMI-A-1"
+        "4, monitor:HDMI-A-1"
+        "5, monitor:HDMI-A-1"
+        "11, monitor:eDP-1, default:true"
+      ];
+
       config = {
         cursor = {
           no_hardware_cursors = true;
@@ -141,24 +150,37 @@ in
         (bind (mod "SPACE") (lua "hl.dsp.exec_cmd(launcher)") null)
         (bind (mod "M") (lua "hl.dsp.exec_cmd(powerMenu)") null)
         (bind (mod "N") (exec "qs-action-center") null)
-        (bind (mod "A") (exec "qs-agent-hub") null)
         (bind (mod "R") (exec "change-wallpaper") null)
         (bind (mod "F") (lua "hl.dsp.window.fullscreen()") null)
         (bind (mod "H") (focusDir "left") null)
         (bind (mod "L") (focusDir "right") null)
         (bind (mod "K") (focusDir "up") null)
         (bind (mod "J") (focusDir "down") null)
-        (bind (mod "SHIFT + H") (swapDir "left") null)
-        (bind (mod "SHIFT + L") (swapDir "right") null)
-        (bind (mod "SHIFT + K") (swapDir "up") null)
-        (bind (mod "SHIFT + J") (swapDir "down") null)
+
+        # Replaced SUPER + SHIFT with SUPER + ALT for window moving & workspace moving
+        (bind (mod "ALT + H") (swapDir "left") null)
+        (bind (mod "ALT + L") (swapDir "right") null)
+        (bind (mod "ALT + K") (swapDir "up") null)
+        (bind (mod "ALT + J") (swapDir "down") null)
+
         (bind (mod "1") (lua "hl.dsp.focus({ workspace = 1 })") null)
         (bind (mod "2") (lua "hl.dsp.focus({ workspace = 2 })") null)
         (bind (mod "3") (lua "hl.dsp.focus({ workspace = 3 })") null)
         (bind (mod "4") (lua "hl.dsp.focus({ workspace = 4 })") null)
+        (bind (mod "5") (lua "hl.dsp.focus({ workspace = 5 })") null)
+        (bind (mod "0") (lua "hl.dsp.focus({ workspace = 11 })") null)
+
+        (bind (mod "ALT + 1") (lua "hl.dsp.window.move_to_workspace({ workspace = 1 })") null)
+        (bind (mod "ALT + 2") (lua "hl.dsp.window.move_to_workspace({ workspace = 2 })") null)
+        (bind (mod "ALT + 3") (lua "hl.dsp.window.move_to_workspace({ workspace = 3 })") null)
+        (bind (mod "ALT + 4") (lua "hl.dsp.window.move_to_workspace({ workspace = 4 })") null)
+        (bind (mod "ALT + 5") (lua "hl.dsp.window.move_to_workspace({ workspace = 5 })") null)
+        (bind (mod "ALT + 0") (lua "hl.dsp.window.move_to_workspace({ workspace = 11 })") null)
+
         (bind "ALT + N" (exec "neovide --no-fork") null)
         (bind "ALT + F" (lua "hl.dsp.exec_cmd(browser)") null)
         (bind "ALT + C" (exec "chromium --enable-features=UseOzonePlatform --ozone-platform=wayland") null)
+        (bind "ALT + B" (exec "blueman-manager") null)
       ];
 
       on = [

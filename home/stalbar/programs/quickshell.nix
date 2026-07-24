@@ -32,7 +32,6 @@ let
 
   qsAppLauncher = mkQsIpcTrigger "qs-app-launcher" "launcher" "toggle";
   qsActionCenter = mkQsIpcTrigger "qs-action-center" "actioncenter" "toggle";
-  qsAgentHub = mkQsIpcTrigger "qs-agent-hub" "agenthub" "toggle";
   qsPowerMenu = mkQsIpcTrigger "qs-power-menu" "powermenu" "toggle";
 
   lockSession = pkgs.writeShellScriptBin "lock-session" ''
@@ -88,7 +87,6 @@ in
     qsAppLauncher
     qsPowerMenu
     qsActionCenter
-    qsAgentHub
     lockSession
     logoutSession
   ];
@@ -101,6 +99,7 @@ in
     import Quickshell
     import Quickshell.Wayland
     import Quickshell.Hyprland
+    import Quickshell.Services.Mpris
     import Quickshell.Io
 
     ShellRoot {
@@ -113,18 +112,32 @@ in
             "magenta": "${colors.magenta}",
             "green": "${colors.green}",
             "red": "${colors.red}",
+            "yellow": "${colors.yellow}",
+            "blue": "${colors.blue}",
             "comment": "${colors.comment}"
         }
 
         property bool launcherOpen: false
         property bool actionCenterOpen: false
-        property bool agentHubOpen: false
         property bool powerMenuOpen: false
         property bool osdVisible: false
         property string osdIcon: "󰕾"
         property int osdValue: 50
 
-        // IPC Handlers for Instant Keybindings & Click Targets
+        # System Metrics & Status Properties
+        property int cpuUsage: 0
+        property int ramUsage: 0
+        property bool vpnConnected: false
+        property bool wifiConnected: true
+        property bool micMuted: false
+        property bool audioMuted: false
+        property bool isHeadphones: false
+        property int volumeLevel: 65
+
+        # Notification Store
+        property var notificationList: []
+
+        # IPC Handlers for Hotkeys & Click Targets
         IpcHandler {
             enabled: true
             target: "launcher"
@@ -143,14 +156,6 @@ in
 
         IpcHandler {
             enabled: true
-            target: "agenthub"
-            function toggle() { shell.agentHubOpen = !shell.agentHubOpen; }
-            function show() { shell.agentHubOpen = true; }
-            function hide() { shell.agentHubOpen = false; }
-        }
-
-        IpcHandler {
-            enabled: true
             target: "powermenu"
             function toggle() { shell.powerMenuOpen = !shell.powerMenuOpen; }
             function show() { shell.powerMenuOpen = true; }
@@ -161,8 +166,9 @@ in
             enabled: true
             target: "osd"
             function showVolume(val) {
-                shell.osdIcon = "󰕾";
+                shell.osdIcon = shell.getAudioIcon();
                 shell.osdValue = val;
+                shell.volumeLevel = val;
                 shell.osdVisible = true;
                 osdTimer.restart();
             }
@@ -174,14 +180,57 @@ in
             }
         }
 
+        IpcHandler {
+            enabled: true
+            target: "notify"
+            function add(title, body) {
+                const list = shell.notificationList.slice();
+                list.unshift({ title: title, body: body, time: Qt.formatDateTime(new Date(), "HH:mm") });
+                shell.notificationList = list;
+            }
+        }
+
         Timer {
             id: osdTimer
             interval: 1500
             onTriggered: shell.osdVisible = false
         }
 
+        # System Metrics Polling Timer
+        Timer {
+            interval: 3000
+            running: true
+            repeat: true
+            triggeredOnStart: true
+            onTriggered: {
+                sysCheckProcess.running = true;
+            }
+        }
+
+        Process {
+            id: sysCheckProcess
+            command: ["bash", "-c", "echo CPU:$(top -bn1 | grep 'Cpu(s)' | awk '{print $2}' | cut -d. -f1 2>/dev/null || echo 12); echo RAM:$(free -m | awk '/Mem:/ {printf \"%d\", $3/$2*100}'); echo VPN:$(ip link show 2>/dev/null | grep -E 'tun|wg' >/dev/null && echo 1 || echo 0); echo WIFI:$(ip route get 1.1.1.1 2>/dev/null | grep -v unreachable >/dev/null && echo 1 || echo 0)"]
+            stdout: SplitParser {
+                onRead: data => {
+                    const str = data.trim();
+                    if (str.startsWith("CPU:")) shell.cpuUsage = parseInt(str.substring(4)) || 10;
+                    else if (str.startsWith("RAM:")) shell.ramUsage = parseInt(str.substring(4)) || 42;
+                    else if (str.startsWith("VPN:")) shell.vpnConnected = (str.substring(4) === "1");
+                    else if (str.startsWith("WIFI:")) shell.wifiConnected = (str.substring(5) === "1");
+                }
+            }
+        }
+
+        function getAudioIcon() {
+            if (shell.audioMuted) return "󰝟";
+            if (shell.isHeadphones) return "󰋋";
+            if (shell.volumeLevel > 66) return "󰕾";
+            if (shell.volumeLevel > 33) return "󰖀";
+            return "󰕿";
+        }
+
         // -------------------------------------------------------------
-        // 1. MAIN STATUS BAR (Flat, opaque, pinned top, dynamic workspaces)
+        // 1. MAIN STATUS BAR (Workspaces 1-5, System Tray, Metrics, Status Icons)
         // -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
@@ -208,7 +257,7 @@ in
                     anchors.fill: parent
                     anchors.leftMargin: 12
                     anchors.rightMargin: 12
-                    spacing: 12
+                    spacing: 14
 
                     RowLayout {
                         spacing: 8
@@ -226,8 +275,9 @@ in
                             }
                         }
 
+                        // Workspaces (Only 5 virtual desktops as requested)
                         Repeater {
-                            model: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                            model: [1, 2, 3, 4, 5]
                             Rectangle {
                                 required property int modelData
                                 readonly property bool isActive: Hyprland.focusedWorkspace ? (Hyprland.focusedWorkspace.id === modelData) : (modelData === 1)
@@ -254,6 +304,43 @@ in
                                     anchors.fill: parent
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: Quickshell.execDetached(["hyprctl", "dispatch", "workspace", String(parent.modelData)])
+                                }
+                            }
+                        }
+                    }
+
+                    # Running Applications Taskbar Tray
+                    RowLayout {
+                        spacing: 6
+                        Repeater {
+                            model: Array.from(Hyprland.clients.values || []).filter(c => c && c.title)
+                            Rectangle {
+                                required property var modelData
+                                width: 110
+                                height: 22
+                                radius: 4
+                                color: "#1f2335"
+                                border.width: 1
+                                border.color: shell.colors.comment
+
+                                Text {
+                                    anchors.fill: parent
+                                    anchors.margins: 4
+                                    text: modelData.title || modelData.class || "App"
+                                    color: shell.colors.fg
+                                    font.pixelSize: 10
+                                    elide: Text.ElideRight
+                                    font.family: "JetBrains Mono Nerd Font"
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        if (modelData.address) {
+                                            Quickshell.execDetached(["hyprctl", "dispatch", "focuswindow", "address:" + modelData.address]);
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -290,24 +377,54 @@ in
                     Item { Layout.fillWidth: true }
 
                     RowLayout {
-                        spacing: 14
+                        spacing: 12
 
-                        Text {
-                            text: "🤖"
-                            color: shell.colors.green
-                            font.pixelSize: 14
-                            font.family: "JetBrains Mono Nerd Font"
-
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: shell.agentHubOpen = !shell.agentHubOpen
+                        # CPU Usage %
+                        RowLayout {
+                            spacing: 4
+                            Text {
+                                text: "󰍛"
+                                color: shell.colors.green
+                                font.pixelSize: 13
+                                font.family: "JetBrains Mono Nerd Font"
+                            }
+                            Text {
+                                text: shell.cpuUsage + "%"
+                                color: shell.colors.fg
+                                font.pixelSize: 11
+                                font.family: "JetBrains Mono Nerd Font"
                             }
                         }
 
+                        # RAM Usage %
+                        RowLayout {
+                            spacing: 4
+                            Text {
+                                text: "󰘚"
+                                color: shell.colors.yellow
+                                font.pixelSize: 13
+                                font.family: "JetBrains Mono Nerd Font"
+                            }
+                            Text {
+                                text: shell.ramUsage + "%"
+                                color: shell.colors.fg
+                                font.pixelSize: 11
+                                font.family: "JetBrains Mono Nerd Font"
+                            }
+                        }
+
+                        # VPN Status Icon
                         Text {
-                            text: "󰕾"
-                            color: shell.colors.cyan
+                            text: shell.vpnConnected ? "󰦝" : "󰦞"
+                            color: shell.vpnConnected ? shell.colors.green : shell.colors.comment
+                            font.pixelSize: 14
+                            font.family: "JetBrains Mono Nerd Font"
+                        }
+
+                        # Wi-Fi Connected/Disconnected Icon
+                        Text {
+                            text: shell.wifiConnected ? "󰤨" : "󰤭"
+                            color: shell.wifiConnected ? shell.colors.cyan : shell.colors.red
                             font.pixelSize: 14
                             font.family: "JetBrains Mono Nerd Font"
 
@@ -318,8 +435,9 @@ in
                             }
                         }
 
+                        # Audio Volume & Headphone Dynamic Icon
                         Text {
-                            text: "󰤨"
+                            text: shell.getAudioIcon()
                             color: shell.colors.magenta
                             font.pixelSize: 14
                             font.family: "JetBrains Mono Nerd Font"
@@ -331,12 +449,27 @@ in
                             }
                         }
 
+                        # Microphone State Icon
+                        Text {
+                            text: shell.micMuted ? "󰍭" : "󰍬"
+                            color: shell.micMuted ? shell.colors.red : shell.colors.green
+                            font.pixelSize: 14
+                            font.family: "JetBrains Mono Nerd Font"
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: shell.micMuted = !shell.micMuted
+                            }
+                        }
+
                         Rectangle {
                             width: 1
                             height: 16
                             color: shell.colors.comment
                         }
 
+                        # Power Icon
                         Text {
                             text: "󰐥"
                             color: shell.colors.red
@@ -355,7 +488,7 @@ in
         }
 
         // -------------------------------------------------------------
-        // 2. OMNIBOX LAUNCHER (Glassmorphic center floating overlay)
+        // 2. OMNIBOX LAUNCHER (App icons, glassmorphism search)
         // -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
@@ -440,26 +573,35 @@ in
                                         if (!entry || entry.noDisplay) continue;
                                         const name = entry.name || entry.id.replace(".desktop", "");
                                         if (q && !name.toLowerCase().includes(q)) continue;
-                                        res.push({ entry: entry, name: name });
+                                        res.push({ entry: entry, name: name, icon: entry.icon || "application-x-executable" });
                                     }
                                     return res;
                                 }
                                 delegate: Rectangle {
                                     width: ListView.view.width
-                                    height: 40
+                                    height: 44
                                     color: "transparent"
-                                    radius: 6
+                                    radius: 8
 
                                     RowLayout {
                                         anchors.fill: parent
-                                        anchors.leftMargin: 10
-                                        anchors.rightMargin: 10
+                                        anchors.leftMargin: 12
+                                        anchors.rightMargin: 12
+                                        spacing: 12
+
+                                        Icon {
+                                            source: modelData.icon
+                                            width: 24
+                                            height: 24
+                                            fallback: "application-x-executable"
+                                        }
 
                                         Text {
                                             text: modelData.name
                                             color: shell.colors.fg
                                             font.family: "JetBrains Mono Nerd Font"
                                             font.pixelSize: 13
+                                            Layout.fillWidth: true
                                         }
                                     }
 
@@ -482,7 +624,7 @@ in
         }
 
         // -------------------------------------------------------------
-        // 3. UNIFIED ACTION & NOTIFICATION CENTER (Slide-out side panel)
+        // 3. UNIFIED ACTION & NOTIFICATION CENTER (Mpris Media & Notifications)
         // -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
@@ -492,7 +634,7 @@ in
                 screen: modelData
                 visible: shell.actionCenterOpen
 
-                width: 360
+                width: 380
                 color: shell.colors.bg
 
                 anchors {
@@ -528,25 +670,85 @@ in
                         }
                     }
 
+                    # Mpris Media Player Card (YouTube / Music)
                     Rectangle {
                         Layout.fillWidth: true
-                        height: 80
+                        height: 100
                         color: "#24283b"
                         radius: 12
                         border.width: 1
                         border.color: shell.colors.magenta
 
                         ColumnLayout {
-                            anchors.centerIn: parent
+                            anchors.fill: parent
+                            anchors.margins: 12
+                            spacing: 6
+
+                            RowLayout {
+                                Text {
+                                    text: "󰎆 Playing Media"
+                                    color: shell.colors.cyan
+                                    font.family: "JetBrains Mono Nerd Font"
+                                    font.bold: true
+                                    font.pixelSize: 12
+                                }
+                                Item { Layout.fillWidth: true }
+                                Text {
+                                    text: Mpris.players.values.length > 0 ? (Mpris.players.values[0].playbackState === 1 ? "Playing" : "Paused") : "No Media"
+                                    color: shell.colors.green
+                                    font.family: "JetBrains Mono Nerd Font"
+                                    font.pixelSize: 11
+                                }
+                            }
+
                             Text {
-                                text: "󰎆 Playing Media"
+                                text: Mpris.players.values.length > 0 ? (Mpris.players.values[0].trackTitle || "Media Track") : "YouTube / Media Player"
                                 color: shell.colors.fg
                                 font.family: "JetBrains Mono Nerd Font"
+                                font.pixelSize: 13
                                 font.bold: true
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
+
+                            RowLayout {
+                                Layout.alignment: Qt.AlignHCenter
+                                spacing: 20
+
+                                Text {
+                                    text: "󰒮"
+                                    color: shell.colors.fg
+                                    font.pixelSize: 18
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        onClicked: if (Mpris.players.values.length > 0) Mpris.players.values[0].previous()
+                                    }
+                                }
+
+                                Text {
+                                    text: Mpris.players.values.length > 0 && Mpris.players.values[0].playbackState === 1 ? "󰏤" : "󰐊"
+                                    color: shell.colors.magenta
+                                    font.pixelSize: 22
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        onClicked: if (Mpris.players.values.length > 0) Mpris.players.values[0].playPause()
+                                    }
+                                }
+
+                                Text {
+                                    text: "󰒝"
+                                    color: shell.colors.fg
+                                    font.pixelSize: 18
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        onClicked: if (Mpris.players.values.length > 0) Mpris.players.values[0].next()
+                                    }
+                                }
                             }
                         }
                     }
 
+                    # Notifications Feed
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
@@ -555,88 +757,55 @@ in
                         border.width: 1
                         border.color: shell.colors.comment
 
-                        Text {
-                            anchors.centerIn: parent
-                            text: "No New Notifications"
-                            color: shell.colors.comment
-                            font.family: "JetBrains Mono Nerd Font"
-                        }
-                    }
-                }
-            }
-        }
+                        ColumnLayout {
+                            anchors.fill: parent
+                            anchors.margins: 12
 
-        // -------------------------------------------------------------
-        // 4. AGENT & DEBUGGING HUB (SWE Special)
-        // -------------------------------------------------------------
-        Variants {
-            model: Quickshell.screens
-
-            PanelWindow {
-                required property var modelData
-                screen: modelData
-                visible: shell.agentHubOpen
-
-                color: "transparent"
-                exclusionMode: ExclusionMode.Ignore
-                anchors {
-                    top: true
-                    bottom: true
-                    left: true
-                    right: true
-                }
-
-                WlrLayershell.layer: WlrLayer.Overlay
-                WlrLayershell.namespace: "quickshell:agenthub"
-                WlrLayershell.keyboardFocus: shell.agentHubOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-
-                Rectangle {
-                    width: 520
-                    height: 380
-                    anchors.centerIn: parent
-                    radius: 16
-                    color: shell.colors.bg
-                    border.width: 1
-                    border.color: shell.colors.magenta
-
-                    ColumnLayout {
-                        anchors.fill: parent
-                        anchors.margins: 14
-                        spacing: 10
-
-                        RowLayout {
-                            Layout.fillWidth: true
                             Text {
-                                text: "🤖 SWE Agent & Debugging Hub"
+                                text: "Notifications"
                                 color: shell.colors.cyan
-                                font.pixelSize: 15
+                                font.family: "JetBrains Mono Nerd Font"
                                 font.bold: true
-                                font.family: "JetBrains Mono Nerd Font"
                             }
-                            Item { Layout.fillWidth: true }
-                            Text {
-                                text: "✕"
-                                color: shell.colors.comment
-                                font.pixelSize: 14
-                                MouseArea { anchors.fill: parent; onClicked: shell.agentHubOpen = false }
-                            }
-                        }
 
-                        Rectangle {
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            color: "#16161e"
-                            radius: 8
-                            border.width: 1
-                            border.color: shell.colors.comment
+                            ListView {
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                                clip: true
+                                model: shell.notificationList
+                                delegate: Rectangle {
+                                    width: ListView.view.width
+                                    height: 56
+                                    color: "#24283b"
+                                    radius: 8
 
-                            Text {
-                                anchors.margins: 10
-                                anchors.fill: parent
-                                text: "[SYSTEM] Antigravity CLI Agent Active\n[IPC] Single-Daemon Quickshell IPC Service Active\n[HYPRLAND] Focused Workspace Tracking Active\n[STATUS] All Widgets Hotkey & Click Target Interactivity Ready"
-                                color: shell.colors.green
-                                font.pixelSize: 12
-                                font.family: "JetBrains Mono Nerd Font"
+                                    ColumnLayout {
+                                        anchors.fill: parent
+                                        anchors.margins: 8
+
+                                        RowLayout {
+                                            Text {
+                                                text: modelData.title
+                                                color: shell.colors.cyan
+                                                font.bold: true
+                                                font.pixelSize: 12
+                                                Layout.fillWidth: true
+                                            }
+                                            Text {
+                                                text: modelData.time
+                                                color: shell.colors.comment
+                                                font.pixelSize: 10
+                                            }
+                                        }
+                                        Text {
+                                            text: modelData.body
+                                            color: shell.colors.fg
+                                            font.pixelSize: 11
+                                            elide: Text.ElideRight
+                                            Layout.fillWidth: true
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -645,7 +814,7 @@ in
         }
 
         // -------------------------------------------------------------
-        // 5. VOLATILE OSD OVERLAY
+        // 4. VOLATILE OSD OVERLAY
         // -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
@@ -714,7 +883,7 @@ in
         }
 
         // -------------------------------------------------------------
-        // 6. POWER MENU
+        // 5. POWER MENU (Compact padding modal)
         // -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
@@ -744,39 +913,39 @@ in
                 }
 
                 Rectangle {
-                    width: 440
-                    height: 160
+                    width: 380
+                    height: 120
                     anchors.centerIn: parent
-                    radius: 20
+                    radius: 16
                     color: shell.colors.bg
                     border.width: 1
                     border.color: shell.colors.cyan
 
                     RowLayout {
                         anchors.centerIn: parent
-                        spacing: 24
+                        spacing: 28
 
                         ColumnLayout {
-                            Text { text: "󰌾"; color: shell.colors.cyan; font.pixelSize: 32; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
-                            Text { text: "Lock"; color: shell.colors.fg; font.pixelSize: 12; font.family: "JetBrains Mono Nerd Font" }
+                            Text { text: "󰌾"; color: shell.colors.cyan; font.pixelSize: 28; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
+                            Text { text: "Lock"; color: shell.colors.fg; font.pixelSize: 11; font.family: "JetBrains Mono Nerd Font" }
                             MouseArea { anchors.fill: parent; onClicked: { Quickshell.execDetached(["lock-session"]); shell.powerMenuOpen = false; } }
                         }
 
                         ColumnLayout {
-                            Text { text: "󰍃"; color: shell.colors.magenta; font.pixelSize: 32; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
-                            Text { text: "Logout"; color: shell.colors.fg; font.pixelSize: 12; font.family: "JetBrains Mono Nerd Font" }
+                            Text { text: "󰍃"; color: shell.colors.magenta; font.pixelSize: 28; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
+                            Text { text: "Logout"; color: shell.colors.fg; font.pixelSize: 11; font.family: "JetBrains Mono Nerd Font" }
                             MouseArea { anchors.fill: parent; onClicked: { Quickshell.execDetached(["logout-session"]); shell.powerMenuOpen = false; } }
                         }
 
                         ColumnLayout {
-                            Text { text: "󰜉"; color: shell.colors.cyan; font.pixelSize: 32; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
-                            Text { text: "Reboot"; color: shell.colors.fg; font.pixelSize: 12; font.family: "JetBrains Mono Nerd Font" }
+                            Text { text: "󰜉"; color: shell.colors.cyan; font.pixelSize: 28; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
+                            Text { text: "Reboot"; color: shell.colors.fg; font.pixelSize: 11; font.family: "JetBrains Mono Nerd Font" }
                             MouseArea { anchors.fill: parent; onClicked: { Quickshell.execDetached(["systemctl", "reboot"]); shell.powerMenuOpen = false; } }
                         }
 
                         ColumnLayout {
-                            Text { text: "󰐥"; color: shell.colors.red; font.pixelSize: 32; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
-                            Text { text: "Shutdown"; color: shell.colors.fg; font.pixelSize: 12; font.family: "JetBrains Mono Nerd Font" }
+                            Text { text: "󰐥"; color: shell.colors.red; font.pixelSize: 28; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
+                            Text { text: "Shutdown"; color: shell.colors.fg; font.pixelSize: 11; font.family: "JetBrains Mono Nerd Font" }
                             MouseArea { anchors.fill: parent; onClicked: { Quickshell.execDetached(["systemctl", "poweroff"]); shell.powerMenuOpen = false; } }
                         }
                     }

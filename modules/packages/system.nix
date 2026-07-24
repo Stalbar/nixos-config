@@ -31,6 +31,7 @@
       neovim
       neovide
       zoxide
+      libnotify
       imagemagick
       nh
       sops

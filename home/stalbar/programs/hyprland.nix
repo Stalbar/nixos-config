@@ -103,12 +103,11 @@ in
       };
 
       bind = [
-        # Core App Binds
+        # Core App Binds (App launcher is bound ONLY to ALT+SPACE)
         (bind "SUPER + Q" (lua ''function() hl.exec_cmd("foot") end'') null)
         (bind "SUPER + F4" (lua ''hl.dsp.window.close()'') null)
         (bind "SUPER + V" (lua ''hl.dsp.window.float({ toggle = true })'') null)
         (bind "ALT + SPACE" (lua ''function() hl.exec_cmd("qs-app-launcher") end'') null)
-        (bind "SUPER + SPACE" (lua ''function() hl.exec_cmd("qs-app-launcher") end'') null)
         (bind "SUPER + M" (lua ''function() hl.exec_cmd("qs-power-menu") end'') null)
         (bind "SUPER + N" (lua ''function() hl.exec_cmd("qs-action-center") end'') null)
         (bind "SUPER + R" (lua ''function() hl.exec_cmd("change-wallpaper") end'') null)
@@ -160,9 +159,10 @@ in
         (bind "SUPER + ALT + 9" (lua ''hl.dsp.window.move({ workspace = 9 })'') null)
         (bind "SUPER + ALT + 0" (lua ''hl.dsp.window.move({ workspace = 11 })'') null)
 
-        # Applications Shortcuts (zen-beta binary for Zen browser)
-        (bind "ALT + N" (lua ''function() hl.exec_cmd("neovide --no-fork") end'') null)
+        # Applications Shortcuts (Zen Browser bound to SUPER+B and ALT+F)
+        (bind "SUPER + B" (lua ''function() hl.exec_cmd("zen-beta") end'') null)
         (bind "ALT + F" (lua ''function() hl.exec_cmd("zen-beta") end'') null)
+        (bind "ALT + N" (lua ''function() hl.exec_cmd("neovide --no-fork") end'') null)
         (bind "ALT + C" (lua ''function() hl.exec_cmd("chromium --enable-features=UseOzonePlatform --ozone-platform=wayland") end'') null)
         (bind "ALT + B" (lua ''function() hl.exec_cmd("blueman-manager") end'') null)
 

@@ -4,21 +4,11 @@ let
   colors = import ../theme/colors.nix;
   lua = lib.generators.mkLuaInline;
 
-  mkBind = mod: key: cmd: {
-    _args = [
-      mod
-      key
-      (lua "function() hl.dsp.exec_cmd(${builtins.toJSON cmd}) end")
-    ];
-  };
-
-  mkBindFn = mod: key: fnStr: {
-    _args = [
-      mod
-      key
-      (lua fnStr)
-    ];
-  };
+  bind =
+    keys: dispatcher: opts:
+    {
+      _args = [ keys dispatcher ] ++ lib.optional (opts != null) opts;
+    };
 in
 {
   xdg.configFile."hypr/hyprland.lua".text = "# Hyprland uses hyprland.conf\n";
@@ -113,54 +103,54 @@ in
       };
 
       bind = [
-        (mkBind "SUPER" "Q" "foot")
-        (mkBindFn "SUPER" "F4" "hl.dsp.window.close")
-        (mkBind "SUPER" "V" "hyprctl dispatch togglefloating")
-        (mkBind "ALT" "SPACE" "qs-app-launcher")
-        (mkBind "SUPER" "SPACE" "qs-app-launcher")
-        (mkBind "SUPER" "M" "qs-power-menu")
-        (mkBind "SUPER" "N" "qs-action-center")
-        (mkBind "SUPER" "R" "change-wallpaper")
-        (mkBind "SUPER" "F" "hyprctl dispatch fullscreen")
+        (bind "SUPER + Q" (lua ''hl.dsp.exec_cmd("foot")'') null)
+        (bind "SUPER + F4" (lua ''hl.dsp.window.close()'') null)
+        (bind "SUPER + V" (lua ''hl.dsp.exec_cmd("hyprctl dispatch togglefloating")'') null)
+        (bind "ALT + SPACE" (lua ''hl.dsp.exec_cmd("qs-app-launcher")'') null)
+        (bind "SUPER + SPACE" (lua ''hl.dsp.exec_cmd("qs-app-launcher")'') null)
+        (bind "SUPER + M" (lua ''hl.dsp.exec_cmd("qs-power-menu")'') null)
+        (bind "SUPER + N" (lua ''hl.dsp.exec_cmd("qs-action-center")'') null)
+        (bind "SUPER + R" (lua ''hl.dsp.exec_cmd("change-wallpaper")'') null)
+        (bind "SUPER + F" (lua ''hl.dsp.exec_cmd("hyprctl dispatch fullscreen")'') null)
 
-        (mkBind "SUPER" "H" "hyprctl dispatch movefocus l")
-        (mkBind "SUPER" "L" "hyprctl dispatch movefocus r")
-        (mkBind "SUPER" "K" "hyprctl dispatch movefocus u")
-        (mkBind "SUPER" "J" "hyprctl dispatch movefocus d")
+        (bind "SUPER + H" (lua ''hl.dsp.exec_cmd("hyprctl dispatch movefocus l")'') null)
+        (bind "SUPER + L" (lua ''hl.dsp.exec_cmd("hyprctl dispatch movefocus r")'') null)
+        (bind "SUPER + K" (lua ''hl.dsp.exec_cmd("hyprctl dispatch movefocus u")'') null)
+        (bind "SUPER + J" (lua ''hl.dsp.exec_cmd("hyprctl dispatch movefocus d")'') null)
 
-        (mkBind "SUPER_ALT" "H" "hyprctl dispatch swapwindow l")
-        (mkBind "SUPER_ALT" "L" "hyprctl dispatch swapwindow r")
-        (mkBind "SUPER_ALT" "K" "hyprctl dispatch swapwindow u")
-        (mkBind "SUPER_ALT" "J" "hyprctl dispatch swapwindow d")
+        (bind "SUPER + ALT + H" (lua ''hl.dsp.exec_cmd("hyprctl dispatch swapwindow l")'') null)
+        (bind "SUPER + ALT + L" (lua ''hl.dsp.exec_cmd("hyprctl dispatch swapwindow r")'') null)
+        (bind "SUPER + ALT + K" (lua ''hl.dsp.exec_cmd("hyprctl dispatch swapwindow u")'') null)
+        (bind "SUPER + ALT + J" (lua ''hl.dsp.exec_cmd("hyprctl dispatch swapwindow d")'') null)
 
-        (mkBind "SUPER" "1" "hyprctl dispatch workspace 1")
-        (mkBind "SUPER" "2" "hyprctl dispatch workspace 2")
-        (mkBind "SUPER" "3" "hyprctl dispatch workspace 3")
-        (mkBind "SUPER" "4" "hyprctl dispatch workspace 4")
-        (mkBind "SUPER" "5" "hyprctl dispatch workspace 5")
-        (mkBind "SUPER" "0" "hyprctl dispatch workspace 11")
+        (bind "SUPER + 1" (lua ''hl.dsp.exec_cmd("hyprctl dispatch workspace 1")'') null)
+        (bind "SUPER + 2" (lua ''hl.dsp.exec_cmd("hyprctl dispatch workspace 2")'') null)
+        (bind "SUPER + 3" (lua ''hl.dsp.exec_cmd("hyprctl dispatch workspace 3")'') null)
+        (bind "SUPER + 4" (lua ''hl.dsp.exec_cmd("hyprctl dispatch workspace 4")'') null)
+        (bind "SUPER + 5" (lua ''hl.dsp.exec_cmd("hyprctl dispatch workspace 5")'') null)
+        (bind "SUPER + 0" (lua ''hl.dsp.exec_cmd("hyprctl dispatch workspace 11")'') null)
 
-        (mkBind "SUPER_ALT" "1" "hyprctl dispatch movetoworkspace 1")
-        (mkBind "SUPER_ALT" "2" "hyprctl dispatch movetoworkspace 2")
-        (mkBind "SUPER_ALT" "3" "hyprctl dispatch movetoworkspace 3")
-        (mkBind "SUPER_ALT" "4" "hyprctl dispatch movetoworkspace 4")
-        (mkBind "SUPER_ALT" "5" "hyprctl dispatch movetoworkspace 5")
-        (mkBind "SUPER_ALT" "0" "hyprctl dispatch movetoworkspace 11")
+        (bind "SUPER + ALT + 1" (lua ''hl.dsp.exec_cmd("hyprctl dispatch movetoworkspace 1")'') null)
+        (bind "SUPER + ALT + 2" (lua ''hl.dsp.exec_cmd("hyprctl dispatch movetoworkspace 2")'') null)
+        (bind "SUPER + ALT + 3" (lua ''hl.dsp.exec_cmd("hyprctl dispatch movetoworkspace 3")'') null)
+        (bind "SUPER + ALT + 4" (lua ''hl.dsp.exec_cmd("hyprctl dispatch movetoworkspace 4")'') null)
+        (bind "SUPER + ALT + 5" (lua ''hl.dsp.exec_cmd("hyprctl dispatch movetoworkspace 5")'') null)
+        (bind "SUPER + ALT + 0" (lua ''hl.dsp.exec_cmd("hyprctl dispatch movetoworkspace 11")'') null)
 
-        (mkBind "ALT" "N" "neovide --no-fork")
-        (mkBind "ALT" "F" "zen")
-        (mkBind "ALT" "C" "chromium --enable-features=UseOzonePlatform --ozone-platform=wayland")
-        (mkBind "ALT" "B" "blueman-manager")
+        (bind "ALT + N" (lua ''hl.dsp.exec_cmd("neovide --no-fork")'') null)
+        (bind "ALT + F" (lua ''hl.dsp.exec_cmd("zen")'') null)
+        (bind "ALT + C" (lua ''hl.dsp.exec_cmd("chromium --enable-features=UseOzonePlatform --ozone-platform=wayland")'') null)
+        (bind "ALT + B" (lua ''hl.dsp.exec_cmd("blueman-manager")'') null)
 
-        (mkBind "" "Print" "grimblast --notify copysave area ~/Pictures/Screenshots/screenshot.png")
-        (mkBind "SUPER" "S" "grim -g \"$(slurp)\" - | swappy -f -")
+        (bind "Print" (lua ''hl.dsp.exec_cmd("grimblast --notify copysave area ~/Pictures/Screenshots/screenshot.png")'') null)
+        (bind "SUPER + S" (lua ''hl.dsp.exec_cmd("grim -g \"$(slurp)\" - | swappy -f -")'') null)
 
-        (mkBind "" "XF86AudioRaiseVolume" "volume --inc")
-        (mkBind "" "XF86AudioLowerVolume" "volume --dec")
-        (mkBind "" "XF86AudioMute" "volume --mute-volume")
-        (mkBind "" "XF86AudioMicMute" "volume --mute-mic")
-        (mkBind "" "XF86MonBrightnessUp" "brightness --inc")
-        (mkBind "" "XF86MonBrightnessDown" "brightness --dec")
+        (bind "XF86AudioRaiseVolume" (lua ''hl.dsp.exec_cmd("volume --inc")'') { repeating = true; })
+        (bind "XF86AudioLowerVolume" (lua ''hl.dsp.exec_cmd("volume --dec")'') { repeating = true; })
+        (bind "XF86AudioMute" (lua ''hl.dsp.exec_cmd("volume --mute-volume")'') null)
+        (bind "XF86AudioMicMute" (lua ''hl.dsp.exec_cmd("volume --mute-mic")'') null)
+        (bind "XF86MonBrightnessUp" (lua ''hl.dsp.exec_cmd("brightness --inc")'') { repeating = true; })
+        (bind "XF86MonBrightnessDown" (lua ''hl.dsp.exec_cmd("brightness --dec")'') { repeating = true; })
       ];
 
       on = [

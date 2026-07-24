@@ -167,18 +167,28 @@ in
         IpcHandler {
             enabled: true
             target: "osd"
-            function showVolume(val) {
+            function showVolume(val: int) {
                 shell.osdIcon = shell.getAudioIcon();
                 shell.osdValue = val;
                 shell.volumeLevel = val;
                 shell.osdVisible = true;
                 osdTimer.restart();
             }
-            function showBrightness(val) {
+            function showBrightness(val: int) {
                 shell.osdIcon = "󰌵";
                 shell.osdValue = val;
                 shell.osdVisible = true;
                 osdTimer.restart();
+            }
+        }
+
+        IpcHandler {
+            enabled: true
+            target: "notify"
+            function add(title: string, body: string) {
+                const list = shell.notificationList.slice();
+                list.unshift({ title: title, body: body, time: Qt.formatDateTime(new Date(), "HH:mm") });
+                shell.notificationList = list;
             }
         }
 

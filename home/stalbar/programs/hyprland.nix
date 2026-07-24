@@ -103,48 +103,55 @@ in
       };
 
       bind = [
+        # Core App Binds
         (bind "SUPER + Q" (lua ''hl.dsp.exec_cmd("foot")'') null)
         (bind "SUPER + F4" (lua ''hl.dsp.window.close()'') null)
-        (bind "SUPER + V" (lua ''hl.dsp.exec_cmd("hyprctl dispatch togglefloating")'') null)
+        (bind "SUPER + V" (lua ''hl.dsp.window.float({ toggle = true })'') null)
         (bind "ALT + SPACE" (lua ''hl.dsp.exec_cmd("qs-app-launcher")'') null)
         (bind "SUPER + SPACE" (lua ''hl.dsp.exec_cmd("qs-app-launcher")'') null)
         (bind "SUPER + M" (lua ''hl.dsp.exec_cmd("qs-power-menu")'') null)
         (bind "SUPER + N" (lua ''hl.dsp.exec_cmd("qs-action-center")'') null)
         (bind "SUPER + R" (lua ''hl.dsp.exec_cmd("change-wallpaper")'') null)
-        (bind "SUPER + F" (lua ''hl.dsp.exec_cmd("hyprctl dispatch fullscreen")'') null)
+        (bind "SUPER + F" (lua ''hl.dsp.window.fullscreen()'') null)
 
-        (bind "SUPER + H" (lua ''hl.dsp.exec_cmd("hyprctl dispatch movefocus l")'') null)
-        (bind "SUPER + L" (lua ''hl.dsp.exec_cmd("hyprctl dispatch movefocus r")'') null)
-        (bind "SUPER + K" (lua ''hl.dsp.exec_cmd("hyprctl dispatch movefocus u")'') null)
-        (bind "SUPER + J" (lua ''hl.dsp.exec_cmd("hyprctl dispatch movefocus d")'') null)
+        # Directional Focus & Swap
+        (bind "SUPER + H" (lua ''hl.dsp.focus({ direction = "l" })'') null)
+        (bind "SUPER + L" (lua ''hl.dsp.focus({ direction = "r" })'') null)
+        (bind "SUPER + K" (lua ''hl.dsp.focus({ direction = "u" })'') null)
+        (bind "SUPER + J" (lua ''hl.dsp.focus({ direction = "d" })'') null)
 
-        (bind "SUPER + ALT + H" (lua ''hl.dsp.exec_cmd("hyprctl dispatch swapwindow l")'') null)
-        (bind "SUPER + ALT + L" (lua ''hl.dsp.exec_cmd("hyprctl dispatch swapwindow r")'') null)
-        (bind "SUPER + ALT + K" (lua ''hl.dsp.exec_cmd("hyprctl dispatch swapwindow u")'') null)
-        (bind "SUPER + ALT + J" (lua ''hl.dsp.exec_cmd("hyprctl dispatch swapwindow d")'') null)
+        (bind "SUPER + ALT + H" (lua ''hl.dsp.window.swap({ direction = "l" })'') null)
+        (bind "SUPER + ALT + L" (lua ''hl.dsp.window.swap({ direction = "r" })'') null)
+        (bind "SUPER + ALT + K" (lua ''hl.dsp.window.swap({ direction = "u" })'') null)
+        (bind "SUPER + ALT + J" (lua ''hl.dsp.window.swap({ direction = "d" })'') null)
 
-        (bind "SUPER + 1" (lua ''hl.dsp.exec_cmd("hyprctl dispatch workspace 1")'') null)
-        (bind "SUPER + 2" (lua ''hl.dsp.exec_cmd("hyprctl dispatch workspace 2")'') null)
-        (bind "SUPER + 3" (lua ''hl.dsp.exec_cmd("hyprctl dispatch workspace 3")'') null)
-        (bind "SUPER + 4" (lua ''hl.dsp.exec_cmd("hyprctl dispatch workspace 4")'') null)
-        (bind "SUPER + 5" (lua ''hl.dsp.exec_cmd("hyprctl dispatch workspace 5")'') null)
-        (bind "SUPER + 0" (lua ''hl.dsp.exec_cmd("hyprctl dispatch workspace 11")'') null)
+        # Virtual Desktops Focus (Verified HL.Dispatcher hl.dsp.focus({ workspace = N }))
+        (bind "SUPER + 1" (lua ''hl.dsp.focus({ workspace = 1 })'') null)
+        (bind "SUPER + 2" (lua ''hl.dsp.focus({ workspace = 2 })'') null)
+        (bind "SUPER + 3" (lua ''hl.dsp.focus({ workspace = 3 })'') null)
+        (bind "SUPER + 4" (lua ''hl.dsp.focus({ workspace = 4 })'') null)
+        (bind "SUPER + 5" (lua ''hl.dsp.focus({ workspace = 5 })'') null)
+        (bind "SUPER + 0" (lua ''hl.dsp.focus({ workspace = 11 })'') null)
 
-        (bind "SUPER + ALT + 1" (lua ''hl.dsp.exec_cmd("hyprctl dispatch movetoworkspace 1")'') null)
-        (bind "SUPER + ALT + 2" (lua ''hl.dsp.exec_cmd("hyprctl dispatch movetoworkspace 2")'') null)
-        (bind "SUPER + ALT + 3" (lua ''hl.dsp.exec_cmd("hyprctl dispatch movetoworkspace 3")'') null)
-        (bind "SUPER + ALT + 4" (lua ''hl.dsp.exec_cmd("hyprctl dispatch movetoworkspace 4")'') null)
-        (bind "SUPER + ALT + 5" (lua ''hl.dsp.exec_cmd("hyprctl dispatch movetoworkspace 5")'') null)
-        (bind "SUPER + ALT + 0" (lua ''hl.dsp.exec_cmd("hyprctl dispatch movetoworkspace 11")'') null)
+        # Virtual Desktops Move Window
+        (bind "SUPER + ALT + 1" (lua ''hl.dsp.window.move({ workspace = 1 })'') null)
+        (bind "SUPER + ALT + 2" (lua ''hl.dsp.window.move({ workspace = 2 })'') null)
+        (bind "SUPER + ALT + 3" (lua ''hl.dsp.window.move({ workspace = 3 })'') null)
+        (bind "SUPER + ALT + 4" (lua ''hl.dsp.window.move({ workspace = 4 })'') null)
+        (bind "SUPER + ALT + 5" (lua ''hl.dsp.window.move({ workspace = 5 })'') null)
+        (bind "SUPER + ALT + 0" (lua ''hl.dsp.window.move({ workspace = 11 })'') null)
 
+        # Applications Shortcuts
         (bind "ALT + N" (lua ''hl.dsp.exec_cmd("neovide --no-fork")'') null)
         (bind "ALT + F" (lua ''hl.dsp.exec_cmd("zen")'') null)
         (bind "ALT + C" (lua ''hl.dsp.exec_cmd("chromium --enable-features=UseOzonePlatform --ozone-platform=wayland")'') null)
         (bind "ALT + B" (lua ''hl.dsp.exec_cmd("blueman-manager")'') null)
 
+        # Screenshots
         (bind "Print" (lua ''hl.dsp.exec_cmd("grimblast --notify copysave area ~/Pictures/Screenshots/screenshot.png")'') null)
         (bind "SUPER + S" (lua ''hl.dsp.exec_cmd("grim -g \"$(slurp)\" - | swappy -f -")'') null)
 
+        # Hardware Keys
         (bind "XF86AudioRaiseVolume" (lua ''hl.dsp.exec_cmd("volume --inc")'') { repeating = true; })
         (bind "XF86AudioLowerVolume" (lua ''hl.dsp.exec_cmd("volume --dec")'') { repeating = true; })
         (bind "XF86AudioMute" (lua ''hl.dsp.exec_cmd("volume --mute-volume")'') null)
@@ -164,12 +171,6 @@ in
                 hl.exec_cmd("nm-applet --indicator")
                 hl.exec_cmd("blueman-applet")
                 hl.exec_cmd("mkdir -p $HOME/Pictures/Screenshots")
-                hl.exec_cmd("hyprctl keyword workspace 1,monitor:HDMI-A-1,default:true")
-                hl.exec_cmd("hyprctl keyword workspace 2,monitor:HDMI-A-1")
-                hl.exec_cmd("hyprctl keyword workspace 3,monitor:HDMI-A-1")
-                hl.exec_cmd("hyprctl keyword workspace 4,monitor:HDMI-A-1")
-                hl.exec_cmd("hyprctl keyword workspace 5,monitor:HDMI-A-1")
-                hl.exec_cmd("hyprctl keyword workspace 11,monitor:eDP-1,default:true")
               end
             '')
           ];

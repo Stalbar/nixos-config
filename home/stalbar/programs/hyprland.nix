@@ -3,17 +3,26 @@
 let
   colors = import ../theme/colors.nix;
   lua = lib.generators.mkLuaInline;
-  mod = key: lua ''mainMod .. " + ${key}"'';
 
-  bind =
-    keys: dispatcher: opts:
-    {
-      _args = [ keys dispatcher ] ++ lib.optional (opts != null) opts;
-    };
+  mkBind = mod: key: cmd: {
+    _args = [
+      mod
+      key
+      (lua "function() hl.dsp.exec_cmd(${builtins.toJSON cmd}) end")
+    ];
+  };
 
-  exec = cmd: lua ''function() hl.dsp.exec_cmd(${builtins.toJSON cmd}) end'';
+  mkBindFn = mod: key: fnStr: {
+    _args = [
+      mod
+      key
+      (lua fnStr)
+    ];
+  };
 in
 {
+  xdg.configFile."hypr/hyprland.lua".text = "# Hyprland uses hyprland.conf\n";
+
   wayland.windowManager.hyprland = {
     enable = true;
     configType = "lua";
@@ -104,54 +113,54 @@ in
       };
 
       bind = [
-        (bind (mod "Q") (exec "foot") null)
-        (bind (mod "F4") (lua "hl.dsp.window.close()") null)
-        (bind (mod "V") (exec "hyprctl dispatch togglefloating") null)
-        (bind "ALT + SPACE" (exec "qs-app-launcher") null)
-        (bind (mod "SPACE") (exec "qs-app-launcher") null)
-        (bind (mod "M") (exec "qs-power-menu") null)
-        (bind (mod "N") (exec "qs-action-center") null)
-        (bind (mod "R") (exec "change-wallpaper") null)
-        (bind (mod "F") (exec "hyprctl dispatch fullscreen") null)
+        (mkBind "SUPER" "Q" "foot")
+        (mkBindFn "SUPER" "F4" "hl.dsp.window.close")
+        (mkBind "SUPER" "V" "hyprctl dispatch togglefloating")
+        (mkBind "ALT" "SPACE" "qs-app-launcher")
+        (mkBind "SUPER" "SPACE" "qs-app-launcher")
+        (mkBind "SUPER" "M" "qs-power-menu")
+        (mkBind "SUPER" "N" "qs-action-center")
+        (mkBind "SUPER" "R" "change-wallpaper")
+        (mkBind "SUPER" "F" "hyprctl dispatch fullscreen")
 
-        (bind (mod "H") (exec "hyprctl dispatch movefocus l") null)
-        (bind (mod "L") (exec "hyprctl dispatch movefocus r") null)
-        (bind (mod "K") (exec "hyprctl dispatch movefocus u") null)
-        (bind (mod "J") (exec "hyprctl dispatch movefocus d") null)
+        (mkBind "SUPER" "H" "hyprctl dispatch movefocus l")
+        (mkBind "SUPER" "L" "hyprctl dispatch movefocus r")
+        (mkBind "SUPER" "K" "hyprctl dispatch movefocus u")
+        (mkBind "SUPER" "J" "hyprctl dispatch movefocus d")
 
-        (bind (mod "ALT + H") (exec "hyprctl dispatch swapwindow l") null)
-        (bind (mod "ALT + L") (exec "hyprctl dispatch swapwindow r") null)
-        (bind (mod "ALT + K") (exec "hyprctl dispatch swapwindow u") null)
-        (bind (mod "ALT + J") (exec "hyprctl dispatch swapwindow d") null)
+        (mkBind "SUPER_ALT" "H" "hyprctl dispatch swapwindow l")
+        (mkBind "SUPER_ALT" "L" "hyprctl dispatch swapwindow r")
+        (mkBind "SUPER_ALT" "K" "hyprctl dispatch swapwindow u")
+        (mkBind "SUPER_ALT" "J" "hyprctl dispatch swapwindow d")
 
-        (bind (mod "1") (exec "hyprctl dispatch workspace 1") null)
-        (bind (mod "2") (exec "hyprctl dispatch workspace 2") null)
-        (bind (mod "3") (exec "hyprctl dispatch workspace 3") null)
-        (bind (mod "4") (exec "hyprctl dispatch workspace 4") null)
-        (bind (mod "5") (exec "hyprctl dispatch workspace 5") null)
-        (bind (mod "0") (exec "hyprctl dispatch workspace 11") null)
+        (mkBind "SUPER" "1" "hyprctl dispatch workspace 1")
+        (mkBind "SUPER" "2" "hyprctl dispatch workspace 2")
+        (mkBind "SUPER" "3" "hyprctl dispatch workspace 3")
+        (mkBind "SUPER" "4" "hyprctl dispatch workspace 4")
+        (mkBind "SUPER" "5" "hyprctl dispatch workspace 5")
+        (mkBind "SUPER" "0" "hyprctl dispatch workspace 11")
 
-        (bind (mod "ALT + 1") (exec "hyprctl dispatch movetoworkspace 1") null)
-        (bind (mod "ALT + 2") (exec "hyprctl dispatch movetoworkspace 2") null)
-        (bind (mod "ALT + 3") (exec "hyprctl dispatch movetoworkspace 3") null)
-        (bind (mod "ALT + 4") (exec "hyprctl dispatch movetoworkspace 4") null)
-        (bind (mod "ALT + 5") (exec "hyprctl dispatch movetoworkspace 5") null)
-        (bind (mod "ALT + 0") (exec "hyprctl dispatch movetoworkspace 11") null)
+        (mkBind "SUPER_ALT" "1" "hyprctl dispatch movetoworkspace 1")
+        (mkBind "SUPER_ALT" "2" "hyprctl dispatch movetoworkspace 2")
+        (mkBind "SUPER_ALT" "3" "hyprctl dispatch movetoworkspace 3")
+        (mkBind "SUPER_ALT" "4" "hyprctl dispatch movetoworkspace 4")
+        (mkBind "SUPER_ALT" "5" "hyprctl dispatch movetoworkspace 5")
+        (mkBind "SUPER_ALT" "0" "hyprctl dispatch movetoworkspace 11")
 
-        (bind "ALT + N" (exec "neovide --no-fork") null)
-        (bind "ALT + F" (exec "zen") null)
-        (bind "ALT + C" (exec "chromium --enable-features=UseOzonePlatform --ozone-platform=wayland") null)
-        (bind "ALT + B" (exec "blueman-manager") null)
+        (mkBind "ALT" "N" "neovide --no-fork")
+        (mkBind "ALT" "F" "zen")
+        (mkBind "ALT" "C" "chromium --enable-features=UseOzonePlatform --ozone-platform=wayland")
+        (mkBind "ALT" "B" "blueman-manager")
 
-        (bind "Print" (exec "grimblast --notify copysave area ~/Pictures/Screenshots/screenshot.png") null)
-        (bind (mod "S") (exec "grim -g \"$(slurp)\" - | swappy -f -") null)
+        (mkBind "" "Print" "grimblast --notify copysave area ~/Pictures/Screenshots/screenshot.png")
+        (mkBind "SUPER" "S" "grim -g \"$(slurp)\" - | swappy -f -")
 
-        (bind "XF86AudioRaiseVolume" (exec "volume --inc") [ "e" ])
-        (bind "XF86AudioLowerVolume" (exec "volume --dec") [ "e" ])
-        (bind "XF86AudioMute" (exec "volume --mute-volume") null)
-        (bind "XF86AudioMicMute" (exec "volume --mute-mic") null)
-        (bind "XF86MonBrightnessUp" (exec "brightness --inc") [ "e" ])
-        (bind "XF86MonBrightnessDown" (exec "brightness --dec") [ "e" ])
+        (mkBind "" "XF86AudioRaiseVolume" "volume --inc")
+        (mkBind "" "XF86AudioLowerVolume" "volume --dec")
+        (mkBind "" "XF86AudioMute" "volume --mute-volume")
+        (mkBind "" "XF86AudioMicMute" "volume --mute-mic")
+        (mkBind "" "XF86MonBrightnessUp" "brightness --inc")
+        (mkBind "" "XF86MonBrightnessDown" "brightness --dec")
       ];
 
       on = [

@@ -591,7 +591,7 @@ in
                                         spacing: 12
 
                                         IconImage {
-                                            source: modelData.icon
+                                            source: modelData.icon ? (modelData.icon.startsWith("/") ? modelData.icon : "image://icon/" + modelData.icon) : "application-x-executable"
                                             width: 24
                                             height: 24
                                         }

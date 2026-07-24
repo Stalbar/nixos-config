@@ -183,13 +183,17 @@ in
         (bind "ALT + C" (exec "chromium --enable-features=UseOzonePlatform --ozone-platform=wayland") null)
         (bind "ALT + B" (exec "blueman-manager") null)
 
-        # Hardware Volume & Brightness Keys
-        (bind ", XF86AudioRaiseVolume" (exec "volume --inc") [ "e" ])
-        (bind ", XF86AudioLowerVolume" (exec "volume --dec") [ "e" ])
-        (bind ", XF86AudioMute" (exec "volume --mute-volume") null)
-        (bind ", XF86AudioMicMute" (exec "volume --mute-mic") null)
-        (bind ", XF86MonBrightnessUp" (exec "brightness --inc") [ "e" ])
-        (bind ", XF86MonBrightnessDown" (exec "brightness --dec") [ "e" ])
+        # Screenshots
+        (bind "Print" (exec "grimblast --notify copysave area ~/Pictures/Screenshots/screenshot.png") null)
+        (bind (mod "S") (exec "grim -g \"$(slurp)\" - | swappy -f -") null)
+
+        # Hardware Volume & Brightness Keys (without leading comma)
+        (bind "XF86AudioRaiseVolume" (exec "volume --inc") [ "e" ])
+        (bind "XF86AudioLowerVolume" (exec "volume --dec") [ "e" ])
+        (bind "XF86AudioMute" (exec "volume --mute-volume") null)
+        (bind "XF86AudioMicMute" (exec "volume --mute-mic") null)
+        (bind "XF86MonBrightnessUp" (exec "brightness --inc") [ "e" ])
+        (bind "XF86MonBrightnessDown" (exec "brightness --dec") [ "e" ])
       ];
 
       on = [
@@ -202,6 +206,7 @@ in
                 hl.exec_cmd(${builtins.toJSON "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"})
                 hl.exec_cmd("nm-applet --indicator")
                 hl.exec_cmd("blueman-applet")
+                hl.exec_cmd("mkdir -p $HOME/Pictures/Screenshots")
               end
             '')
           ];

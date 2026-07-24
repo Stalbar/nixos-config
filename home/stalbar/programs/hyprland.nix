@@ -65,15 +65,6 @@ in
         }
       ];
 
-      workspace = [
-        "1, monitor:HDMI-A-1, default:true"
-        "2, monitor:HDMI-A-1"
-        "3, monitor:HDMI-A-1"
-        "4, monitor:HDMI-A-1"
-        "5, monitor:HDMI-A-1"
-        "11, monitor:eDP-1, default:true"
-      ];
-
       config = {
         cursor = {
           no_hardware_cursors = true;
@@ -204,6 +195,12 @@ in
                 hl.exec_cmd("nm-applet --indicator")
                 hl.exec_cmd("blueman-applet")
                 hl.exec_cmd("mkdir -p $HOME/Pictures/Screenshots")
+                hl.exec_cmd("hyprctl keyword workspace 1,monitor:HDMI-A-1,default:true")
+                hl.exec_cmd("hyprctl keyword workspace 2,monitor:HDMI-A-1")
+                hl.exec_cmd("hyprctl keyword workspace 3,monitor:HDMI-A-1")
+                hl.exec_cmd("hyprctl keyword workspace 4,monitor:HDMI-A-1")
+                hl.exec_cmd("hyprctl keyword workspace 5,monitor:HDMI-A-1")
+                hl.exec_cmd("hyprctl keyword workspace 11,monitor:eDP-1,default:true")
               end
             '')
           ];

@@ -11,6 +11,32 @@
     '';
     shellAliases = {
       cd = "z";
+      c = "clear";
+      v = "neovide --no-fork";
+      vim = "nvim";
+      ls = "eza --icons";
+      ll = "eza -l --icons --git";
+      la = "eza -la --icons --git";
+      lt = "eza --tree --icons";
+      cat = "bat";
+      
+      # Git Aliases
+      g = "git";
+      gs = "git status";
+      ga = "git add";
+      gaa = "git add -A";
+      gc = "git commit -m";
+      gp = "git push";
+      gpl = "git pull";
+      gd = "git diff";
+      gl = "git log --oneline --graph --decorate";
+
+      # NixOS System Aliases
+      rebuild = "sudo nixos-rebuild switch --flake /home/stalbar/nixos-config#laptop";
+      nrs = "sudo nixos-rebuild switch --flake /home/stalbar/nixos-config#laptop";
+      nrb = "sudo nixos-rebuild boot --flake /home/stalbar/nixos-config#laptop";
+      nhs = "nh os switch /home/stalbar/nixos-config#laptop";
+      nclean = "sudo nix-collect-garbage -d && nix-collect-garbage -d";
     };
   };
 

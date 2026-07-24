@@ -349,7 +349,7 @@ in
                     RowLayout {
                         spacing: 12
 
-                        // Running Applications Tray near time (Image source with image://icon/ provider)
+                        // Running Applications Tray near time (Qt Quick Image with sourceSize)
                         RowLayout {
                             spacing: 8
                             Repeater {
@@ -359,11 +359,14 @@ in
                                     }
                                     return [];
                                 }
-                                IconImage {
+                                Image {
                                     required property var modelData
                                     source: shell.getIconSource(modelData)
                                     width: 18
                                     height: 18
+                                    sourceSize.width: 18
+                                    sourceSize.height: 18
+                                    fillMode: Image.PreserveAspectFit
 
                                     MouseArea {
                                         anchors.fill: parent
@@ -634,10 +637,12 @@ in
                                         anchors.rightMargin: 12
                                         spacing: 12
 
-                                        IconImage {
+                                        Image {
                                             source: modelData.icon ? (modelData.icon.startsWith("/") ? modelData.icon : "image://icon/" + modelData.icon) : "image://icon/application-x-executable"
                                             width: 24
                                             height: 24
+                                            sourceSize.width: 24
+                                            sourceSize.height: 24
                                         }
 
                                         Text {

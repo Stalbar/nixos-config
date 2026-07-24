@@ -278,21 +278,26 @@ in
                             }
                         }
 
-                        // Virtual Desktops (Only show used / existing workspaces)
+                        // Virtual Desktops (Dedicated per monitor)
                         Repeater {
                             model: {
-                                if (Hyprland.workspaces && Hyprland.workspaces.values) {
-                                    const ws = Array.from(Hyprland.workspaces.values)
-                                        .filter(w => w && w.id > 0)
-                                        .sort((a, b) => a.id - b.id);
-                                    if (ws.length > 0) return ws;
+                                if (barWin.modelData && barWin.modelData.name === "eDP-1") {
+                                    return [{ id: 11 }];
                                 }
-                                return [{ id: 1 }];
+                                return [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 }, { id: 7 }, { id: 8 }, { id: 9 }];
                             }
                             Rectangle {
                                 required property var modelData
                                 readonly property int wsId: modelData.id
                                 readonly property bool isActive: Hyprland.focusedWorkspace ? (Hyprland.focusedWorkspace.id === wsId) : (wsId === 1)
+                                readonly property bool hasWindows: {
+                                    if (Hyprland.workspaces && Hyprland.workspaces.values) {
+                                        return Array.from(Hyprland.workspaces.values).some(w => w && w.id === wsId);
+                                    }
+                                    return false;
+                                }
+
+                                visible: isActive || hasWindows || wsId <= 5 || wsId === 11
                                 width: isActive ? 28 : 22
                                 height: 22
                                 radius: 5
@@ -315,7 +320,7 @@ in
                                 MouseArea {
                                     anchors.fill: parent
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.focus({ workspace = " + String(parent.wsId) + " })"])
+                                    onClicked: Quickshell.execDetached(["hyprctl", "dispatch", "workspace", String(parent.wsId)])
                                 }
                             }
                         }
@@ -375,16 +380,21 @@ in
                         RowLayout {
                             spacing: 8
                             Repeater {
-                                model: SystemTray.items.values
+                                model: SystemTray.items ? SystemTray.items.values : []
                                 IconImage {
                                     required property var modelData
-                                    source: modelData.icon
+                                    source: {
+                                        if (!modelData) return "application-x-executable";
+                                        if (modelData.iconName) return modelData.iconName.startsWith("/") ? modelData.iconName : "image://icon/" + modelData.iconName;
+                                        if (modelData.icon) return modelData.icon.startsWith("/") ? modelData.icon : "image://icon/" + modelData.icon;
+                                        return "application-x-executable";
+                                    }
                                     width: 18
                                     height: 18
                                     MouseArea {
                                         anchors.fill: parent
                                         cursorShape: Qt.PointingHandCursor
-                                        onClicked: parent.modelData.activate()
+                                        onClicked: if (modelData && modelData.activate) modelData.activate()
                                     }
                                 }
                             }
@@ -876,7 +886,7 @@ in
         }
 
         // -------------------------------------------------------------
-        // 4. VOLATILE OSD OVERLAY
+        // 4. VOLATILE OSD OVERLAY (exclusiveZone: 0 to PREVENT WINDOW RESIZING)
         // -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
@@ -899,6 +909,7 @@ in
 
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.namespace: "quickshell:osd"
+                WlrLayershell.exclusiveZone: 0
 
                 Rectangle {
                     anchors.fill: parent

@@ -240,6 +240,21 @@ in
             return "󰕿";
         }
 
+        function getIconSource(modelData) {
+            if (!modelData) return "image://icon/application-x-executable";
+            const cls = (modelData.initialClass || modelData.class || "").toLowerCase();
+            if (cls.includes("foot")) return "image://icon/foot";
+            if (cls.includes("zen")) return "image://icon/zen-browser";
+            if (cls.includes("chrom")) return "image://icon/chromium";
+            if (cls.includes("neovide")) return "image://icon/neovide";
+            if (cls.includes("obsidian")) return "image://icon/obsidian";
+            if (cls.includes("thunar")) return "image://icon/system-file-manager";
+            if (cls.includes("telegram")) return "image://icon/telegram";
+            if (cls.includes("discord")) return "image://icon/discord";
+            if (cls) return "image://icon/" + cls;
+            return "image://icon/application-x-executable";
+        }
+
         // -------------------------------------------------------------
         // 1. MAIN STATUS BAR (Only Active Workspaces + Running Apps near Time)
         // -------------------------------------------------------------
@@ -334,7 +349,7 @@ in
                     RowLayout {
                         spacing: 12
 
-                        // Running Applications Tray near time (Quickshell IconImage.name)
+                        // Running Applications Tray near time (Image source with image://icon/ provider)
                         RowLayout {
                             spacing: 8
                             Repeater {
@@ -346,18 +361,7 @@ in
                                 }
                                 IconImage {
                                     required property var modelData
-                                    name: {
-                                        const cls = (modelData.initialClass || modelData.class || "").toLowerCase();
-                                        if (cls.includes("foot")) return "foot";
-                                        if (cls.includes("zen")) return "zen-browser";
-                                        if (cls.includes("chrom")) return "chromium";
-                                        if (cls.includes("neovide")) return "neovide";
-                                        if (cls.includes("obsidian")) return "obsidian";
-                                        if (cls.includes("thunar")) return "system-file-manager";
-                                        if (cls.includes("telegram")) return "telegram";
-                                        if (cls.includes("discord")) return "discord";
-                                        return cls || "application-x-executable";
-                                    }
+                                    source: shell.getIconSource(modelData)
                                     width: 18
                                     height: 18
 
@@ -631,7 +635,7 @@ in
                                         spacing: 12
 
                                         IconImage {
-                                            name: modelData.icon ? modelData.icon : "application-x-executable"
+                                            source: modelData.icon ? (modelData.icon.startsWith("/") ? modelData.icon : "image://icon/" + modelData.icon) : "image://icon/application-x-executable"
                                             width: 24
                                             height: 24
                                         }

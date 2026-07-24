@@ -170,13 +170,13 @@ in
         (bind "Print" (lua ''hl.dsp.exec_cmd("grimblast --notify copysave area ~/Pictures/Screenshots/screenshot.png")'') null)
         (bind "SUPER + S" (lua ''hl.dsp.exec_cmd("grim -g \"$(slurp)\" - | swappy -f -")'') null)
 
-        # Hardware Keys
-        (bind "XF86AudioRaiseVolume" (lua ''hl.dsp.exec_cmd("volume --inc")'') { repeating = true; })
-        (bind "XF86AudioLowerVolume" (lua ''hl.dsp.exec_cmd("volume --dec")'') { repeating = true; })
-        (bind "XF86AudioMute" (lua ''hl.dsp.exec_cmd("volume --mute-volume")'') null)
-        (bind "XF86AudioMicMute" (lua ''hl.dsp.exec_cmd("volume --mute-mic")'') null)
-        (bind "XF86MonBrightnessUp" (lua ''hl.dsp.exec_cmd("brightness --inc")'') { repeating = true; })
-        (bind "XF86MonBrightnessDown" (lua ''hl.dsp.exec_cmd("brightness --dec")'') { repeating = true; })
+        # Hardware Keys (XF86 volume & brightness keys)
+        (bind "XF86AudioRaiseVolume" (lua ''hl.dsp.exec_cmd("volume --inc")'') { "repeat" = true; locked = true; })
+        (bind "XF86AudioLowerVolume" (lua ''hl.dsp.exec_cmd("volume --dec")'') { "repeat" = true; locked = true; })
+        (bind "XF86AudioMute" (lua ''hl.dsp.exec_cmd("volume --mute-volume")'') { locked = true; })
+        (bind "XF86AudioMicMute" (lua ''hl.dsp.exec_cmd("volume --mute-mic")'') { locked = true; })
+        (bind "XF86MonBrightnessUp" (lua ''hl.dsp.exec_cmd("brightness --inc")'') { "repeat" = true; locked = true; })
+        (bind "XF86MonBrightnessDown" (lua ''hl.dsp.exec_cmd("brightness --dec")'') { "repeat" = true; locked = true; })
       ];
 
       on = [
@@ -190,16 +190,6 @@ in
                 hl.exec_cmd("nm-applet --indicator")
                 hl.exec_cmd("blueman-applet")
                 hl.exec_cmd("mkdir -p $HOME/Pictures/Screenshots")
-                hl.exec_cmd("hyprctl keyword workspace 1,monitor:HDMI-A-1,default:true")
-                hl.exec_cmd("hyprctl keyword workspace 2,monitor:HDMI-A-1")
-                hl.exec_cmd("hyprctl keyword workspace 3,monitor:HDMI-A-1")
-                hl.exec_cmd("hyprctl keyword workspace 4,monitor:HDMI-A-1")
-                hl.exec_cmd("hyprctl keyword workspace 5,monitor:HDMI-A-1")
-                hl.exec_cmd("hyprctl keyword workspace 6,monitor:HDMI-A-1")
-                hl.exec_cmd("hyprctl keyword workspace 7,monitor:HDMI-A-1")
-                hl.exec_cmd("hyprctl keyword workspace 8,monitor:HDMI-A-1")
-                hl.exec_cmd("hyprctl keyword workspace 9,monitor:HDMI-A-1")
-                hl.exec_cmd("hyprctl keyword workspace 11,monitor:eDP-1,default:true")
               end
             '')
           ];

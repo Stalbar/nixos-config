@@ -135,7 +135,6 @@ in
         property bool audioMuted: false
         property bool isHeadphones: false
         property int volumeLevel: 65
-        property var runningAppsList: []
 
         // Notification Store
         property var notificationList: []
@@ -207,7 +206,6 @@ in
             triggeredOnStart: true
             onTriggered: {
                 sysCheckProcess.running = true;
-                appCheckProcess.running = true;
             }
         }
 
@@ -226,25 +224,6 @@ in
             }
         }
 
-        Process {
-            id: appCheckProcess
-            command: ["hyprctl", "clients", "-j"]
-            stdout: SplitParser {
-                onRead: data => {
-                    try {
-                        const parsed = JSON.parse(data);
-                        if (Array.isArray(parsed)) {
-                            shell.runningAppsList = parsed.filter(c => c && c.title && c.mapped).map(c => ({
-                                title: c.title,
-                                address: c.address,
-                                initialClass: c.initialClass || c.class
-                            }));
-                        }
-                    } catch (e) {}
-                }
-            }
-        }
-
         function getAudioIcon() {
             if (shell.audioMuted) return "󰝟";
             if (shell.isHeadphones) return "󰋋";
@@ -254,7 +233,7 @@ in
         }
 
         // -------------------------------------------------------------
-        // 1. MAIN STATUS BAR (Only Active Workspaces + Running Apps Tray to the right)
+        // 1. MAIN STATUS BAR (Only Active Workspaces + Running Apps Tray directly to the right)
         // -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
@@ -345,12 +324,17 @@ in
                         RowLayout {
                             spacing: 6
                             Repeater {
-                                model: shell.runningAppsList
+                                model: {
+                                    if (Hyprland.toplevels && Hyprland.toplevels.values) {
+                                        return Array.from(Hyprland.toplevels.values).filter(c => c && (c.title || c.initialClass || c.class));
+                                    }
+                                    return [];
+                                }
                                 Rectangle {
                                     required property var modelData
-                                    width: 110
+                                    width: 120
                                     height: 22
-                                    radius: 4
+                                    radius: 5
                                     color: "#1f2335"
                                     border.width: 1
                                     border.color: shell.colors.comment
@@ -361,13 +345,13 @@ in
                                         spacing: 4
 
                                         IconImage {
-                                            source: modelData.initialClass ? "image://icon/" + modelData.initialClass.toLowerCase() : "application-x-executable"
+                                            source: modelData.initialClass ? "image://icon/" + modelData.initialClass.toLowerCase() : (modelData.class ? "image://icon/" + modelData.class.toLowerCase() : "application-x-executable")
                                             width: 14
                                             height: 14
                                         }
 
                                         Text {
-                                            text: modelData.title || modelData.initialClass || "App"
+                                            text: modelData.title || modelData.initialClass || modelData.class || "App"
                                             color: shell.colors.fg
                                             font.pixelSize: 10
                                             elide: Text.ElideRight

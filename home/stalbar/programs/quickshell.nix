@@ -334,7 +334,7 @@ in
                     RowLayout {
                         spacing: 12
 
-                        // Running Applications Tray near time (System Default Icons like App Launcher)
+                        // Running Applications Tray near time (Quickshell IconImage.name)
                         RowLayout {
                             spacing: 8
                             Repeater {
@@ -346,17 +346,17 @@ in
                                 }
                                 IconImage {
                                     required property var modelData
-                                    source: {
+                                    name: {
                                         const cls = (modelData.initialClass || modelData.class || "").toLowerCase();
-                                        if (cls.includes("foot")) return "image://icon/foot";
-                                        if (cls.includes("zen")) return "image://icon/zen-browser";
-                                        if (cls.includes("chrom")) return "image://icon/chromium";
-                                        if (cls.includes("neovide")) return "image://icon/neovide";
-                                        if (cls.includes("obsidian")) return "image://icon/obsidian";
-                                        if (cls.includes("thunar")) return "image://icon/system-file-manager";
-                                        if (cls.includes("telegram")) return "image://icon/telegram";
-                                        if (cls.includes("discord")) return "image://icon/discord";
-                                        return cls ? (cls.startsWith("/") ? cls : "image://icon/" + cls) : "application-x-executable";
+                                        if (cls.includes("foot")) return "foot";
+                                        if (cls.includes("zen")) return "zen-browser";
+                                        if (cls.includes("chrom")) return "chromium";
+                                        if (cls.includes("neovide")) return "neovide";
+                                        if (cls.includes("obsidian")) return "obsidian";
+                                        if (cls.includes("thunar")) return "system-file-manager";
+                                        if (cls.includes("telegram")) return "telegram";
+                                        if (cls.includes("discord")) return "discord";
+                                        return cls || "application-x-executable";
                                     }
                                     width: 18
                                     height: 18
@@ -631,7 +631,7 @@ in
                                         spacing: 12
 
                                         IconImage {
-                                            source: modelData.icon ? (modelData.icon.startsWith("/") ? modelData.icon : "image://icon/" + modelData.icon) : "application-x-executable"
+                                            name: modelData.icon ? modelData.icon : "application-x-executable"
                                             width: 24
                                             height: 24
                                         }

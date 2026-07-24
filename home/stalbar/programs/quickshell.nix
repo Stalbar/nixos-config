@@ -232,8 +232,21 @@ in
             return "󰕿";
         }
 
+        function getAppNerdIcon(cls, title) {
+            const str = ((cls || "") + " " + (title || "")).toLowerCase();
+            if (str.includes("foot") || str.includes("terminal") || str.includes("kitty")) return "󰞷";
+            if (str.includes("zen") || str.includes("firefox")) return "󰈹";
+            if (str.includes("chrom")) return "";
+            if (str.includes("neovide") || str.includes("nvim") || str.includes("vim")) return "";
+            if (str.includes("obsidian")) return "󱓧";
+            if (str.includes("thunar") || str.includes("files")) return "󰉋";
+            if (str.includes("discord")) return "󰙯";
+            if (str.includes("telegram")) return "󰈹";
+            return "󰣆";
+        }
+
         // -------------------------------------------------------------
-        // 1. MAIN STATUS BAR (Workspaces + Running Apps Tray: CLEAN ICONS ONLY)
+        // 1. MAIN STATUS BAR (Only Active Workspaces + Running Apps near Time)
         // -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
@@ -278,26 +291,21 @@ in
                             }
                         }
 
-                        // Virtual Desktops (Dedicated per monitor)
+                        // Dynamic Virtual Desktops (Only show used / active workspaces)
                         Repeater {
                             model: {
-                                if (barWin.modelData && barWin.modelData.name === "eDP-1") {
-                                    return [{ id: 11 }];
+                                if (Hyprland.workspaces && Hyprland.workspaces.values) {
+                                    const ws = Array.from(Hyprland.workspaces.values)
+                                        .filter(w => w && w.id > 0)
+                                        .sort((a, b) => a.id - b.id);
+                                    if (ws.length > 0) return ws;
                                 }
-                                return [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 }, { id: 7 }, { id: 8 }, { id: 9 }];
+                                return [{ id: 1 }];
                             }
                             Rectangle {
                                 required property var modelData
                                 readonly property int wsId: modelData.id
                                 readonly property bool isActive: Hyprland.focusedWorkspace ? (Hyprland.focusedWorkspace.id === wsId) : (wsId === 1)
-                                readonly property bool hasWindows: {
-                                    if (Hyprland.workspaces && Hyprland.workspaces.values) {
-                                        return Array.from(Hyprland.workspaces.values).some(w => w && w.id === wsId);
-                                    }
-                                    return false;
-                                }
-
-                                visible: isActive || hasWindows || wsId <= 5 || wsId === 11
                                 width: isActive ? 28 : 22
                                 height: 22
                                 radius: 5
@@ -324,14 +332,14 @@ in
                                 }
                             }
                         }
+                    }
 
-                        Rectangle {
-                            width: 1
-                            height: 14
-                            color: shell.colors.comment
-                        }
+                    Item { Layout.fillWidth: true }
 
-                        // Running Applications Tray: CLEAN ICONS ONLY (No text, no individual borders)
+                    RowLayout {
+                        spacing: 12
+
+                        // Running Applications Tray near time (Nerd Font Icon mapping)
                         RowLayout {
                             spacing: 8
                             Repeater {
@@ -341,21 +349,12 @@ in
                                     }
                                     return [];
                                 }
-                                IconImage {
+                                Text {
                                     required property var modelData
-                                    source: {
-                                        const cls = (modelData.initialClass || modelData.class || "").toLowerCase();
-                                        if (cls.includes("foot")) return "image://icon/foot";
-                                        if (cls.includes("zen")) return "image://icon/zen-browser";
-                                        if (cls.includes("chrom")) return "image://icon/chromium";
-                                        if (cls.includes("code") || cls.includes("zed")) return "image://icon/zed";
-                                        if (cls.includes("neovide") || cls.includes("nvim")) return "image://icon/neovide";
-                                        if (cls.includes("obsidian")) return "image://icon/obsidian";
-                                        if (cls.includes("thunar")) return "image://icon/system-file-manager";
-                                        return cls ? "image://icon/" + cls : "application-x-executable";
-                                    }
-                                    width: 18
-                                    height: 18
+                                    text: shell.getAppNerdIcon(modelData.initialClass || modelData.class, modelData.title)
+                                    color: shell.colors.cyan
+                                    font.pixelSize: 15
+                                    font.family: "JetBrains Mono Nerd Font"
 
                                     MouseArea {
                                         anchors.fill: parent
@@ -369,36 +368,6 @@ in
                                 }
                             }
                         }
-                    }
-
-                    Item { Layout.fillWidth: true }
-
-                    RowLayout {
-                        spacing: 12
-
-                        // Native System Tray (SNI Applets like nm-applet, blueman)
-                        RowLayout {
-                            spacing: 8
-                            Repeater {
-                                model: SystemTray.items ? SystemTray.items.values : []
-                                IconImage {
-                                    required property var modelData
-                                    source: {
-                                        if (!modelData) return "application-x-executable";
-                                        if (modelData.iconName) return modelData.iconName.startsWith("/") ? modelData.iconName : "image://icon/" + modelData.iconName;
-                                        if (modelData.icon) return modelData.icon.startsWith("/") ? modelData.icon : "image://icon/" + modelData.icon;
-                                        return "application-x-executable";
-                                    }
-                                    width: 18
-                                    height: 18
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: if (modelData && modelData.activate) modelData.activate()
-                                    }
-                                }
-                            }
-                        }
 
                         Rectangle {
                             width: 1
@@ -406,7 +375,7 @@ in
                             color: shell.colors.comment
                         }
 
-                        // Current Date & Time Aligned Near CPU Usage
+                        // Current Date & Time
                         Text {
                             id: clock
                             property string timeStr: ""

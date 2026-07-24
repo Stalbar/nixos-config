@@ -13,6 +13,7 @@
     ./antigravity.nix
     ./graphify.nix
     ./firefox.nix
+    ./zen.nix
     ./obsidian.nix
     ./cool-retro-term.nix
     ./notifications.nix

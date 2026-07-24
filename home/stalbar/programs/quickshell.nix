@@ -19,7 +19,9 @@ let
     "${pkgs.papirus-icon-theme}/share"
     "${pkgs.hicolor-icon-theme}/share"
     "/run/current-system/sw/share"
+    "/etc/profiles/per-user/stalbar/share"
     "$HOME/.nix-profile/share"
+    "$HOME/.local/share"
   ];
 
   mkQsIpcTrigger =
@@ -79,6 +81,7 @@ in
       Environment = [
         "QML2_IMPORT_PATH=${qmlImportPath}"
         "XDG_DATA_DIRS=${xdgDataDirs}"
+        "QS_ICON_THEME=Papirus-Dark"
         "QT_LOGGING_RULES=qt.qpa.theme.gnome.warning=false"
         "QT_QUICK_CONTROLS_STYLE=Basic"
       ];
@@ -240,19 +243,23 @@ in
             return "󰕿";
         }
 
-        function getAppIconName(modelData) {
-            if (!modelData) return "application-x-executable";
+        function getAppIcon(modelData) {
+            if (!modelData) return Quickshell.iconPath("application-x-executable");
             const cls = (modelData.initialClass || modelData.class || "").toLowerCase();
-            if (cls.includes("foot")) return "foot";
-            if (cls.includes("zen")) return "zen-browser";
-            if (cls.includes("chrom")) return "chromium";
-            if (cls.includes("neovide")) return "neovide";
-            if (cls.includes("obsidian")) return "obsidian";
-            if (cls.includes("thunar")) return "system-file-manager";
-            if (cls.includes("telegram")) return "telegram";
-            if (cls.includes("discord")) return "discord";
-            if (cls) return cls;
-            return "application-x-executable";
+            let iconName = "application-x-executable";
+            if (cls.includes("foot")) iconName = "foot";
+            else if (cls.includes("zen")) iconName = "zen-browser";
+            else if (cls.includes("chrom")) iconName = "chromium";
+            else if (cls.includes("neovide")) iconName = "neovide";
+            else if (cls.includes("obsidian")) iconName = "obsidian";
+            else if (cls.includes("thunar")) iconName = "system-file-manager";
+            else if (cls.includes("telegram")) iconName = "telegram";
+            else if (cls.includes("discord")) iconName = "discord";
+            else if (cls) iconName = cls;
+
+            const res = Quickshell.iconPath(iconName);
+            if (res && res.length > 0) return res;
+            return Quickshell.iconPath("application-x-executable");
         }
 
         // -------------------------------------------------------------
@@ -349,7 +356,7 @@ in
                     RowLayout {
                         spacing: 12
 
-                        // Running Applications Tray near time (IconImage with explicit implicitSize)
+                        // Running Applications Tray near time (Quickshell.iconPath + Layout dimensions)
                         RowLayout {
                             spacing: 8
                             Repeater {
@@ -361,10 +368,11 @@ in
                                 }
                                 IconImage {
                                     required property var modelData
-                                    implicitSize: 18
-                                    width: 18
-                                    height: 18
-                                    source: shell.getAppIconName(modelData)
+                                    Layout.preferredWidth: 18
+                                    Layout.preferredHeight: 18
+                                    implicitWidth: 18
+                                    implicitHeight: 18
+                                    source: shell.getAppIcon(modelData)
 
                                     MouseArea {
                                         anchors.fill: parent
@@ -527,7 +535,7 @@ in
         }
 
         // -------------------------------------------------------------
-        // 2. OMNIBOX LAUNCHER (Compact icons & full application list search)
+        // 2. OMNIBOX LAUNCHER (Compact 22px icons & full application search)
         // -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
@@ -637,10 +645,16 @@ in
                                         spacing: 12
 
                                         IconImage {
-                                            implicitSize: 22
-                                            width: 22
-                                            height: 22
-                                            source: modelData.icon ? modelData.icon : "application-x-executable"
+                                            Layout.preferredWidth: 22
+                                            Layout.preferredHeight: 22
+                                            implicitWidth: 22
+                                            implicitHeight: 22
+                                            source: {
+                                                if (!modelData.icon) return Quickshell.iconPath("application-x-executable");
+                                                const res = Quickshell.iconPath(modelData.icon);
+                                                if (res && res.length > 0) return res;
+                                                return modelData.icon.startsWith("/") ? modelData.icon : Quickshell.iconPath("application-x-executable");
+                                            }
                                         }
 
                                         Text {

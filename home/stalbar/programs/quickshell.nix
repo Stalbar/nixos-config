@@ -245,7 +245,7 @@ in
 
         function getAppIcon(modelData) {
             if (!modelData) return Quickshell.iconPath("application-x-executable");
-            const cls = (modelData.initialClass || modelData.class || "").toLowerCase();
+            const cls = (modelData.initialClass || modelData.class || modelData.lastClass || "").toLowerCase();
             
             if (cls.includes("foot")) return Quickshell.iconPath("foot") || Quickshell.iconPath("utilities-terminal");
             if (cls.includes("zen")) return Quickshell.iconPath("zen-browser") || Quickshell.iconPath("zen") || Quickshell.iconPath("firefox");
@@ -258,7 +258,7 @@ in
             
             if (cls) {
                 const direct = Quickshell.iconPath(cls);
-                if (direct && direct.length > 0) return direct;
+                if (direct && direct.length > 0 && !direct.endsWith("application-x-executable")) return direct;
             }
 
             return Quickshell.iconPath("application-x-executable");
@@ -358,7 +358,7 @@ in
                     RowLayout {
                         spacing: 12
 
-                        // Running Applications Tray near time (With ToolTip on hover showing window title/class)
+                        // Running Applications Tray near time (With TokyoNight ToolTip on hover)
                         RowLayout {
                             spacing: 8
                             Repeater {
@@ -388,9 +388,27 @@ in
                                         }
                                     }
 
-                                    ToolTip.visible: appHoverArea.containsMouse
-                                    ToolTip.delay: 150
-                                    ToolTip.text: modelData ? (modelData.title || modelData.class || modelData.initialClass || "Application") : ""
+                                    ToolTip {
+                                        id: appToolTip
+                                        visible: appHoverArea.containsMouse
+                                        delay: 150
+                                        timeout: 5000
+
+                                        contentItem: Text {
+                                            text: modelData ? (modelData.title ? (modelData.title.length > 35 ? modelData.title.substring(0, 35) + "…" : modelData.title) : (modelData.class || "Application")) : ""
+                                            color: shell.colors.cyan
+                                            font.family: "JetBrains Mono Nerd Font"
+                                            font.pixelSize: 11
+                                            font.bold: true
+                                        }
+
+                                        background: Rectangle {
+                                            color: "#1f2335"
+                                            radius: 8
+                                            border.width: 1
+                                            border.color: shell.colors.magenta
+                                        }
+                                    }
                                 }
                             }
                         }

@@ -103,7 +103,7 @@ in
       };
 
       bind = [
-        # Core App Binds (App launcher is bound ONLY to ALT+SPACE)
+        # Core App Binds (App launcher bound ONLY to ALT+SPACE)
         (bind "SUPER + Q" (lua ''function() hl.exec_cmd("foot") end'') null)
         (bind "SUPER + F4" (lua ''hl.dsp.window.close()'') null)
         (bind "SUPER + V" (lua ''hl.dsp.window.float({ toggle = true })'') null)
@@ -159,12 +159,18 @@ in
         (bind "SUPER + ALT + 9" (lua ''hl.dsp.window.move({ workspace = 9 })'') null)
         (bind "SUPER + ALT + 0" (lua ''hl.dsp.window.move({ workspace = 11 })'') null)
 
-        # Applications Shortcuts (Zen Browser bound to SUPER+B and ALT+F)
+        # Applications Shortcuts (Thunar, Telegram, Zen, Neovide, Chromium, Blueman, Discord, Obsidian)
+        (bind "SUPER + E" (lua ''function() hl.exec_cmd("thunar") end'') null)
+        (bind "ALT + E" (lua ''function() hl.exec_cmd("thunar") end'') null)
+        (bind "SUPER + T" (lua ''function() hl.exec_cmd("Telegram") end'') null)
+        (bind "ALT + T" (lua ''function() hl.exec_cmd("Telegram") end'') null)
         (bind "SUPER + B" (lua ''function() hl.exec_cmd("zen-beta") end'') null)
         (bind "ALT + F" (lua ''function() hl.exec_cmd("zen-beta") end'') null)
         (bind "ALT + N" (lua ''function() hl.exec_cmd("neovide --no-fork") end'') null)
         (bind "ALT + C" (lua ''function() hl.exec_cmd("chromium --enable-features=UseOzonePlatform --ozone-platform=wayland") end'') null)
         (bind "ALT + B" (lua ''function() hl.exec_cmd("blueman-manager") end'') null)
+        (bind "ALT + D" (lua ''function() hl.exec_cmd("discord") end'') null)
+        (bind "ALT + O" (lua ''function() hl.exec_cmd("obsidian") end'') null)
 
         # Screenshots
         (bind "Print" (lua ''function() hl.exec_cmd("grimblast --notify copysave area ~/Pictures/Screenshots/screenshot.png") end'') null)

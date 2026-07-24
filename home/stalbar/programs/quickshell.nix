@@ -15,6 +15,13 @@ let
     "${pkgs.qt6.qtwayland}${pkgs.qt6.qtbase.qtQmlPrefix}"
   ];
 
+  xdgDataDirs = lib.concatStringsSep ":" [
+    "${pkgs.papirus-icon-theme}/share"
+    "${pkgs.hicolor-icon-theme}/share"
+    "/run/current-system/sw/share"
+    "$HOME/.nix-profile/share"
+  ];
+
   mkQsIpcTrigger =
     name: target: action:
     pkgs.writeShellApplication {
@@ -71,6 +78,7 @@ in
       RestartSec = 1;
       Environment = [
         "QML2_IMPORT_PATH=${qmlImportPath}"
+        "XDG_DATA_DIRS=${xdgDataDirs}"
         "QT_LOGGING_RULES=qt.qpa.theme.gnome.warning=false"
         "QT_QUICK_CONTROLS_STYLE=Basic"
       ];
@@ -232,19 +240,6 @@ in
             return "󰕿";
         }
 
-        function getAppNerdIcon(cls, title) {
-            const str = ((cls || "") + " " + (title || "")).toLowerCase();
-            if (str.includes("foot") || str.includes("terminal") || str.includes("kitty")) return "󰞷";
-            if (str.includes("zen") || str.includes("firefox")) return "󰈹";
-            if (str.includes("chrom")) return "";
-            if (str.includes("neovide") || str.includes("nvim") || str.includes("vim")) return "";
-            if (str.includes("obsidian")) return "󱓧";
-            if (str.includes("thunar") || str.includes("files")) return "󰉋";
-            if (str.includes("discord")) return "󰙯";
-            if (str.includes("telegram")) return "󰈹";
-            return "󰣆";
-        }
-
         // -------------------------------------------------------------
         // 1. MAIN STATUS BAR (Only Active Workspaces + Running Apps near Time)
         // -------------------------------------------------------------
@@ -339,7 +334,7 @@ in
                     RowLayout {
                         spacing: 12
 
-                        // Running Applications Tray near time (Nerd Font Icon mapping)
+                        // Running Applications Tray near time (System Default Icons like App Launcher)
                         RowLayout {
                             spacing: 8
                             Repeater {
@@ -349,12 +344,22 @@ in
                                     }
                                     return [];
                                 }
-                                Text {
+                                IconImage {
                                     required property var modelData
-                                    text: shell.getAppNerdIcon(modelData.initialClass || modelData.class, modelData.title)
-                                    color: shell.colors.cyan
-                                    font.pixelSize: 15
-                                    font.family: "JetBrains Mono Nerd Font"
+                                    source: {
+                                        const cls = (modelData.initialClass || modelData.class || "").toLowerCase();
+                                        if (cls.includes("foot")) return "image://icon/foot";
+                                        if (cls.includes("zen")) return "image://icon/zen-browser";
+                                        if (cls.includes("chrom")) return "image://icon/chromium";
+                                        if (cls.includes("neovide")) return "image://icon/neovide";
+                                        if (cls.includes("obsidian")) return "image://icon/obsidian";
+                                        if (cls.includes("thunar")) return "image://icon/system-file-manager";
+                                        if (cls.includes("telegram")) return "image://icon/telegram";
+                                        if (cls.includes("discord")) return "image://icon/discord";
+                                        return cls ? (cls.startsWith("/") ? cls : "image://icon/" + cls) : "application-x-executable";
+                                    }
+                                    width: 18
+                                    height: 18
 
                                     MouseArea {
                                         anchors.fill: parent

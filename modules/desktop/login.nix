@@ -2,7 +2,7 @@
 
 let
   tuigreet = "${pkgs.tuigreet}/bin/tuigreet";
-  hyprlandSession = "${pkgs.hyprland}/bin/Hyprland";
+  hyprlandSession = "start-hyprland";
 in
 {
   services.greetd = {

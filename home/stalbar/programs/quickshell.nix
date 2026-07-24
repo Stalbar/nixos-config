@@ -527,7 +527,7 @@ in
         }
 
         // -------------------------------------------------------------
-        // 2. OMNIBOX LAUNCHER (App icons, glassmorphism search)
+        // 2. OMNIBOX LAUNCHER (Compact icons & full application list search)
         // -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
@@ -616,16 +616,17 @@ in
                                     const res = [];
                                     for (let i = 0; i < raw.length; i++) {
                                         const entry = raw[i];
-                                        if (!entry || entry.noDisplay) continue;
-                                        const name = entry.name || entry.id.replace(".desktop", "");
-                                        if (q && !name.toLowerCase().includes(q)) continue;
+                                        if (!entry) continue;
+                                        const name = entry.name || (entry.id ? entry.id.replace(".desktop", "") : "");
+                                        if (!name) continue;
+                                        if (q && !name.toLowerCase().includes(q) && !(entry.comment && entry.comment.toLowerCase().includes(q)) && !(entry.id && entry.id.toLowerCase().includes(q))) continue;
                                         res.push({ entry: entry, name: name, icon: entry.icon || "application-x-executable" });
                                     }
                                     return res;
                                 }
                                 delegate: Rectangle {
                                     width: ListView.view.width
-                                    height: 44
+                                    height: 40
                                     color: "transparent"
                                     radius: 8
 
@@ -636,9 +637,9 @@ in
                                         spacing: 12
 
                                         IconImage {
-                                            implicitSize: 24
-                                            width: 24
-                                            height: 24
+                                            implicitSize: 22
+                                            width: 22
+                                            height: 22
                                             source: modelData.icon ? modelData.icon : "application-x-executable"
                                         }
 

@@ -2,16 +2,6 @@
 
 let
   colors = import ../theme/colors.nix;
-  lua = lib.generators.mkLuaInline;
-  mod = key: lua ''mainMod .. " + ${key}"'';
-
-  bind =
-    keys: dispatcher: opts:
-    {
-      _args = [ keys dispatcher ] ++ lib.optional (opts != null) opts;
-    };
-
-  exec = cmd: lua ''hl.dsp.exec_cmd(${builtins.toJSON cmd})'';
 in
 {
   wayland.windowManager.hyprland = {
@@ -131,64 +121,67 @@ in
       };
 
       bind = [
-        (bind (mod "Q") (exec "foot") null)
-        (bind (mod "F4") (exec "hyprctl dispatch killactive") null)
-        (bind (mod "V") (exec "hyprctl dispatch togglefloating") null)
-        (bind "ALT + SPACE" (exec "qs-app-launcher") null)
-        (bind (mod "SPACE") (exec "qs-app-launcher") null)
-        (bind (mod "M") (exec "qs-power-menu") null)
-        (bind (mod "N") (exec "qs-action-center") null)
-        (bind (mod "R") (exec "change-wallpaper") null)
-        (bind (mod "F") (exec "hyprctl dispatch fullscreen") null)
-        (bind (mod "H") (exec "hyprctl dispatch movefocus l") null)
-        (bind (mod "L") (exec "hyprctl dispatch movefocus r") null)
-        (bind (mod "K") (exec "hyprctl dispatch movefocus u") null)
-        (bind (mod "J") (exec "hyprctl dispatch movefocus d") null)
+        "SUPER, Q, exec, foot"
+        "SUPER, F4, killactive,"
+        "SUPER, V, togglefloating,"
+        "ALT, SPACE, exec, qs-app-launcher"
+        "SUPER, SPACE, exec, qs-app-launcher"
+        "SUPER, M, exec, qs-power-menu"
+        "SUPER, N, exec, qs-action-center"
+        "SUPER, R, exec, change-wallpaper"
+        "SUPER, F, fullscreen, 0"
 
-        (bind (mod "ALT + H") (exec "hyprctl dispatch swapwindow l") null)
-        (bind (mod "ALT + L") (exec "hyprctl dispatch swapwindow r") null)
-        (bind (mod "ALT + K") (exec "hyprctl dispatch swapwindow u") null)
-        (bind (mod "ALT + J") (exec "hyprctl dispatch swapwindow d") null)
+        "SUPER, H, movefocus, l"
+        "SUPER, L, movefocus, r"
+        "SUPER, K, movefocus, u"
+        "SUPER, J, movefocus, d"
 
-        # Workspaces focus using hyprctl dispatch
-        (bind (mod "1") (exec "hyprctl dispatch workspace 1") null)
-        (bind (mod "2") (exec "hyprctl dispatch workspace 2") null)
-        (bind (mod "3") (exec "hyprctl dispatch workspace 3") null)
-        (bind (mod "4") (exec "hyprctl dispatch workspace 4") null)
-        (bind (mod "5") (exec "hyprctl dispatch workspace 5") null)
-        (bind (mod "0") (exec "hyprctl dispatch workspace 11") null)
+        "SUPER ALT, H, swapwindow, l"
+        "SUPER ALT, L, swapwindow, r"
+        "SUPER ALT, K, swapwindow, u"
+        "SUPER ALT, J, swapwindow, d"
 
-        # Workspaces move window using hyprctl dispatch movetoworkspace
-        (bind (mod "ALT + 1") (exec "hyprctl dispatch movetoworkspace 1") null)
-        (bind (mod "ALT + 2") (exec "hyprctl dispatch movetoworkspace 2") null)
-        (bind (mod "ALT + 3") (exec "hyprctl dispatch movetoworkspace 3") null)
-        (bind (mod "ALT + 4") (exec "hyprctl dispatch movetoworkspace 4") null)
-        (bind (mod "ALT + 5") (exec "hyprctl dispatch movetoworkspace 5") null)
-        (bind (mod "ALT + 0") (exec "hyprctl dispatch movetoworkspace 11") null)
+        "SUPER, 1, workspace, 1"
+        "SUPER, 2, workspace, 2"
+        "SUPER, 3, workspace, 3"
+        "SUPER, 4, workspace, 4"
+        "SUPER, 5, workspace, 5"
+        "SUPER, 0, workspace, 11"
 
-        (bind "ALT + N" (exec "neovide --no-fork") null)
-        (bind "ALT + F" (exec "zen") null)
-        (bind "ALT + C" (exec "chromium --enable-features=UseOzonePlatform --ozone-platform=wayland") null)
-        (bind "ALT + B" (exec "blueman-manager") null)
+        "SUPER ALT, 1, movetoworkspace, 1"
+        "SUPER ALT, 2, movetoworkspace, 2"
+        "SUPER ALT, 3, movetoworkspace, 3"
+        "SUPER ALT, 4, movetoworkspace, 4"
+        "SUPER ALT, 5, movetoworkspace, 5"
+        "SUPER ALT, 0, movetoworkspace, 11"
+
+        "ALT, N, exec, neovide --no-fork"
+        "ALT, F, exec, zen"
+        "ALT, C, exec, chromium --enable-features=UseOzonePlatform --ozone-platform=wayland"
+        "ALT, B, exec, blueman-manager"
 
         # Screenshots
-        (bind "Print" (exec "grimblast --notify copysave area ~/Pictures/Screenshots/screenshot.png") null)
-        (bind (mod "S") (exec "grim -g \"$(slurp)\" - | swappy -f -") null)
+        ", Print, exec, grimblast --notify copysave area ~/Pictures/Screenshots/screenshot.png"
+        "SUPER, S, exec, grim -g \"$(slurp)\" - | swappy -f -"
+      ];
 
-        # Hardware Volume & Brightness Keys
-        (bind "XF86AudioRaiseVolume" (exec "volume --inc") [ "e" ])
-        (bind "XF86AudioLowerVolume" (exec "volume --dec") [ "e" ])
-        (bind "XF86AudioMute" (exec "volume --mute-volume") null)
-        (bind "XF86AudioMicMute" (exec "volume --mute-mic") null)
-        (bind "XF86MonBrightnessUp" (exec "brightness --inc") [ "e" ])
-        (bind "XF86MonBrightnessDown" (exec "brightness --dec") [ "e" ])
+      binde = [
+        ", XF86AudioRaiseVolume, exec, volume --inc"
+        ", XF86AudioLowerVolume, exec, volume --dec"
+        ", XF86MonBrightnessUp, exec, brightness --inc"
+        ", XF86MonBrightnessDown, exec, brightness --dec"
+      ];
+
+      bindl = [
+        ", XF86AudioMute, exec, volume --mute-volume"
+        ", XF86AudioMicMute, exec, volume --mute-mic"
       ];
 
       on = [
         {
           _args = [
             "hyprland.start"
-            (lua ''
+            (lib.generators.mkLuaInline ''
               function()
                 hl.exec_cmd("change-wallpaper --reapply")
                 hl.exec_cmd(${builtins.toJSON "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"})

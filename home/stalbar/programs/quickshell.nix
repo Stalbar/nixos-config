@@ -134,6 +134,7 @@ in
         property bool audioMuted: false
         property bool isHeadphones: false
         property int volumeLevel: 65
+        property var runningAppsList: []
 
         // Notification Store
         property var notificationList: []
@@ -199,18 +200,19 @@ in
 
         // System Metrics Polling Timer
         Timer {
-            interval: 3000
+            interval: 2500
             running: true
             repeat: true
             triggeredOnStart: true
             onTriggered: {
                 sysCheckProcess.running = true;
+                appCheckProcess.running = true;
             }
         }
 
         Process {
             id: sysCheckProcess
-            command: ["bash", "-c", "echo CPU:$(top -bn1 | grep 'Cpu(s)' | awk '{print $2}' | cut -d. -f1 2>/dev/null || echo 12); echo RAM:$(free -m | awk '/Mem:/ {printf \"%d\", $3/$2*100}'); echo VPN:$(ip link show 2>/dev/null | grep -E 'tun|wg' >/dev/null && echo 1 || echo 0); echo WIFI:$(ip route get 1.1.1.1 2>/dev/null | grep -v unreachable >/dev/null && echo 1 || echo 0)"]
+            command: ["bash", "-c", "echo CPU:$(top -bn1 | grep 'Cpu(s)' | awk '{print $2}' | cut -d. -f1 2>/dev/null || echo 12); echo RAM:$(free -m | awk '/Mem:/ {printf \"%d\", $3/$2*100}'); echo VPN:$(ip link show 2>/dev/null | grep -E 'tun|wg' >/dev/null && echo 1 || echo 0); echo WIFI:$(ip route get 1.1.1.1 2>/dev/null | grep -v unreachable >/dev/null && echo 1 || echo 0); echo HEADPHONES:$(wpctl status 2>/dev/null | grep -iE 'headphone|headset' >/dev/null && echo 1 || echo 0)"]
             stdout: SplitParser {
                 onRead: data => {
                     const str = data.trim();
@@ -218,6 +220,26 @@ in
                     else if (str.startsWith("RAM:")) shell.ramUsage = parseInt(str.substring(4)) || 42;
                     else if (str.startsWith("VPN:")) shell.vpnConnected = (str.substring(4) === "1");
                     else if (str.startsWith("WIFI:")) shell.wifiConnected = (str.substring(5) === "1");
+                    else if (str.startsWith("HEADPHONES:")) shell.isHeadphones = (str.substring(11) === "1");
+                }
+            }
+        }
+
+        Process {
+            id: appCheckProcess
+            command: ["hyprctl", "clients", "-j"]
+            stdout: SplitParser {
+                onRead: data => {
+                    try {
+                        const parsed = JSON.parse(data);
+                        if (Array.isArray(parsed)) {
+                            shell.runningAppsList = parsed.filter(c => c && c.title && c.mapped).map(c => ({
+                                title: c.title,
+                                address: c.address,
+                                initialClass: c.initialClass || c.class
+                            }));
+                        }
+                    } catch (e) {}
                 }
             }
         }
@@ -231,7 +253,7 @@ in
         }
 
         // -------------------------------------------------------------
-        // 1. MAIN STATUS BAR (Workspaces 1-5, System Tray, Metrics, Status Icons)
+        // 1. MAIN STATUS BAR (Workspaces 1-5, System Tray, Metrics, Date, Status Icons)
         // -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
@@ -314,7 +336,7 @@ in
                     RowLayout {
                         spacing: 6
                         Repeater {
-                            model: Array.from(Hyprland.clients.values || []).filter(c => c && c.title)
+                            model: shell.runningAppsList
                             Rectangle {
                                 required property var modelData
                                 width: 110
@@ -327,7 +349,7 @@ in
                                 Text {
                                     anchors.fill: parent
                                     anchors.margins: 4
-                                    text: modelData.title || modelData.class || "App"
+                                    text: modelData.title || modelData.initialClass || "App"
                                     color: shell.colors.fg
                                     font.pixelSize: 10
                                     elide: Text.ElideRight
@@ -349,36 +371,41 @@ in
 
                     Item { Layout.fillWidth: true }
 
-                    Text {
-                        id: clock
-                        property string timeStr: ""
-                        text: timeStr
-                        color: shell.colors.cyan
-                        font.pixelSize: 13
-                        font.bold: true
-                        font.family: "JetBrains Mono Nerd Font"
+                    RowLayout {
+                        spacing: 12
 
-                        Timer {
-                            interval: 1000
-                            running: true
-                            repeat: true
-                            triggeredOnStart: true
-                            onTriggered: {
-                                clock.timeStr = Qt.formatDateTime(new Date(), "ddd d MMM  HH:mm")
+                        // Current Date & Time Aligned Near CPU Usage
+                        Text {
+                            id: clock
+                            property string timeStr: ""
+                            text: timeStr
+                            color: shell.colors.cyan
+                            font.pixelSize: 12
+                            font.bold: true
+                            font.family: "JetBrains Mono Nerd Font"
+
+                            Timer {
+                                interval: 1000
+                                running: true
+                                repeat: true
+                                triggeredOnStart: true
+                                onTriggered: {
+                                    clock.timeStr = Qt.formatDateTime(new Date(), "ddd d MMM  HH:mm")
+                                }
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: shell.actionCenterOpen = !shell.actionCenterOpen
                             }
                         }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: shell.actionCenterOpen = !shell.actionCenterOpen
+                        Rectangle {
+                            width: 1
+                            height: 14
+                            color: shell.colors.comment
                         }
-                    }
-
-                    Item { Layout.fillWidth: true }
-
-                    RowLayout {
-                        spacing: 12
 
                         // CPU Usage %
                         RowLayout {

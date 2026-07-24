@@ -4,6 +4,8 @@ let
   colors = import ../theme/colors.nix;
 in
 {
+  xdg.configFile."hypr/hyprland.lua".text = "# Hyprland uses hyprland.conf\n";
+
   wayland.windowManager.hyprland = {
     enable = true;
     configType = "hyprlang";

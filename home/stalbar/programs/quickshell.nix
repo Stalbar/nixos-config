@@ -124,7 +124,7 @@ in
         property string osdIcon: "󰕾"
         property int osdValue: 50
 
-        # System Metrics & Status Properties
+        // System Metrics & Status Properties
         property int cpuUsage: 0
         property int ramUsage: 0
         property bool vpnConnected: false
@@ -134,10 +134,10 @@ in
         property bool isHeadphones: false
         property int volumeLevel: 65
 
-        # Notification Store
+        // Notification Store
         property var notificationList: []
 
-        # IPC Handlers for Hotkeys & Click Targets
+        // IPC Handlers for Hotkeys & Click Targets
         IpcHandler {
             enabled: true
             target: "launcher"
@@ -196,7 +196,7 @@ in
             onTriggered: shell.osdVisible = false
         }
 
-        # System Metrics Polling Timer
+        // System Metrics Polling Timer
         Timer {
             interval: 3000
             running: true
@@ -309,7 +309,7 @@ in
                         }
                     }
 
-                    # Running Applications Taskbar Tray
+                    // Running Applications Taskbar Tray
                     RowLayout {
                         spacing: 6
                         Repeater {
@@ -379,7 +379,7 @@ in
                     RowLayout {
                         spacing: 12
 
-                        # CPU Usage %
+                        // CPU Usage %
                         RowLayout {
                             spacing: 4
                             Text {
@@ -396,7 +396,7 @@ in
                             }
                         }
 
-                        # RAM Usage %
+                        // RAM Usage %
                         RowLayout {
                             spacing: 4
                             Text {
@@ -413,7 +413,7 @@ in
                             }
                         }
 
-                        # VPN Status Icon
+                        // VPN Status Icon
                         Text {
                             text: shell.vpnConnected ? "󰦝" : "󰦞"
                             color: shell.vpnConnected ? shell.colors.green : shell.colors.comment
@@ -421,7 +421,7 @@ in
                             font.family: "JetBrains Mono Nerd Font"
                         }
 
-                        # Wi-Fi Connected/Disconnected Icon
+                        // Wi-Fi Connected/Disconnected Icon
                         Text {
                             text: shell.wifiConnected ? "󰤨" : "󰤭"
                             color: shell.wifiConnected ? shell.colors.cyan : shell.colors.red
@@ -435,7 +435,7 @@ in
                             }
                         }
 
-                        # Audio Volume & Headphone Dynamic Icon
+                        // Audio Volume & Headphone Dynamic Icon
                         Text {
                             text: shell.getAudioIcon()
                             color: shell.colors.magenta
@@ -449,7 +449,7 @@ in
                             }
                         }
 
-                        # Microphone State Icon
+                        // Microphone State Icon
                         Text {
                             text: shell.micMuted ? "󰍭" : "󰍬"
                             color: shell.micMuted ? shell.colors.red : shell.colors.green
@@ -469,7 +469,7 @@ in
                             color: shell.colors.comment
                         }
 
-                        # Power Icon
+                        // Power Icon
                         Text {
                             text: "󰐥"
                             color: shell.colors.red
@@ -670,7 +670,7 @@ in
                         }
                     }
 
-                    # Mpris Media Player Card (YouTube / Music)
+                    // Mpris Media Player Card (YouTube / Music)
                     Rectangle {
                         Layout.fillWidth: true
                         height: 100
@@ -748,7 +748,7 @@ in
                         }
                     }
 
-                    # Notifications Feed
+                    // Notifications Feed
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true

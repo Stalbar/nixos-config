@@ -49,16 +49,16 @@ in
 
       monitor = [
         {
-          output = "eDP-1";
-          mode = "1920x1080@120.03";
-          position = "0x0";
-          scale = 1;
+          output = "HDMI-A-1";
+          mode = "highres";
+          position = "auto";
+          scale = 1.25;
         }
         {
-          output = "HDMI-A-1";
-          mode = "2560x1440@59.95";
-          position = "1920x0";
-          scale = 1.25;
+          output = "eDP-1";
+          mode = "highrr";
+          position = "0x0";
+          scale = 1;
         }
         {
           output = "";
@@ -146,9 +146,9 @@ in
         (bind (mod "Q") (lua "hl.dsp.exec_cmd(terminal)") null)
         (bind (mod "F4") (lua "hl.dsp.window.close()") null)
         (bind (mod "V") (lua "hl.dsp.window.float({ action = \"toggle\" })") null)
-        (bind "ALT + SPACE" (lua "hl.dsp.exec_cmd(launcher)") null)
-        (bind (mod "SPACE") (lua "hl.dsp.exec_cmd(launcher)") null)
-        (bind (mod "M") (lua "hl.dsp.exec_cmd(powerMenu)") null)
+        (bind "ALT + SPACE" (exec "qs-app-launcher") null)
+        (bind (mod "SPACE") (exec "qs-app-launcher") null)
+        (bind (mod "M") (exec "qs-power-menu") null)
         (bind (mod "N") (exec "qs-action-center") null)
         (bind (mod "R") (exec "change-wallpaper") null)
         (bind (mod "F") (lua "hl.dsp.window.fullscreen()") null)
@@ -157,30 +157,39 @@ in
         (bind (mod "K") (focusDir "up") null)
         (bind (mod "J") (focusDir "down") null)
 
-        # Replaced SUPER + SHIFT with SUPER + ALT for window moving & workspace moving
         (bind (mod "ALT + H") (swapDir "left") null)
         (bind (mod "ALT + L") (swapDir "right") null)
         (bind (mod "ALT + K") (swapDir "up") null)
         (bind (mod "ALT + J") (swapDir "down") null)
 
-        (bind (mod "1") (lua "hl.dsp.focus({ workspace = 1 })") null)
-        (bind (mod "2") (lua "hl.dsp.focus({ workspace = 2 })") null)
-        (bind (mod "3") (lua "hl.dsp.focus({ workspace = 3 })") null)
-        (bind (mod "4") (lua "hl.dsp.focus({ workspace = 4 })") null)
-        (bind (mod "5") (lua "hl.dsp.focus({ workspace = 5 })") null)
-        (bind (mod "0") (lua "hl.dsp.focus({ workspace = 11 })") null)
+        # Workspaces focus using hyprctl dispatch
+        (bind (mod "1") (exec "hyprctl dispatch workspace 1") null)
+        (bind (mod "2") (exec "hyprctl dispatch workspace 2") null)
+        (bind (mod "3") (exec "hyprctl dispatch workspace 3") null)
+        (bind (mod "4") (exec "hyprctl dispatch workspace 4") null)
+        (bind (mod "5") (exec "hyprctl dispatch workspace 5") null)
+        (bind (mod "0") (exec "hyprctl dispatch workspace 11") null)
 
-        (bind (mod "ALT + 1") (lua "hl.dsp.window.move_to_workspace({ workspace = 1 })") null)
-        (bind (mod "ALT + 2") (lua "hl.dsp.window.move_to_workspace({ workspace = 2 })") null)
-        (bind (mod "ALT + 3") (lua "hl.dsp.window.move_to_workspace({ workspace = 3 })") null)
-        (bind (mod "ALT + 4") (lua "hl.dsp.window.move_to_workspace({ workspace = 4 })") null)
-        (bind (mod "ALT + 5") (lua "hl.dsp.window.move_to_workspace({ workspace = 5 })") null)
-        (bind (mod "ALT + 0") (lua "hl.dsp.window.move_to_workspace({ workspace = 11 })") null)
+        # Workspaces move window using hyprctl dispatch movetoworkspace
+        (bind (mod "ALT + 1") (exec "hyprctl dispatch movetoworkspace 1") null)
+        (bind (mod "ALT + 2") (exec "hyprctl dispatch movetoworkspace 2") null)
+        (bind (mod "ALT + 3") (exec "hyprctl dispatch movetoworkspace 3") null)
+        (bind (mod "ALT + 4") (exec "hyprctl dispatch movetoworkspace 4") null)
+        (bind (mod "ALT + 5") (exec "hyprctl dispatch movetoworkspace 5") null)
+        (bind (mod "ALT + 0") (exec "hyprctl dispatch movetoworkspace 11") null)
 
         (bind "ALT + N" (exec "neovide --no-fork") null)
-        (bind "ALT + F" (lua "hl.dsp.exec_cmd(browser)") null)
+        (bind "ALT + F" (exec "zen") null)
         (bind "ALT + C" (exec "chromium --enable-features=UseOzonePlatform --ozone-platform=wayland") null)
         (bind "ALT + B" (exec "blueman-manager") null)
+
+        # Hardware Volume & Brightness Keys
+        (bind ", XF86AudioRaiseVolume" (exec "volume --inc") [ "e" ])
+        (bind ", XF86AudioLowerVolume" (exec "volume --dec") [ "e" ])
+        (bind ", XF86AudioMute" (exec "volume --mute-volume") null)
+        (bind ", XF86AudioMicMute" (exec "volume --mute-mic") null)
+        (bind ", XF86MonBrightnessUp" (exec "brightness --inc") [ "e" ])
+        (bind ", XF86MonBrightnessDown" (exec "brightness --dec") [ "e" ])
       ];
 
       on = [

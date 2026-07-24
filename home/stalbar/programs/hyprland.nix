@@ -170,13 +170,13 @@ in
         (bind "Print" (lua ''function() hl.exec_cmd("grimblast --notify copysave area ~/Pictures/Screenshots/screenshot.png") end'') null)
         (bind "SUPER + S" (lua ''function() hl.exec_cmd("grim -g \"$(slurp)\" - | swappy -f -") end'') null)
 
-        # Hardware Keys (XF86 volume & brightness keys)
-        (bind "XF86AudioRaiseVolume" (lua ''function() hl.exec_cmd("volume --inc") end'') { "repeat" = true; locked = true; })
-        (bind "XF86AudioLowerVolume" (lua ''function() hl.exec_cmd("volume --dec") end'') { "repeat" = true; locked = true; })
-        (bind "XF86AudioMute" (lua ''function() hl.exec_cmd("volume --mute-volume") end'') { locked = true; })
-        (bind "XF86AudioMicMute" (lua ''function() hl.exec_cmd("volume --mute-mic") end'') { locked = true; })
-        (bind "XF86MonBrightnessUp" (lua ''function() hl.exec_cmd("brightness --inc") end'') { "repeat" = true; locked = true; })
-        (bind "XF86MonBrightnessDown" (lua ''function() hl.exec_cmd("brightness --dec") end'') { "repeat" = true; locked = true; })
+        # Hardware Keys ("el" flags for continuous repeat when held down + locked screen support)
+        (bind "XF86AudioRaiseVolume" (lua ''function() hl.exec_cmd("volume --inc") end'') "el")
+        (bind "XF86AudioLowerVolume" (lua ''function() hl.exec_cmd("volume --dec") end'') "el")
+        (bind "XF86AudioMute" (lua ''function() hl.exec_cmd("volume --mute-volume") end'') "l")
+        (bind "XF86AudioMicMute" (lua ''function() hl.exec_cmd("volume --mute-mic") end'') "l")
+        (bind "XF86MonBrightnessUp" (lua ''function() hl.exec_cmd("brightness --inc") end'') "el")
+        (bind "XF86MonBrightnessDown" (lua ''function() hl.exec_cmd("brightness --dec") end'') "el")
       ];
 
       on = [

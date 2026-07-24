@@ -223,7 +223,7 @@ in
         }
 
         // -------------------------------------------------------------
-        // 1. MAIN STATUS BAR (Only Active Workspaces + Running Apps Tray directly to the right)
+        // 1. MAIN STATUS BAR (Workspaces + Running Apps Tray: CLEAN ICONS ONLY)
         // -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
@@ -310,45 +310,37 @@ in
                             }
                         }
 
-                        // Running Applications Taskbar Tray directly to the right of virtual desktops
+                        Rectangle {
+                            width: 1
+                            height: 14
+                            color: shell.colors.comment
+                        }
+
+                        // Running Applications Tray: CLEAN ICONS ONLY (No text, no individual borders)
                         RowLayout {
-                            spacing: 6
+                            spacing: 8
                             Repeater {
                                 model: {
                                     if (Hyprland.toplevels && Hyprland.toplevels.values) {
-                                        return Array.from(Hyprland.toplevels.values).filter(c => c && (c.title || c.initialClass || c.class));
+                                        return Array.from(Hyprland.toplevels.values).filter(c => c && (c.initialClass || c.class || c.title));
                                     }
                                     return [];
                                 }
-                                Rectangle {
+                                IconImage {
                                     required property var modelData
-                                    width: 120
-                                    height: 22
-                                    radius: 5
-                                    color: "#1f2335"
-                                    border.width: 1
-                                    border.color: shell.colors.comment
-
-                                    RowLayout {
-                                        anchors.fill: parent
-                                        anchors.margins: 3
-                                        spacing: 4
-
-                                        IconImage {
-                                            source: modelData.initialClass ? "image://icon/" + modelData.initialClass.toLowerCase() : (modelData.class ? "image://icon/" + modelData.class.toLowerCase() : "application-x-executable")
-                                            width: 14
-                                            height: 14
-                                        }
-
-                                        Text {
-                                            text: modelData.title || modelData.initialClass || modelData.class || "App"
-                                            color: shell.colors.fg
-                                            font.pixelSize: 10
-                                            elide: Text.ElideRight
-                                            font.family: "JetBrains Mono Nerd Font"
-                                            Layout.fillWidth: true
-                                        }
+                                    source: {
+                                        const cls = (modelData.initialClass || modelData.class || "").toLowerCase();
+                                        if (cls.includes("foot")) return "image://icon/foot";
+                                        if (cls.includes("zen")) return "image://icon/zen-browser";
+                                        if (cls.includes("chrom")) return "image://icon/chromium";
+                                        if (cls.includes("code") || cls.includes("zed")) return "image://icon/zed";
+                                        if (cls.includes("neovide") || cls.includes("nvim")) return "image://icon/neovide";
+                                        if (cls.includes("obsidian")) return "image://icon/obsidian";
+                                        if (cls.includes("thunar")) return "image://icon/system-file-manager";
+                                        return cls ? "image://icon/" + cls : "application-x-executable";
                                     }
+                                    width: 18
+                                    height: 18
 
                                     MouseArea {
                                         anchors.fill: parent

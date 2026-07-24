@@ -103,15 +103,15 @@ in
       };
 
       bind = [
-        # Core App Binds
-        (bind "SUPER + Q" (lua ''hl.dsp.exec_cmd("foot")'') null)
+        # Core App Binds (Lua function wrappers for exec_cmd)
+        (bind "SUPER + Q" (lua ''function() hl.exec_cmd("foot") end'') null)
         (bind "SUPER + F4" (lua ''hl.dsp.window.close()'') null)
         (bind "SUPER + V" (lua ''hl.dsp.window.float({ toggle = true })'') null)
-        (bind "ALT + SPACE" (lua ''hl.dsp.exec_cmd("qs-app-launcher")'') null)
-        (bind "SUPER + SPACE" (lua ''hl.dsp.exec_cmd("qs-app-launcher")'') null)
-        (bind "SUPER + M" (lua ''hl.dsp.exec_cmd("qs-power-menu")'') null)
-        (bind "SUPER + N" (lua ''hl.dsp.exec_cmd("qs-action-center")'') null)
-        (bind "SUPER + R" (lua ''hl.dsp.exec_cmd("change-wallpaper")'') null)
+        (bind "ALT + SPACE" (lua ''function() hl.exec_cmd("qs-app-launcher") end'') null)
+        (bind "SUPER + SPACE" (lua ''function() hl.exec_cmd("qs-app-launcher") end'') null)
+        (bind "SUPER + M" (lua ''function() hl.exec_cmd("qs-power-menu") end'') null)
+        (bind "SUPER + N" (lua ''function() hl.exec_cmd("qs-action-center") end'') null)
+        (bind "SUPER + R" (lua ''function() hl.exec_cmd("change-wallpaper") end'') null)
         (bind "SUPER + F" (lua ''hl.dsp.window.fullscreen()'') null)
 
         # Directional Focus & Movement
@@ -137,7 +137,7 @@ in
         (bind "SUPER + 9" (lua ''hl.dsp.focus({ workspace = 9 })'') null)
         (bind "SUPER + 0" (lua ''hl.dsp.focus({ workspace = 11 })'') null)
 
-        # Virtual Desktops Window Movement
+        # Virtual Desktops Window Movement (Super + Shift + 1..5 AND Super + Alt + 1..5)
         (bind "SUPER + SHIFT + 1" (lua ''hl.dsp.window.move({ workspace = 1 })'') null)
         (bind "SUPER + SHIFT + 2" (lua ''hl.dsp.window.move({ workspace = 2 })'') null)
         (bind "SUPER + SHIFT + 3" (lua ''hl.dsp.window.move({ workspace = 3 })'') null)
@@ -161,22 +161,22 @@ in
         (bind "SUPER + ALT + 0" (lua ''hl.dsp.window.move({ workspace = 11 })'') null)
 
         # Applications Shortcuts
-        (bind "ALT + N" (lua ''hl.dsp.exec_cmd("neovide --no-fork")'') null)
-        (bind "ALT + F" (lua ''hl.dsp.exec_cmd("zen")'') null)
-        (bind "ALT + C" (lua ''hl.dsp.exec_cmd("chromium --enable-features=UseOzonePlatform --ozone-platform=wayland")'') null)
-        (bind "ALT + B" (lua ''hl.dsp.exec_cmd("blueman-manager")'') null)
+        (bind "ALT + N" (lua ''function() hl.exec_cmd("neovide --no-fork") end'') null)
+        (bind "ALT + F" (lua ''function() hl.exec_cmd("zen") end'') null)
+        (bind "ALT + C" (lua ''function() hl.exec_cmd("chromium --enable-features=UseOzonePlatform --ozone-platform=wayland") end'') null)
+        (bind "ALT + B" (lua ''function() hl.exec_cmd("blueman-manager") end'') null)
 
         # Screenshots
-        (bind "Print" (lua ''hl.dsp.exec_cmd("grimblast --notify copysave area ~/Pictures/Screenshots/screenshot.png")'') null)
-        (bind "SUPER + S" (lua ''hl.dsp.exec_cmd("grim -g \"$(slurp)\" - | swappy -f -")'') null)
+        (bind "Print" (lua ''function() hl.exec_cmd("grimblast --notify copysave area ~/Pictures/Screenshots/screenshot.png") end'') null)
+        (bind "SUPER + S" (lua ''function() hl.exec_cmd("grim -g \"$(slurp)\" - | swappy -f -") end'') null)
 
         # Hardware Keys (XF86 volume & brightness keys)
-        (bind "XF86AudioRaiseVolume" (lua ''hl.dsp.exec_cmd("volume --inc")'') { "repeat" = true; locked = true; })
-        (bind "XF86AudioLowerVolume" (lua ''hl.dsp.exec_cmd("volume --dec")'') { "repeat" = true; locked = true; })
-        (bind "XF86AudioMute" (lua ''hl.dsp.exec_cmd("volume --mute-volume")'') { locked = true; })
-        (bind "XF86AudioMicMute" (lua ''hl.dsp.exec_cmd("volume --mute-mic")'') { locked = true; })
-        (bind "XF86MonBrightnessUp" (lua ''hl.dsp.exec_cmd("brightness --inc")'') { "repeat" = true; locked = true; })
-        (bind "XF86MonBrightnessDown" (lua ''hl.dsp.exec_cmd("brightness --dec")'') { "repeat" = true; locked = true; })
+        (bind "XF86AudioRaiseVolume" (lua ''function() hl.exec_cmd("volume --inc") end'') { "repeat" = true; locked = true; })
+        (bind "XF86AudioLowerVolume" (lua ''function() hl.exec_cmd("volume --dec") end'') { "repeat" = true; locked = true; })
+        (bind "XF86AudioMute" (lua ''function() hl.exec_cmd("volume --mute-volume") end'') { locked = true; })
+        (bind "XF86AudioMicMute" (lua ''function() hl.exec_cmd("volume --mute-mic") end'') { locked = true; })
+        (bind "XF86MonBrightnessUp" (lua ''function() hl.exec_cmd("brightness --inc") end'') { "repeat" = true; locked = true; })
+        (bind "XF86MonBrightnessDown" (lua ''function() hl.exec_cmd("brightness --dec") end'') { "repeat" = true; locked = true; })
       ];
 
       on = [

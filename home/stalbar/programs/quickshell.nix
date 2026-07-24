@@ -240,19 +240,19 @@ in
             return "󰕿";
         }
 
-        function getIconSource(modelData) {
-            if (!modelData) return "image://icon/application-x-executable";
+        function getAppIconName(modelData) {
+            if (!modelData) return "application-x-executable";
             const cls = (modelData.initialClass || modelData.class || "").toLowerCase();
-            if (cls.includes("foot")) return "image://icon/foot";
-            if (cls.includes("zen")) return "image://icon/zen-browser";
-            if (cls.includes("chrom")) return "image://icon/chromium";
-            if (cls.includes("neovide")) return "image://icon/neovide";
-            if (cls.includes("obsidian")) return "image://icon/obsidian";
-            if (cls.includes("thunar")) return "image://icon/system-file-manager";
-            if (cls.includes("telegram")) return "image://icon/telegram";
-            if (cls.includes("discord")) return "image://icon/discord";
-            if (cls) return "image://icon/" + cls;
-            return "image://icon/application-x-executable";
+            if (cls.includes("foot")) return "foot";
+            if (cls.includes("zen")) return "zen-browser";
+            if (cls.includes("chrom")) return "chromium";
+            if (cls.includes("neovide")) return "neovide";
+            if (cls.includes("obsidian")) return "obsidian";
+            if (cls.includes("thunar")) return "system-file-manager";
+            if (cls.includes("telegram")) return "telegram";
+            if (cls.includes("discord")) return "discord";
+            if (cls) return cls;
+            return "application-x-executable";
         }
 
         // -------------------------------------------------------------
@@ -349,7 +349,7 @@ in
                     RowLayout {
                         spacing: 12
 
-                        // Running Applications Tray near time (Qt Quick Image with sourceSize)
+                        // Running Applications Tray near time (IconImage with explicit implicitSize)
                         RowLayout {
                             spacing: 8
                             Repeater {
@@ -359,14 +359,12 @@ in
                                     }
                                     return [];
                                 }
-                                Image {
+                                IconImage {
                                     required property var modelData
-                                    source: shell.getIconSource(modelData)
+                                    implicitSize: 18
                                     width: 18
                                     height: 18
-                                    sourceSize.width: 18
-                                    sourceSize.height: 18
-                                    fillMode: Image.PreserveAspectFit
+                                    source: shell.getAppIconName(modelData)
 
                                     MouseArea {
                                         anchors.fill: parent
@@ -637,12 +635,11 @@ in
                                         anchors.rightMargin: 12
                                         spacing: 12
 
-                                        Image {
-                                            source: modelData.icon ? (modelData.icon.startsWith("/") ? modelData.icon : "image://icon/" + modelData.icon) : "image://icon/application-x-executable"
+                                        IconImage {
+                                            implicitSize: 24
                                             width: 24
                                             height: 24
-                                            sourceSize.width: 24
-                                            sourceSize.height: 24
+                                            source: modelData.icon ? modelData.icon : "application-x-executable"
                                         }
 
                                         Text {

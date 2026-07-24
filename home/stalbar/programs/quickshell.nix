@@ -246,19 +246,21 @@ in
         function getAppIcon(modelData) {
             if (!modelData) return Quickshell.iconPath("application-x-executable");
             const cls = (modelData.initialClass || modelData.class || "").toLowerCase();
-            let iconName = "application-x-executable";
-            if (cls.includes("foot")) iconName = "foot";
-            else if (cls.includes("zen")) iconName = "zen-browser";
-            else if (cls.includes("chrom")) iconName = "chromium";
-            else if (cls.includes("neovide")) iconName = "neovide";
-            else if (cls.includes("obsidian")) iconName = "obsidian";
-            else if (cls.includes("thunar")) iconName = "system-file-manager";
-            else if (cls.includes("telegram")) iconName = "telegram";
-            else if (cls.includes("discord")) iconName = "discord";
-            else if (cls) iconName = cls;
+            
+            if (cls.includes("foot")) return Quickshell.iconPath("foot") || Quickshell.iconPath("utilities-terminal");
+            if (cls.includes("zen")) return Quickshell.iconPath("zen-browser") || Quickshell.iconPath("zen") || Quickshell.iconPath("firefox");
+            if (cls.includes("chrom")) return Quickshell.iconPath("chromium") || Quickshell.iconPath("google-chrome");
+            if (cls.includes("neovide")) return Quickshell.iconPath("neovide") || Quickshell.iconPath("nvim");
+            if (cls.includes("obsidian")) return Quickshell.iconPath("obsidian");
+            if (cls.includes("thunar")) return Quickshell.iconPath("system-file-manager") || Quickshell.iconPath("thunar") || Quickshell.iconPath("org.xfce.thunar");
+            if (cls.includes("telegram")) return Quickshell.iconPath("telegram") || Quickshell.iconPath("org.telegram.desktop");
+            if (cls.includes("discord")) return Quickshell.iconPath("discord");
+            
+            if (cls) {
+                const direct = Quickshell.iconPath(cls);
+                if (direct && direct.length > 0) return direct;
+            }
 
-            const res = Quickshell.iconPath(iconName);
-            if (res && res.length > 0) return res;
             return Quickshell.iconPath("application-x-executable");
         }
 
@@ -356,7 +358,7 @@ in
                     RowLayout {
                         spacing: 12
 
-                        // Running Applications Tray near time (Quickshell.iconPath + Layout dimensions)
+                        // Running Applications Tray near time (With ToolTip on hover showing window title/class)
                         RowLayout {
                             spacing: 8
                             Repeater {
@@ -375,7 +377,9 @@ in
                                     source: shell.getAppIcon(modelData)
 
                                     MouseArea {
+                                        id: appHoverArea
                                         anchors.fill: parent
+                                        hoverEnabled: true
                                         cursorShape: Qt.PointingHandCursor
                                         onClicked: {
                                             if (modelData.address) {
@@ -383,6 +387,10 @@ in
                                             }
                                         }
                                     }
+
+                                    ToolTip.visible: appHoverArea.containsMouse
+                                    ToolTip.delay: 150
+                                    ToolTip.text: modelData ? (modelData.title || modelData.class || modelData.initialClass || "Application") : ""
                                 }
                             }
                         }
@@ -619,7 +627,7 @@ in
                                 Layout.fillHeight: true
                                 clip: true
                                 model: {
-                                    const raw = Array.from(DesktopEntries.applications.values || []);
+                                    const raw = (DesktopEntries.applications && DesktopEntries.applications.values) ? Array.from(DesktopEntries.applications.values) : [];
                                     const q = launcherSearch.text.toLowerCase();
                                     const res = [];
                                     for (let i = 0; i < raw.length; i++) {

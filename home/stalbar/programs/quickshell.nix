@@ -512,6 +512,12 @@ in
                 WlrLayershell.namespace: "quickshell:launcher"
                 WlrLayershell.keyboardFocus: shell.launcherOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
+                Shortcut {
+                    sequence: "Escape"
+                    enabled: shell.launcherOpen
+                    onActivated: shell.launcherOpen = false
+                }
+
                 Item {
                     id: launcherAnim
                     anchors.fill: parent
@@ -552,6 +558,7 @@ in
                                     font.family: "JetBrains Mono Nerd Font"
                                     font.pixelSize: 14
                                     focus: shell.launcherOpen
+                                    Keys.onEscapePressed: shell.launcherOpen = false
                                     background: Rectangle {
                                         color: "#1f2335"
                                         radius: 8
@@ -646,6 +653,12 @@ in
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.namespace: "quickshell:actioncenter"
                 WlrLayershell.keyboardFocus: shell.actionCenterOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+
+                Shortcut {
+                    sequence: "Escape"
+                    enabled: shell.actionCenterOpen
+                    onActivated: shell.actionCenterOpen = false
+                }
 
                 ColumnLayout {
                     anchors.fill: parent
@@ -883,7 +896,7 @@ in
         }
 
         // -------------------------------------------------------------
-        // 5. POWER MENU (Compact padding modal)
+        // 5. POWER MENU (Ultra-compact modal)
         // -------------------------------------------------------------
         Variants {
             model: Quickshell.screens
@@ -906,6 +919,12 @@ in
                 WlrLayershell.namespace: "quickshell:powermenu"
                 WlrLayershell.keyboardFocus: shell.powerMenuOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
+                Shortcut {
+                    sequence: "Escape"
+                    enabled: shell.powerMenuOpen
+                    onActivated: shell.powerMenuOpen = false
+                }
+
                 Rectangle {
                     anchors.fill: parent
                     color: "#aa10121d"
@@ -913,39 +932,43 @@ in
                 }
 
                 Rectangle {
-                    width: 380
-                    height: 120
+                    width: 320
+                    height: 72
                     anchors.centerIn: parent
-                    radius: 16
+                    radius: 12
                     color: shell.colors.bg
                     border.width: 1
                     border.color: shell.colors.cyan
 
                     RowLayout {
                         anchors.centerIn: parent
-                        spacing: 28
+                        spacing: 24
 
                         ColumnLayout {
-                            Text { text: "󰌾"; color: shell.colors.cyan; font.pixelSize: 28; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
-                            Text { text: "Lock"; color: shell.colors.fg; font.pixelSize: 11; font.family: "JetBrains Mono Nerd Font" }
+                            spacing: 2
+                            Text { text: "󰌾"; color: shell.colors.cyan; font.pixelSize: 22; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
+                            Text { text: "Lock"; color: shell.colors.fg; font.pixelSize: 10; font.family: "JetBrains Mono Nerd Font" }
                             MouseArea { anchors.fill: parent; onClicked: { Quickshell.execDetached(["lock-session"]); shell.powerMenuOpen = false; } }
                         }
 
                         ColumnLayout {
-                            Text { text: "󰍃"; color: shell.colors.magenta; font.pixelSize: 28; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
-                            Text { text: "Logout"; color: shell.colors.fg; font.pixelSize: 11; font.family: "JetBrains Mono Nerd Font" }
+                            spacing: 2
+                            Text { text: "󰍃"; color: shell.colors.magenta; font.pixelSize: 22; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
+                            Text { text: "Logout"; color: shell.colors.fg; font.pixelSize: 10; font.family: "JetBrains Mono Nerd Font" }
                             MouseArea { anchors.fill: parent; onClicked: { Quickshell.execDetached(["logout-session"]); shell.powerMenuOpen = false; } }
                         }
 
                         ColumnLayout {
-                            Text { text: "󰜉"; color: shell.colors.cyan; font.pixelSize: 28; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
-                            Text { text: "Reboot"; color: shell.colors.fg; font.pixelSize: 11; font.family: "JetBrains Mono Nerd Font" }
+                            spacing: 2
+                            Text { text: "󰜉"; color: shell.colors.cyan; font.pixelSize: 22; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
+                            Text { text: "Reboot"; color: shell.colors.fg; font.pixelSize: 10; font.family: "JetBrains Mono Nerd Font" }
                             MouseArea { anchors.fill: parent; onClicked: { Quickshell.execDetached(["systemctl", "reboot"]); shell.powerMenuOpen = false; } }
                         }
 
                         ColumnLayout {
-                            Text { text: "󰐥"; color: shell.colors.red; font.pixelSize: 28; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
-                            Text { text: "Shutdown"; color: shell.colors.fg; font.pixelSize: 11; font.family: "JetBrains Mono Nerd Font" }
+                            spacing: 2
+                            Text { text: "󰐥"; color: shell.colors.red; font.pixelSize: 22; font.family: "JetBrains Mono Nerd Font"; Layout.alignment: Qt.AlignHCenter }
+                            Text { text: "Shutdown"; color: shell.colors.fg; font.pixelSize: 10; font.family: "JetBrains Mono Nerd Font" }
                             MouseArea { anchors.fill: parent; onClicked: { Quickshell.execDetached(["systemctl", "poweroff"]); shell.powerMenuOpen = false; } }
                         }
                     }

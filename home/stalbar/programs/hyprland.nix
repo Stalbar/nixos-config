@@ -12,9 +12,6 @@ let
     };
 
   exec = cmd: lua ''hl.dsp.exec_cmd(${builtins.toJSON cmd})'';
-
-  focusDir = dir: lua ''hl.dsp.focus({ direction = "${dir}" })'';
-  swapDir = dir: lua ''hl.dsp.window.swap({ direction = "${dir}" })'';
 in
 {
   wayland.windowManager.hyprland = {
@@ -143,24 +140,24 @@ in
       };
 
       bind = [
-        (bind (mod "Q") (lua "hl.dsp.exec_cmd(terminal)") null)
-        (bind (mod "F4") (lua "hl.dsp.window.close()") null)
-        (bind (mod "V") (lua "hl.dsp.window.float({ action = \"toggle\" })") null)
+        (bind (mod "Q") (exec "foot") null)
+        (bind (mod "F4") (exec "hyprctl dispatch killactive") null)
+        (bind (mod "V") (exec "hyprctl dispatch togglefloating") null)
         (bind "ALT + SPACE" (exec "qs-app-launcher") null)
         (bind (mod "SPACE") (exec "qs-app-launcher") null)
         (bind (mod "M") (exec "qs-power-menu") null)
         (bind (mod "N") (exec "qs-action-center") null)
         (bind (mod "R") (exec "change-wallpaper") null)
-        (bind (mod "F") (lua "hl.dsp.window.fullscreen()") null)
-        (bind (mod "H") (focusDir "left") null)
-        (bind (mod "L") (focusDir "right") null)
-        (bind (mod "K") (focusDir "up") null)
-        (bind (mod "J") (focusDir "down") null)
+        (bind (mod "F") (exec "hyprctl dispatch fullscreen") null)
+        (bind (mod "H") (exec "hyprctl dispatch movefocus l") null)
+        (bind (mod "L") (exec "hyprctl dispatch movefocus r") null)
+        (bind (mod "K") (exec "hyprctl dispatch movefocus u") null)
+        (bind (mod "J") (exec "hyprctl dispatch movefocus d") null)
 
-        (bind (mod "ALT + H") (swapDir "left") null)
-        (bind (mod "ALT + L") (swapDir "right") null)
-        (bind (mod "ALT + K") (swapDir "up") null)
-        (bind (mod "ALT + J") (swapDir "down") null)
+        (bind (mod "ALT + H") (exec "hyprctl dispatch swapwindow l") null)
+        (bind (mod "ALT + L") (exec "hyprctl dispatch swapwindow r") null)
+        (bind (mod "ALT + K") (exec "hyprctl dispatch swapwindow u") null)
+        (bind (mod "ALT + J") (exec "hyprctl dispatch swapwindow d") null)
 
         # Workspaces focus using hyprctl dispatch
         (bind (mod "1") (exec "hyprctl dispatch workspace 1") null)
@@ -187,7 +184,7 @@ in
         (bind "Print" (exec "grimblast --notify copysave area ~/Pictures/Screenshots/screenshot.png") null)
         (bind (mod "S") (exec "grim -g \"$(slurp)\" - | swappy -f -") null)
 
-        # Hardware Volume & Brightness Keys (without leading comma)
+        # Hardware Volume & Brightness Keys
         (bind "XF86AudioRaiseVolume" (exec "volume --inc") [ "e" ])
         (bind "XF86AudioLowerVolume" (exec "volume --dec") [ "e" ])
         (bind "XF86AudioMute" (exec "volume --mute-volume") null)

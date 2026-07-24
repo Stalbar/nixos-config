@@ -114,18 +114,18 @@ in
         (bind "SUPER + R" (lua ''hl.dsp.exec_cmd("change-wallpaper")'') null)
         (bind "SUPER + F" (lua ''hl.dsp.window.fullscreen()'') null)
 
-        # Directional Focus & Swap
+        # Directional Focus & Movement
         (bind "SUPER + H" (lua ''hl.dsp.focus({ direction = "l" })'') null)
         (bind "SUPER + L" (lua ''hl.dsp.focus({ direction = "r" })'') null)
         (bind "SUPER + K" (lua ''hl.dsp.focus({ direction = "u" })'') null)
         (bind "SUPER + J" (lua ''hl.dsp.focus({ direction = "d" })'') null)
 
-        (bind "SUPER + ALT + H" (lua ''hl.dsp.window.swap({ direction = "l" })'') null)
-        (bind "SUPER + ALT + L" (lua ''hl.dsp.window.swap({ direction = "r" })'') null)
-        (bind "SUPER + ALT + K" (lua ''hl.dsp.window.swap({ direction = "u" })'') null)
-        (bind "SUPER + ALT + J" (lua ''hl.dsp.window.swap({ direction = "d" })'') null)
+        (bind "SUPER + ALT + H" (lua ''hl.dsp.window.move({ direction = "l" })'') null)
+        (bind "SUPER + ALT + L" (lua ''hl.dsp.window.move({ direction = "r" })'') null)
+        (bind "SUPER + ALT + K" (lua ''hl.dsp.window.move({ direction = "u" })'') null)
+        (bind "SUPER + ALT + J" (lua ''hl.dsp.window.move({ direction = "d" })'') null)
 
-        # Virtual Desktops Focus (Verified HL.Dispatcher hl.dsp.focus({ workspace = N }))
+        # Virtual Desktops Focus (Super + 1..5, Super + 0)
         (bind "SUPER + 1" (lua ''hl.dsp.focus({ workspace = 1 })'') null)
         (bind "SUPER + 2" (lua ''hl.dsp.focus({ workspace = 2 })'') null)
         (bind "SUPER + 3" (lua ''hl.dsp.focus({ workspace = 3 })'') null)
@@ -133,7 +133,14 @@ in
         (bind "SUPER + 5" (lua ''hl.dsp.focus({ workspace = 5 })'') null)
         (bind "SUPER + 0" (lua ''hl.dsp.focus({ workspace = 11 })'') null)
 
-        # Virtual Desktops Move Window
+        # Virtual Desktops Window Movement (Super + Shift + 1..5 AND Super + Alt + 1..5)
+        (bind "SUPER + SHIFT + 1" (lua ''hl.dsp.window.move({ workspace = 1 })'') null)
+        (bind "SUPER + SHIFT + 2" (lua ''hl.dsp.window.move({ workspace = 2 })'') null)
+        (bind "SUPER + SHIFT + 3" (lua ''hl.dsp.window.move({ workspace = 3 })'') null)
+        (bind "SUPER + SHIFT + 4" (lua ''hl.dsp.window.move({ workspace = 4 })'') null)
+        (bind "SUPER + SHIFT + 5" (lua ''hl.dsp.window.move({ workspace = 5 })'') null)
+        (bind "SUPER + SHIFT + 0" (lua ''hl.dsp.window.move({ workspace = 11 })'') null)
+
         (bind "SUPER + ALT + 1" (lua ''hl.dsp.window.move({ workspace = 1 })'') null)
         (bind "SUPER + ALT + 2" (lua ''hl.dsp.window.move({ workspace = 2 })'') null)
         (bind "SUPER + ALT + 3" (lua ''hl.dsp.window.move({ workspace = 3 })'') null)

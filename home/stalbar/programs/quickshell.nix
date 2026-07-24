@@ -97,6 +97,7 @@ in
     import QtQuick.Controls
     import QtQuick.Layouts
     import Quickshell
+    import Quickshell.Widgets
     import Quickshell.Wayland
     import Quickshell.Hyprland
     import Quickshell.Services.Mpris
@@ -589,11 +590,10 @@ in
                                         anchors.rightMargin: 12
                                         spacing: 12
 
-                                        Icon {
+                                        IconImage {
                                             source: modelData.icon
                                             width: 24
                                             height: 24
-                                            fallback: "application-x-executable"
                                         }
 
                                         Text {

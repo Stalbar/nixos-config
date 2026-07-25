@@ -1,6 +1,7 @@
+{ ... }:
+
 {
-  imports = [
-    ./firefox/extensions.nix
-    ./firefox/profile.nix
-  ];
+  programs.firefox = {
+    enable = true;
+  };
 }

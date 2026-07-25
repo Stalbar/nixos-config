@@ -1,7 +1,7 @@
 { ... }:
 
 {
-  wayland.windowManager.hyprland = {
+  programs.kitty = {
     enable = true;
     settings = { };
   };

@@ -1,5 +1,5 @@
 {
-  description = "NixOS";
+  description = "NixOS Base Flake";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -7,7 +7,6 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     antigravity-nix.url = "github:jacopone/antigravity-nix";
     antigravity-nix.inputs.nixpkgs.follows = "nixpkgs";
-    nixpkgs-regreet.url = "github:NixOS/nixpkgs/a799d3e3886da994fa307f817a6bc705ae538eeb";
   };
 
   outputs =
@@ -25,7 +24,7 @@
         inherit system;
         specialArgs = { inherit inputs; };
         modules = [
-          ./hosts/laptop/default.nix
+          ./configuration.nix
           home-manager.nixosModules.home-manager
           (
             { inputs, ... }:

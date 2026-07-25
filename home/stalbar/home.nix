@@ -2,8 +2,6 @@
 
 {
   imports = [
-    ./packages.nix
-    ./theme/nord.nix
     ./programs/default.nix
   ];
 
@@ -11,15 +9,5 @@
   home.homeDirectory = "/home/stalbar";
   home.stateVersion = "25.11";
 
-  stalbar.profiles = {
-    dev.enable = true;
-    gaming.enable = false;
-  };
-
   programs.home-manager.enable = true;
-
-  programs.direnv = {
-    enable = true;
-    nix-direnv.enable = true;
-  };
 }

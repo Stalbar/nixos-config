@@ -1,92 +1,15 @@
 return {
 	{
-		"shaunsingh/nord.nvim",
-		name = "nord",
+		"folke/tokyonight.nvim",
+		name = "tokyonight",
 		lazy = false,
 		priority = 1000,
-	},
-	{
-		"sainnhe/gruvbox-material",
-		name = "gruvbox-material",
-		lazy = false,
-		priority = 1000,
-	},
-	{
-		"catppuccin/nvim",
-		name = "catppuccin",
-		lazy = false,
-		priority = 1000,
-	},
-	{
-		"rebelot/kanagawa.nvim",
-		name = "kanagawa",
-		lazy = false,
-		priority = 1000,
-	},
-	{
-		"rose-pine/neovim",
-		name = "rose-pine",
-		lazy = false,
-		priority = 1000,
-	},
-	{
-		"navarasu/onedark.nvim",
-		name = "onedark",
-		lazy = false,
-		priority = 1000,
-	},
-	{
-		"sainnhe/everforest",
-		name = "everforest",
-		lazy = false,
-		priority = 1000,
-	},
-	{
-		"scottmckendry/cyberdream.nvim",
-		name = "cyberdream",
-		lazy = false,
-		priority = 1000,
-	},
-	{
-		"Mofiqul/dracula.nvim",
-		name = "dracula",
-		lazy = false,
-		priority = 1000,
-	},
-	{
-		"maxmx03/solarized.nvim",
-		name = "solarized",
-		lazy = false,
-		priority = 1000,
-	},
-	{
-		"craftzdog/solarized-osaka.nvim",
-		name = "solarized-osaka",
-		lazy = false,
-		priority = 1000,
-	},
-	{
-		"sainnhe/sonokai",
-		name = "sonokai",
-		lazy = false,
-		priority = 1000,
-	},
-	{
-		"tiagovla/tokyodark.nvim",
-		name = "tokyodark",
-		lazy = false,
-		priority = 1000,
-	},
-	{
-		"maxmx03/fluoromachine.nvim",
-		name = "fluoromachine",
-		lazy = false,
-		priority = 1000,
-	},
-	{
-		"shaunsingh/moonlight.nvim",
-		name = "moonlight",
-		lazy = false,
-		priority = 1000,
+		config = function()
+			require("tokyonight").setup({
+				style = "night",
+				transparent = false,
+			})
+			vim.cmd([[colorscheme tokyonight]])
+		end,
 	},
 }
